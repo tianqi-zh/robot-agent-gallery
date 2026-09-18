@@ -6,13 +6,15 @@ This gallery publishes all scored episode videos from the completed LIBERO v5 r4
 
 **LIBERO v5 r4:** 40 tasks across Spatial, Goal, Object, and LIBERO-10, with official initial states 0–9 for each task: 400 scored episodes. Results are 322 successes and 78 failures. The suite success counts, each out of 100, are 95, 79, 89, and 59 respectively. Every episode allows up to 500 control steps, 750 tool calls, and 3,600 seconds per episode, including initialization. Up to 10 initialization warmup steps are outside the control-step budget.
 
-The source run is `astra_libero_v5_calibrated_parallel10_r4`. Its four infrastructure failures were retried with fresh contexts under the same frozen protocol, producing 404 total attempts and 400 valid final results. Earlier r1–r3 runs are excluded in their entirety. Selection uses the final valid episode result; it does not choose the highest-scoring attempt. Policy failures were not retried to improve the score.
+The source run is `astra_libero_v5_calibrated_parallel10_r4`. Its four infrastructure failures were retried with fresh contexts under the same frozen protocol, producing 404 total attempts and 400 valid final results. Earlier r1–r3 runs are excluded in their entirety. Policy failures were not retried to improve the score.
 
 **RoboTwin first pass:** the 50 official tasks, one valid episode per task, using `demo_clean`, the Aloha AgileX embodiment, and seen instructions: 36 successes and 14 failures, including one policy timeout. It uses each task's native action horizon, up to 750 tool calls, and 1,800 seconds of policy time. Environment preparation has a separate timeout.
 
 The source run is `robotwin_astra_firstpass_20260917`. Initial seeds start at 100000. The private host applies RoboTwin's expert validity screening, then resets to the same valid initial scene before the policy begins. Expert actions and state are not policy inputs. Increasing concurrency from six to eight interrupted six active attempts; these six were rerun with fresh contexts. The source retains 56 attempts, yielding 50 final valid results. The separate setup pilot is excluded. No policy failure or timeout was rerun to improve the score.
 
-The gallery includes every selected success and failure. It contains 450 episode videos; no combined success rate is reported.
+For each planned episode, the exporter selects the latest attempt and requires a valid terminal result: success, failure, or timeout. It does not choose the highest-scoring attempt. The gallery includes every selected success and failure: 450 episode videos, with no combined success rate.
+
+The [live gallery](https://tianqi-zh.github.io/robot-agent-gallery/) offers benchmark and suite navigation, task search, outcome filters, and links to individual episodes. Filters operate on tasks and retain every episode within each matching task. The [episode CSV](data/episodes.csv) contains the complete selected set regardless of the active page filters.
 
 Displayed elapsed times are runner episode wall times, including preparation and cleanup. They are not model-only inference time or video playback duration.
 
@@ -30,11 +32,11 @@ LIBERO source videos include one initial frame, the actual warmup frames, and on
 
 RoboTwin source videos include one initial frame and one frame after every native action, played at 10 FPS. A native action can contain many interpolated physics steps. The video is therefore a sequence of action-end observations, not continuous physical-time playback.
 
-Gallery videos are derived, compressed H.264 presentation assets. Re-encoding changes bytes and image quality, while retaining the source frame count and order. Public export metadata records the relationship between source videos and gallery files. Thumbnails are navigation aids; the full videos determine what is visible.
+Gallery videos are derived, compressed H.264 presentation assets. Re-encoding changes bytes and image quality, while retaining the source frame count, order, frame rate, dimensions, and camera layout. Public export metadata records the relationship between source videos and gallery files. Each JPEG thumbnail uses a middle frame from its episode; the full video provides the recorded sequence.
 
 ## Verification and limitations
 
-The public validator checks the expected task/episode matrix, unique identities, aggregate native outcomes, media availability, metadata privacy, and publication size limits. With `--videos`, it decodes frame counts through `ffprobe` and checks H.264 encoding, pixel format, dimensions, and the source-to-export frame-count mapping.
+The public validator checks the expected task/episode matrix, unique identities, aggregate native outcomes, CSV consistency, media hashes and availability, metadata privacy, and publication size limits. With `--videos`, it decodes frame counts through `ffprobe` and checks H.264 encoding, pixel format, dimensions, frame rates, and the source-to-export frame-count mapping. GitHub Pages deployment runs the default validator before staging the public files; full video decoding remains a separate check.
 
 These checks validate the exported metadata and presentation assets. Source provenance fingerprints identify the recorded inputs; they do not independently prove benchmark execution, policy isolation, or the correctness of private simulator scores. The original project performed additional runtime and isolation audits. Raw model reasoning, authentication data, private logs, and machine-local source paths are intentionally outside this publication.
 
