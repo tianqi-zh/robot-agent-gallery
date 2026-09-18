@@ -3,15 +3,18 @@ const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const pad = value => String(value).padStart(2, '0');
 const statusName = status => ({success:'Success',failure:'Failure',timeout:'Timeout'}[status] || status);
-const state = {data:null,benchmark:'libero',suite:'all',search:'',outcome:'all',sort:'default',task:null,episode:null,returnTask:null};
+const state = {data:null,demos:{tasks:{}},benchmark:'libero',suite:'all',search:'',outcome:'all',sort:'default',task:null,episode:null,view:'episode',returnTask:null,returnView:'episode'};
 const dialog = $('episode-dialog');
 const video = $('episode-video');
 let routeRendering = false;
+let lastRenderedUrl = null;
 
 function benchmark(id = state.benchmark) { return state.data.benchmarks.find(item => item.id === id); }
 function prettySuite(suite) { return ({libero_spatial:'Spatial',libero_goal:'Goal',libero_object:'Object',libero_10:'LIBERO-10',robotwin:'All tasks',robocasa_atomic:'Atomic',robocasa_composite:'Composite'}[suite] || suite); }
 function elapsed(seconds) { return seconds < 60 ? `${Math.round(seconds)}s` : `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`; }
 function duration(seconds) { return `${Math.floor(seconds / 60)}:${pad(Math.floor(seconds % 60))}`; }
+function taskDemo(task) { return state.demos.tasks[task.id] || {status:'unavailable',reason:state.demos.unavailableReason || 'A training demonstration is not available for this task yet.'}; }
+function demoAvailable(demo) { return demo.status === 'available' && Boolean(demo.video); }
 function resolveVideoSource(episode) {
   return window.GALLERY_REMOTE_VIDEOS === true && typeof episode.remoteVideo === 'string' && episode.remoteVideo
     ? episode.remoteVideo : episode.video;
@@ -53,12 +56,27 @@ function route(values, replace = false) {
   const params = new URLSearchParams({benchmark:values.benchmark || state.benchmark});
   if (values.task) params.set('task', values.task);
   if (values.episode) params.set('episode', values.episode);
+  if (values.view === 'demo') params.set('view', 'demo');
   history[replace ? 'replaceState' : 'pushState']({gallery:{benchmark:values.benchmark || state.benchmark,returnUrl}}, '', `${location.pathname}${location.search}#${params}`);
   applyRoute();
 }
 function openEpisode(benchmarkId, taskId, episodeId) {
-  state.returnTask = taskId;
+  if (!dialog.open) { state.returnTask = taskId; state.returnView = 'episode'; }
   route({benchmark:benchmarkId,task:taskId,episode:episodeId}, dialog.open);
+}
+function openDemo(benchmarkId, taskId) {
+  if (!dialog.open) { state.returnTask = taskId; state.returnView = 'demo'; }
+  route({benchmark:benchmarkId,task:taskId,view:'demo'}, dialog.open);
+}
+function switchPlayerView(view) {
+  if (view === 'demo') openDemo(state.benchmark,state.task.id);
+  else openEpisode(state.benchmark,state.task.id,state.episode.id);
+  dialog.scrollTop = 0;
+  $(`view-${view}`).focus({preventScroll:true});
+}
+function clearVideo() {
+  video.pause(); video.removeAttribute('src'); video.removeAttribute('poster');
+  delete video.dataset.episode; delete video.dataset.media; video.load();
 }
 function closeEpisode() {
   if (history.state?.gallery?.returnUrl) history.back();
@@ -71,8 +89,11 @@ function switchBenchmark(id, scroll = false) {
   route({benchmark:id});
   if (scroll) $('collection').scrollIntoView({behavior:'smooth'});
 }
-function applyRoute() {
-  if (!state.data || routeRendering) return;
+function applyRoute(event) {
+  // Back/forward can emit both popstate and hashchange for the same URL.
+  // Render once so a second event does not replace the restored focus target.
+  if (!state.data || routeRendering || (event && lastRenderedUrl === location.href)) return;
+  lastRenderedUrl = location.href;
   routeRendering = true;
   const params = new URLSearchParams(location.hash.slice(1));
   const incoming = params.get('benchmark') || history.state?.gallery?.benchmark || (location.hash === '' ? 'libero' : state.benchmark);
@@ -86,17 +107,19 @@ function applyRoute() {
   renderCollection();
   const selectedTask = benchmark().tasks.find(task => task.id === params.get('task'));
   if (selectedTask) {
+    const previousEpisode = state.task?.id === selectedTask.id ? state.episode : null;
     state.task = selectedTask;
-    state.episode = selectedTask.episodes.find(episode => episode.id === params.get('episode')) || selectedTask.episodes[0];
+    state.episode = selectedTask.episodes.find(episode => episode.id === params.get('episode')) || previousEpisode || selectedTask.episodes[0];
+    state.view = params.get('view') === 'demo' ? 'demo' : 'episode';
     renderPlayer();
-    if (!dialog.open) { dialog.showModal(); document.body.classList.add('modal-open'); $('close-dialog').focus(); }
+    if (!dialog.open) { dialog.showModal(); dialog.scrollTop = 0; document.body.classList.add('modal-open'); $('close-dialog').focus(); }
   } else {
     if (dialog.open) {
-      video.pause(); video.removeAttribute('src'); delete video.dataset.episode; video.load(); dialog.close(); document.body.classList.remove('modal-open');
-      const target = document.querySelector(`[data-task="${CSS.escape(state.returnTask || '')}"]`);
+      clearVideo(); dialog.close(); document.body.classList.remove('modal-open');
+      const target = document.querySelector(`.task-card [data-task="${CSS.escape(state.returnTask || '')}"]${state.returnView === 'demo' ? '[data-open-demo]' : '[data-episode]'}`);
       if (target) target.focus({preventScroll:true});
     }
-    state.task = null; state.episode = null;
+    state.task = null; state.episode = null; state.view = 'episode';
   }
   routeRendering = false;
 }
@@ -134,15 +157,60 @@ function renderCollection() {
   $('results-count').textContent = `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'} · ${totalEpisodes} ${totalEpisodes === 1 ? 'rollout' : 'rollouts'}`;
   $('empty-state').hidden = tasks.length > 0;
   $('task-grid').innerHTML = tasks.map(task => {
-    const episode = task.episodes[0], count = task.episodes.length;
-    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${episode.poster}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div></div></article>`;
+    const episode = task.episodes[0], count = task.episodes.length, available = demoAvailable(taskDemo(task));
+    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${episode.poster}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div><button class="task-demo ${available ? '' : 'unavailable'}" data-open-demo="${b.id}" data-task="${task.id}" aria-label="Training demo for ${escapeHtml(task.name)}${available ? '' : ', unavailable'}"><span><span aria-hidden="true">${available ? '▷' : '○'}</span> Training demo</span><span class="demo-card-status">${available ? 'Watch ↗' : 'Unavailable'}</span></button></div></article>`;
   }).join('');
 }
 function renderPlayer() {
   const b = benchmark(), task = state.task, episode = state.episode;
-  $('dialog-eyebrow').textContent = `${b.name.toUpperCase()} / ${b.suites.length > 1 ? prettySuite(task.suite).toUpperCase() : sampling(b).toUpperCase()} / RECORDED ROLLOUT`;
+  const isDemo = state.view === 'demo', demo = taskDemo(task), available = !isDemo || demoAvailable(demo);
+  dialog.dataset.view = state.view;
+  for (const view of ['episode','demo']) {
+    const selected = state.view === view;
+    $(`view-${view}`).setAttribute('aria-selected', String(selected));
+    $(`view-${view}`).tabIndex = selected ? 0 : -1;
+  }
+  $('player-panel').setAttribute('aria-labelledby', `view-${state.view}`);
+  $('episode-summary').hidden = isDemo;
+  $('episode-chooser').hidden = isDemo;
+  $('episode-navigation').hidden = isDemo;
+  $('demo-source').hidden = !isDemo;
+  $('demo-unavailable').hidden = available;
+  video.hidden = !available;
+  $('playback-controls').hidden = !available;
+  $('camera-labels').hidden = !available;
+  $('episode-facts').hidden = !available;
+  $('download-video').hidden = !available;
+  $('copy-link-label').textContent = isDemo ? 'Copy demo link' : 'Copy episode link';
+  $('copy-status').textContent = ''; $('video-error').hidden = true;
   $('dialog-title').textContent = task.name;
-  $('task-instruction').textContent = task.instruction;
+  $('task-instruction-label').textContent = isDemo ? 'TRAINING TASK' : 'TASK INSTRUCTION';
+  $('task-instruction').textContent = isDemo ? (demo.instruction || task.name) : task.instruction;
+  if (isDemo) {
+    $('dialog-eyebrow').textContent = `${b.name.toUpperCase()} / TRAINING DEMONSTRATION`;
+    const source = demo.source || {};
+    $('demo-dataset').textContent = source.dataset || `${b.name} training dataset`;
+    $('demo-source-link').hidden = !source.url;
+    if (source.url) $('demo-source-link').href = source.url;
+    else $('demo-source-link').removeAttribute('href');
+    $('demo-source-episode').textContent = source.episode != null ? `Source episode: ${source.episode}${source.split ? ` · ${source.split}` : ''}` : '';
+    $('demo-source-episode').hidden = source.episode == null;
+    $('video-note').textContent = 'A demonstration from the benchmark’s training dataset. Training demos are separate from the agent evaluation results.';
+    if (!available) {
+      $('demo-unavailable-reason').textContent = demo.reason || 'A training demonstration is not available for this task yet.';
+      $('episode-facts').innerHTML = ''; $('camera-labels').innerHTML = '';
+      $('download-video').removeAttribute('href'); $('download-video').removeAttribute('download');
+      clearVideo();
+      return;
+    }
+    const facts = [['Source FPS',demo.fps],['Frames',demo.frames],['Video length',duration(demo.durationSeconds)]];
+    $('episode-facts').innerHTML = facts.map(([label,value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('');
+    setCameras(demo.cameras || []);
+    $('video-note').textContent += ` Playback at 1× uses the dataset’s ${demo.fps} FPS.`;
+    setVideo(demo, `demo:${task.id}`, `${task.id}-training-demo`);
+    return;
+  }
+  $('dialog-eyebrow').textContent = `${b.name.toUpperCase()} / ${b.suites.length > 1 ? prettySuite(task.suite).toUpperCase() : sampling(b).toUpperCase()} / RECORDED ROLLOUT`;
   $('episode-status').textContent = statusName(episode.status);
   $('episode-status').className = `status-badge ${episode.status}`;
   $('episode-number').textContent = `Episode ${pad(episode.index+1)} / ${pad(task.episodes.length)}`;
@@ -151,26 +219,36 @@ function renderPlayer() {
   const facts = [['Seed',episode.seed],[b.protocol.stepsLabel,`${episode.steps} / ${episode.maxSteps}`],['Tool calls',episode.toolCalls],['Video length',duration(episode.durationSeconds)],['Episode wall time',elapsed(episode.wallSeconds)]];
   if (episode.initStateId !== null) facts.splice(1,0,['Initial state',episode.initStateId]);
   $('episode-facts').innerHTML = facts.map(([label,value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('');
-  $('camera-labels').style.setProperty('--camera-count', b.protocol.cameras.length);
-  $('camera-labels').innerHTML = b.protocol.cameras.map(name => `<span>${escapeHtml(name)}</span>`).join('');
+  setCameras(b.protocol.cameras);
   $('video-note').textContent = `${b.protocol.videoNote} Episode wall time includes preparation and cleanup.`;
-  const source = resolveVideoSource(episode);
-  $('download-video').href = source; $('download-video').download = `${episode.id}.mp4`;
-  $('copy-status').textContent = ''; $('video-error').hidden = true;
   const index = task.episodes.findIndex(ep => ep.id === episode.id);
   $('previous-episode').disabled = index === 0; $('next-episode').disabled = index === task.episodes.length-1;
-  if (video.dataset.episode !== episode.id) {
-    video.pause(); video.poster = episode.poster; video.src = source; video.preload = 'metadata'; video.dataset.episode = episode.id;
-    video.style.aspectRatio = `${episode.width}/${episode.height}`; video.load();
+  setVideo(episode, `episode:${episode.id}`, episode.id);
+  video.dataset.episode = episode.id;
+}
+function setCameras(cameras) {
+  $('camera-labels').style.setProperty('--camera-count', cameras.length || 1);
+  $('camera-labels').innerHTML = cameras.map(name => `<span>${escapeHtml(name)}</span>`).join('');
+}
+function setVideo(recording, key, filename) {
+  const source = resolveVideoSource(recording);
+  $('download-video').href = source; $('download-video').download = `${filename}.mp4`;
+  if (video.dataset.media !== key) {
+    video.pause(); video.poster = recording.poster; video.src = source; video.preload = 'metadata';
+    video.dataset.media = key; delete video.dataset.episode;
+    video.style.aspectRatio = `${recording.width}/${recording.height}`; video.load();
     video.playbackRate = Number($('playback-speed').value);
   }
 }
 function moveEpisode(direction) {
+  if (state.view !== 'episode') return;
   const index = state.task.episodes.findIndex(ep => ep.id === state.episode.id);
   const next = state.task.episodes[index+direction];
   if (next) openEpisode(state.benchmark,state.task.id,next.id);
 }
 document.addEventListener('click', event => {
+  const demo = event.target.closest('[data-open-demo]');
+  if (demo) { openDemo(demo.dataset.openDemo,demo.dataset.task); return; }
   const opener = event.target.closest('[data-open-benchmark]');
   if (opener) { openEpisode(opener.dataset.openBenchmark,opener.dataset.task,opener.dataset.episode); return; }
   const b = event.target.closest('[data-benchmark]');
@@ -189,18 +267,30 @@ dialog.addEventListener('cancel',event=>{event.preventDefault();closeEpisode();}
 dialog.addEventListener('click',event=>{if(event.target === dialog){const box=dialog.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)closeEpisode();}});
 $('previous-episode').addEventListener('click',()=>moveEpisode(-1));
 $('next-episode').addEventListener('click',()=>moveEpisode(1));
+for (const view of ['episode','demo']) $(`view-${view}`).addEventListener('click',()=>switchPlayerView(view));
+$('player-views').addEventListener('keydown',event=>{
+  if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+  event.preventDefault();
+  switchPlayerView(event.key === 'Home' ? 'episode' : event.key === 'End' ? 'demo' : state.view === 'demo' ? 'episode' : 'demo');
+});
 $('playback-speed').addEventListener('change',event=>{video.playbackRate=Number(event.target.value);});
 video.addEventListener('error',()=>{if(video.hasAttribute('src'))$('video-error').hidden=false;});
 $('copy-link').addEventListener('click',async()=>{
-  try { await navigator.clipboard.writeText(location.href); $('copy-status').textContent='Episode link copied.'; }
+  try { await navigator.clipboard.writeText(location.href); $('copy-status').textContent=state.view === 'demo' ? 'Demo link copied.' : 'Episode link copied.'; }
   catch { $('copy-status').textContent=location.href; }
 });
 window.addEventListener('hashchange',applyRoute);
 window.addEventListener('popstate',applyRoute);
-fetch('data/gallery.json').then(response=>{if(!response.ok)throw new Error('Manifest unavailable');return response.json();}).then(data=>{
+Promise.all([
+  fetch('data/gallery.json').then(response=>{if(!response.ok)throw new Error('Manifest unavailable');return response.json();}),
+  fetch('data/task-demos.json').then(response=>{if(!response.ok)throw new Error('Training demo catalog unavailable');return response.json();})
+    .then(demos=>{if(!demos || !demos.tasks || typeof demos.tasks !== 'object' || Array.isArray(demos.tasks))throw new Error('Invalid training demo catalog');return demos;})
+    .catch(()=>({tasks:{},unavailableReason:'The training demo catalog could not load. Reload this page to try again.'}))
+]).then(([data,demos])=>{
   const available = data.benchmarks.filter(b => b.tasks.length > 0 && b.tasks.every(task => task.episodes.length > 0));
   if (!available.length) throw new Error('No published episodes available');
   state.data={...data,benchmarks:available};
+  state.demos=demos && typeof demos.tasks === 'object' && demos.tasks !== null ? demos : {tasks:{}};
   if (!benchmark()) state.benchmark=available[0].id;
   renderOverview(); renderFeatured(); applyRoute();
 }).catch(error=>{console.error(error);$('load-error').hidden=false;$('results-count').textContent='Collection unavailable';});

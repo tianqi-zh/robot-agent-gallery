@@ -116,6 +116,19 @@ def test_without_robocasa_copies_local_media_and_does_not_inject_flag(workspace)
     assert "GALLERY_REMOTE_VIDEOS" not in (destination / "index.html").read_text()
 
 
+def test_training_demonstrations_are_staged_locally_alongside_release_rollouts(workspace):
+    root, destination, _, episodes, _ = workspace
+    catalog = root / "data/task-demos.json"
+    catalog.write_text('{"schemaVersion": 1, "tasks": {}}\n')
+    demo = root / "media/demos/robocasa/robocasa_alpha.mp4"
+    demo.parent.mkdir(parents=True)
+    demo.write_bytes(b"synthetic training demonstration")
+    build.main()
+    assert (destination / catalog.relative_to(root)).read_bytes() == catalog.read_bytes()
+    assert (destination / demo.relative_to(root)).read_bytes() == demo.read_bytes()
+    assert all(not (destination / episode["video"]).exists() for episode in episodes)
+
+
 @pytest.mark.parametrize("corruption", [
     "hosting_repository", "hosting_tag", "remote_repository", "remote_tag",
     "remote_episode", "remote_query", "video_absolute", "video_traversal", "video_benchmark",
