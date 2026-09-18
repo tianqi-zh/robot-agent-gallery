@@ -1,48 +1,66 @@
 # Robot Agent Gallery
 
-Browse every scored episode from two coding-agent robot evaluations, including failures. The policy uses `gpt-6-astra` with `high` reasoning and controls the robot from RGB images, robot proprioception, and calibration.
+Browse all **815 scored episodes from 455 tasks** across three coding-agent robot evaluations, including failures and timeouts. Each policy requests `gpt-6-astra` with `high` reasoning and controls the robot from RGB images, robot proprioception and calibration.
 
 **Website:** [tianqi-zh.github.io/robot-agent-gallery](https://tianqi-zh.github.io/robot-agent-gallery/)
 
-| Evaluation | Tasks | Episodes | Successes | Failures | Success rate |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| LIBERO v5 r4 | 40 | 400 | 322 | 78 | 80.5% |
-| RoboTwin first pass | 50 | 50 | 36 | 14 | 72.0% |
+| Evaluation | Experiment date | Tasks | Episodes | Successes | Failures, including timeouts | Success rate |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| LIBERO v5 r4 | 2026-09-17 | 40 | 400 | 322 | 78 | 80.5% |
+| RoboTwin first pass | 2026-09-17 | 50 | 50 | 36 | 14 | 72.0% |
+| RoboCasa365 | 2026-09-18 | 365 | 365 | 165 | 200 | 45.2% |
 
-LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100, and LIBERO-10 59/100. RoboTwin's failures include one timeout. These evaluations use different tasks, controls, and budgets; their rates are not directly comparable. RoboTwin has only one sampled episode per task.
+LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes all 65 atomic tasks (28 successes) and 300 composite tasks (137 successes). RoboTwin's failures include one timeout; RoboCasa's include two. RoboTwin and RoboCasa each have one valid sampled episode per task. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
 
-Videos are compressed presentation copies that retain every recorded frame. LIBERO plays at 20 FPS and includes initialization and warmup. RoboTwin plays at 10 FPS with one frame after each native action; its playback is not physical elapsed time. Read [METHODOLOGY.md](METHODOLOGY.md) for selection, scoring, and limitations.
+Success is the benchmark's native score. It is separate from the policy's written assessment or an independent visual judgment; the [methodology](METHODOLOGY.md) explains the known StackCans criterion limitation and how invalid initial scenes are excluded.
+
+Videos are compressed presentation copies retaining every recorded frame. LIBERO plays at 20 FPS, including initialization and warmup. RoboTwin plays at 10 FPS, with an initial frame and one frame after each native action. RoboCasa plays at 20 FPS, with an initial frame and every native action across three camera views. Thinking and transport delays are omitted; playback duration is not evaluation wall time.
 
 ## Browse and share
 
-Open [LIBERO](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=libero) or [RoboTwin](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robotwin), then:
+Open [LIBERO](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=libero), [RoboTwin](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robotwin), or [RoboCasa365](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robocasa), then:
 
-1. Choose a LIBERO suite, search task names or instructions, and filter tasks by **With failures** or **All successful**. Sort by success rate to explore results.
-2. Open a task or numbered episode. Each LIBERO task has all 10 episodes; each RoboTwin task has one. The player shows the native outcome, instruction, seed, steps, and recorded camera views.
-3. Use **Copy episode link** to share the selected task and episode, or **Download MP4** to save its video. For example: [RoboTwin, stack three blocks, episode 1](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robotwin&task=robotwin_stack_blocks_three&episode=stack_blocks_three_r00).
+1. Choose a benchmark and suite or task group, search task names or instructions, and filter by **With failures** or **All successful**. RoboCasa has **Atomic** and **Composite** groups.
+2. Open a task or episode. LIBERO retains all 10 episodes per task; RoboTwin and RoboCasa each show one. The player displays the native outcome, instruction, seed, action count and recorded camera views.
+3. Use **Copy episode link** or **Download MP4**. For example: [RoboCasa, Prepare Broiling Station](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robocasa&task=robocasa_preparebroilingstation&episode=robocasa_preparebroilingstation_r00).
 
-Outcome filters select tasks; they retain every episode within each matching task, including unsuccessful episodes. The complete episode table is available as [CSV](data/episodes.csv).
+Outcome filters select tasks and retain all episodes within each matching task. The [episode CSV](data/episodes.csv) contains the complete 815-episode set. Its `video` column is the local path; `remoteVideo` provides RoboCasa's public MP4 URL.
 
-## Run locally
+## Videos and local preview
 
-From this repository:
+LIBERO and RoboTwin MP4s and all JPEG posters are stored in the repository. All 365 RoboCasa presentation MP4s are also kept locally under `media/robocasa/` in the export checkout, but are ignored by Git. Public RoboCasa videos are assets of the [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918). Pages stages the existing 450 MP4s, all posters and the catalog, and uses those Release URLs for RoboCasa playback and downloads.
+
+For a fresh clone, verify the published Release and preview the staged website:
 
 ```bash
-python3 -m http.server 8080
+python3 scripts/validate_gallery.py --require-robocasa --release-media
+python3 scripts/build_site.py
+python3 -m http.server 8080 --directory _site
 ```
 
-Open [localhost:8080](http://localhost:8080/). The site is static and requires no API key, model access, or server application.
+Open [localhost:8080](http://localhost:8080/). The website is static and requires no model access or API key. The staged preview uses public network access for RoboCasa videos. To serve the repository root with `python3 -m http.server 8080`, first download the RoboCasa MP4 assets into `media/robocasa/` or reproduce the full local export; the root page uses local video paths.
 
 ## Validate
 
+With all 815 MP4s present locally:
+
 ```bash
-python3 scripts/validate_gallery.py
-python3 scripts/validate_gallery.py --videos
+python3 scripts/validate_gallery.py --require-robocasa
+python3 scripts/validate_gallery.py --require-robocasa --videos
 ```
 
-The first command checks completeness, results, public metadata, media references, and size limits. The second also uses `ffprobe` to verify every video against its exported frame and encoding metadata.
+The first command checks the complete task matrix, native results, CSV, public metadata, media hashes and size limits. The second also uses `ffprobe` to verify every video against its frame and encoding metadata.
 
-The optional browser check exercises task filters, episode switching, actual playback, share links, history navigation, and mobile layouts. With the local server running:
+With Release-hosted RoboCasa media:
+
+```bash
+python3 scripts/release_media.py --check
+python3 scripts/validate_gallery.py --require-robocasa --release-media
+```
+
+These commands check the public asset registry's exact names, SHA256 digests, sizes, upload state and URLs. The validator still checks any local RoboCasa MP4s that are present. Adding `--videos` to Release-media validation probes the remote RoboCasa videos as well and requires network access.
+
+The browser check exercises task groups, filters, episode switching, actual playback, share links, history navigation and mobile layouts. With a local server running:
 
 ```bash
 npm ci
@@ -50,32 +68,24 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-Pass a different website URL after `--` to check a deployment. Screenshots are saved under the ignored `artifacts/browser/` directory. Node dependencies are only needed for this check; the website itself has none.
+Pass a different website URL after `--` to check a deployment. Screenshots are saved under the ignored `artifacts/browser/` directory. Node dependencies are only needed for this check.
 
-The gallery exports contain task descriptions, episode results, provenance fingerprints, and local presentation assets. They exclude raw model reasoning, credentials, private logs, and source-machine paths. See [METHODOLOGY.md](METHODOLOGY.md) for what can be verified from this public export.
+The export contains task descriptions, results and provenance fingerprints. It excludes raw model reasoning, credentials, private logs and source-machine paths. Public checks do not replace the private source audit; see [METHODOLOGY.md](METHODOLOGY.md).
 
 ## Publish to GitHub Pages
 
-[The Pages workflow](.github/workflows/pages.yml) runs on every push to `main`, or manually from **Actions → Deploy evaluation gallery → Run workflow**. It runs the default Python validator, stages the public site with `scripts/build_site.py`, uploads `_site/`, and deploys to the website linked above. Full video decoding and browser checks are separate local checks.
+[The Pages workflow](.github/workflows/pages.yml) runs on pushes to `main` or manual dispatch. It requires the complete 815-episode catalog and runs `validate_gallery.py --require-robocasa --release-media` before staging `_site/`. Full video decoding and browser checks are separate verification steps. The repository's **Settings → Pages → Source** uses **GitHub Actions**.
 
-The repository's **Settings → Pages → Source** uses **GitHub Actions**. No model credentials or frontend build dependencies are needed for deployment.
+The release tag must point to the final validated gallery commit. Finish the full local export, verification and documentation, create that commit, and push only its `robocasa365-20260918` tag first. Verify the remote tag's peeled commit SHA, upload and publish the verified videos, then check the public Release before pushing the same commit to `main`. A tag-only push does not trigger this Pages workflow. See [ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md) for the complete commands and resume behavior.
 
 ## Files and rebuilding
 
-- `index.html`, `app.js`, `styles.css`: the static gallery interface.
-- `data/gallery.json`: task and episode metadata used by the interface.
-- `data/episodes.csv`: the same selected episodes in tabular form.
-- `data/export-report.json`: source-selection fingerprints and media validation metadata.
-- `media/libero/`, `media/robotwin/`: compressed MP4 videos and JPEG posters.
-- `scripts/`: export, validation, and publication staging tools.
-- `.github/workflows/pages.yml`: GitHub Pages deployment.
+- `index.html`, `app.js`, `styles.css`: static interface.
+- `data/gallery.json` and `data/episodes.csv`: the complete task and episode catalog.
+- `data/export-report.json`: source selections, exclusion provenance and media fingerprints.
+- `media/libero/`, `media/robotwin/`, `media/robocasa/`: presentation media; RoboCasa MP4s are local/Release assets and its posters are tracked.
+- `scripts/export_gallery.py`, `scripts/robocasa_export.py`: source selection and export.
+- `scripts/validate_gallery.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, Release handling and Pages staging.
+- [METHODOLOGY.md](METHODOLOGY.md): protocol, native scoring, recovery and limitations.
 
-Rebuilding the export requires Python 3.10+, `ffmpeg`, `ffprobe`, and access to both original evaluation run directories. For a sibling source checkout containing those runs:
-
-```bash
-python3 scripts/export_gallery.py --source-root ../robot-agent/eval_runs --jobs 6
-python3 scripts/validate_gallery.py --videos
-python3 scripts/build_site.py
-```
-
-The exporter reads existing results and recordings; it does not call a model or run new evaluations. `build_site.py` stages only the public website files in `_site/`. GitHub Pages uses that directory as its deployment artifact. The public gallery alone does not contain the private source runs needed to repeat the export.
+Rebuilding requires Python 3.10+, FFmpeg/ffprobe and the private original evaluation runs, including every registered RoboCasa recovery run and its complete collection audit. Follow [ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md); the exporter reads existing recordings and does not call a model or start new episodes. The public gallery alone does not include the private evidence needed to repeat the source audit.

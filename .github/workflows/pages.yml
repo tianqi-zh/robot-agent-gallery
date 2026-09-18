@@ -24,7 +24,7 @@ jobs:
       - name: Check out the gallery
         uses: actions/checkout@v6
       - name: Validate the published evaluation matrix
-        run: python3 scripts/validate_gallery.py
+        run: python3 scripts/validate_gallery.py --require-robocasa --release-media
       - name: Stage the static website
         run: python3 scripts/build_site.py
       - name: Configure GitHub Pages

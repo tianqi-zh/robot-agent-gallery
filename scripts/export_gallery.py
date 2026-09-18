@@ -38,6 +38,7 @@ ENCODING = {
     "maxRate": "600k", "bufferSize": "1200k", "preset": "medium",
     "fastStart": True, "resize": False, "preserveFramesAndFps": True,
 }
+ROBOCASA_ENCODING = {**ENCODING, "crf": 26, "maxRate": "2000k", "bufferSize": "4000k"}
 VALID_STATUSES = {"success", "failure", "timeout"}
 
 
@@ -127,7 +128,7 @@ def aggregate(episodes, tasks):
     }
 
 
-def load_plan(source_root: Path, output_root: Path):
+def load_plan(source_root: Path, output_root: Path, robocasa_audit: Path | None = None):
     gallery = {
         "schemaVersion": 1, "generatedAt": datetime.now(timezone.utc).isoformat(),
         "model": "gpt-6-astra", "evaluationDate": "2026-09-17", "benchmarks": [],
@@ -234,6 +235,7 @@ def load_plan(source_root: Path, output_root: Path):
         }
         gallery["benchmarks"].append({
             "id": benchmark_id, "name": "LIBERO" if benchmark_id == "libero" else "RoboTwin",
+            "evaluationDate": "2026-09-17",
             "summary": counts, "suites": suites, "protocol": protocol,
             "provenance": {"run": run_name, "manifestSha256": manifest_hash}, "tasks": list(tasks.values()),
         })
@@ -241,6 +243,20 @@ def load_plan(source_root: Path, output_root: Path):
                            "manifestSha256": manifest_hash, "selectedEpisodes": len(all_episodes),
                            "excludedAttemptCount": sum(len(item["excludedAttempts"]) for item in run_attempts),
                            "attemptSelection": run_attempts})
+    if robocasa_audit is not None:
+        from robocasa_export import load_audited_robocasa
+        from release_media import RELEASE_HOSTING, remote_video_url
+
+        benchmark, extra_jobs, source = load_audited_robocasa(source_root, robocasa_audit, output_root)
+        benchmark["videoHosting"] = dict(RELEASE_HOSTING)
+        benchmark["evaluationDate"] = "2026-09-18"
+        for job in extra_jobs:
+            job["episode"]["remoteVideo"] = remote_video_url(job["episode"]["id"])
+        gallery["benchmarks"].append(benchmark)
+        jobs.extend(extra_jobs)
+        provenance.append(source)
+        gallery["evaluationDate"] = "2026-09-18"
+        gallery["evaluationDates"] = ["2026-09-17", "2026-09-18"]
     return gallery, jobs, provenance
 
 
@@ -248,6 +264,8 @@ def publish_metadata(output_root: Path, gallery):
     write_json(output_root / "data/gallery.json", gallery)
     fields = ["benchmark", "suite", "task", "instruction", "episode", "rolloutIndex", "status", "seed",
               "initStateId", "steps", "maxSteps", "toolCalls", "wallSeconds", "durationSeconds", "frames", "video", "poster"]
+    if any(benchmark["id"] == "robocasa" for benchmark in gallery["benchmarks"]):
+        fields.append("remoteVideo")
     with (output_root / "data/episodes.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
@@ -257,7 +275,7 @@ def publish_metadata(output_root: Path, gallery):
                     writer.writerow({
                         "benchmark": benchmark["id"], "suite": task["suite"], "task": task["id"],
                         "instruction": task["instruction"], "episode": episode["id"], "rolloutIndex": episode["index"],
-                        **{key: episode[key] for key in fields[6:]},
+                        **{key: episode.get(key) if key == "remoteVideo" else episode[key] for key in fields[6:]},
                     })
 
 
@@ -269,6 +287,10 @@ def encode(job, prior):
     poster = output_root / episode["poster"]
     video.parent.mkdir(parents=True, exist_ok=True)
     source_hash = sha256(source)
+    audited_hash = job["selection"].get("sourceVideoSha256")
+    if audited_hash is not None:
+        assert source_hash == audited_hash, "Source video changed after the collection audit"
+    encoding = job.get("encoding", ENCODING)
     if (prior and prior.get("sourceSha256") == source_hash and video.is_file() and poster.is_file()
             and prior.get("videoSha256") == sha256(video) and prior.get("posterSha256") == sha256(poster)):
         for field in ("width", "height", "frames"):
@@ -283,8 +305,8 @@ def encode(job, prior):
     command = [
         "ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-y", "-threads", "1", "-filter_threads", "1",
         "-i", str(source), "-map", "0:v:0", "-an", "-map_metadata", "-1", "-map_chapters", "-1",
-        "-c:v", "libx264", "-threads", "2", "-preset", ENCODING["preset"],
-        "-crf", str(ENCODING["crf"]), "-maxrate", ENCODING["maxRate"], "-bufsize", ENCODING["bufferSize"],
+        "-c:v", "libx264", "-threads", "2", "-preset", encoding["preset"],
+        "-crf", str(encoding["crf"]), "-maxrate", encoding["maxRate"], "-bufsize", encoding["bufferSize"],
         "-pix_fmt", "yuv420p", "-fps_mode", "passthrough", "-movflags", "+faststart", str(temporary),
     ]
     subprocess.run(command, check=True, capture_output=True, text=True)
@@ -319,7 +341,9 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True, help="Directory containing both source run directories")
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--jobs", type=int, default=6, choices=range(1, 7))
-    parser.add_argument("--plan-only", action="store_true")
+    parser.add_argument("--robocasa-audit", type=Path,
+                        help="Completed, hash-bound RoboCasa365 collection audit; adds all 365 scored episodes")
+    parser.add_argument("--plan-only", action="store_true", help="Check source selection without writing export files")
     parser.add_argument("--sample", type=int, default=0, help="Encode a deterministic representative subset first")
     args = parser.parse_args()
     args.source_root = args.source_root.resolve()
@@ -327,23 +351,41 @@ def main():
     assert (args.output != args.source_root
             and not args.source_root.is_relative_to(args.output)
             and not args.output.is_relative_to(args.source_root)), "Source and output directories must be separate"
-    gallery, jobs, provenance = load_plan(args.source_root, args.output)
+    existing_gallery = args.output / "data/gallery.json"
+    if (args.robocasa_audit is None and existing_gallery.is_file()
+            and any(benchmark["id"] == "robocasa" for benchmark in read_json(existing_gallery)["benchmarks"])):
+        parser.error("This gallery already contains RoboCasa365; supply --robocasa-audit to retain its complete collection")
+    gallery, jobs, provenance = load_plan(args.source_root, args.output, args.robocasa_audit)
+    encoding_by_benchmark = {benchmark["id"]: (ROBOCASA_ENCODING if benchmark["id"] == "robocasa" else ENCODING)
+                             for benchmark in gallery["benchmarks"]}
+    for job in jobs:
+        job["encoding"] = encoding_by_benchmark[job["benchmark"]]
+    plan_summary = {"planned": len(jobs), "sourceBytes": sum(job["source"].stat().st_size for job in jobs),
+                    "summaries": {benchmark["id"]: benchmark["summary"] for benchmark in gallery["benchmarks"]}}
+    print(json.dumps(plan_summary), flush=True)
+    if args.plan_only:
+        return
     publish_metadata(args.output, gallery)
     report_path = args.output / "data/export-report.json"
     prior_report = read_json(report_path) if report_path.exists() else {}
-    prior = {item["episode"]: item for item in prior_report.get("media", [])} if prior_report.get("encoding") == ENCODING else {}
+    previous_encodings = prior_report.get("encodingByBenchmark", {
+        benchmark_id: prior_report.get("encoding") for benchmark_id in encoding_by_benchmark})
+    expected_ids = {job["episode"]["id"] for job in jobs}
+    prior = {item["episode"]: item for item in prior_report.get("media", [])
+             if item["episode"] in expected_ids
+             and previous_encodings.get(item["benchmark"]) == encoding_by_benchmark.get(item["benchmark"])}
     report = {
         "schemaVersion": 1, "generatedAt": gallery["generatedAt"], "complete": False,
-        "selectionRule": "Latest attempt for every planned episode. Policy failures and timeouts are included; only earlier infrastructure/interruption attempts are excluded.",
-        "encoding": ENCODING, "runs": provenance, "media": list(prior.values()),
+        "selectionRule": ("Latest valid attempt for LIBERO and RoboTwin; RoboCasa365 uses the unique source selected by its complete collection audit. "
+                          "Policy failures and timeouts are included. Only documented infrastructure/interruption attempts and zero-action invalid initial scenes are excluded."),
+        "encoding": ENCODING, "encodingByBenchmark": encoding_by_benchmark,
+        "videoHosting": {benchmark["id"]: benchmark["videoHosting"]
+                         for benchmark in gallery["benchmarks"] if "videoHosting" in benchmark},
+        "runs": provenance, "media": list(prior.values()),
         "expectedEpisodes": len(jobs), "verifiedEpisodes": len(prior),
-        "sourceBytes": sum(job["source"].stat().st_size for job in jobs),
+        "sourceBytes": plan_summary["sourceBytes"],
     }
     write_json(report_path, report)
-    print(json.dumps({"planned": len(jobs), "sourceBytes": report["sourceBytes"],
-                      "summaries": {benchmark["id"]: benchmark["summary"] for benchmark in gallery["benchmarks"]}}), flush=True)
-    if args.plan_only:
-        return
     selected_jobs = jobs
     if args.sample:
         # Include each benchmark, short and long episodes, then uniformly spaced episodes.
@@ -367,13 +409,16 @@ def main():
     expected_ids = {job["episode"]["id"] for job in jobs}
     report["complete"] = len(selected_jobs) == len(jobs) and set(prior) == expected_ids
     report["publishedMediaBytes"] = report.get("videoBytes", 0) + report.get("posterBytes", 0)
-    assert report["publishedMediaBytes"] < 800_000_000, "Published media exceeds export size budget"
+    report["externalVideoBytes"] = sum(item["videoBytes"] for item in prior.values()
+                                        if item["benchmark"] in report["videoHosting"])
+    report["pagesMediaBytes"] = report["publishedMediaBytes"] - report["externalVideoBytes"]
+    assert report["pagesMediaBytes"] < 800_000_000, "Pages media exceeds export size budget"
     report["validation"] = {
         "expectedEpisodes": len(jobs), "verifiedEpisodes": len(prior),
         "decodedFrameCount": sum(item["frames"] for item in prior.values()),
         "allFramesAndFpsPreserved": all(item["verified"] for item in prior.values()),
         "allBrowserH264Yuv420pFastStart": all(item["codec"] == "h264" and item["pixelFormat"] == "yuv420p" and item["fastStart"] for item in prior.values()),
-        "sourceFilesUnmodified": True, "within800MBMediaBudget": True,
+        "sourceFilesUnmodified": True, "within800MBPagesMediaBudget": True,
     }
     write_json(report_path, report)
     publish_metadata(args.output, gallery)
