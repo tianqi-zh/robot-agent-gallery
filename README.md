@@ -26,6 +26,8 @@ Open [LIBERO](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=libero)
 
 Outcome filters select tasks and retain all episodes within each matching task. The [episode CSV](data/episodes.csv) contains the complete 815-episode set. Its `video` column is the local path; `remoteVideo` provides RoboCasa's public MP4 URL.
 
+Each task also has a **Training demo** entry with its dataset source, instruction and original playback rate. There are 406 reference videos: all 40 LIBERO tasks, all 50 RoboTwin tasks, and 316 RoboCasa tasks. The other 49 RoboCasa tasks display an explicit unavailable state because their released training data contains no matching demonstration. See [training sources and export details](TRAINING_DEMOS.md). Demo videos have their own share links and do not contribute to the evaluation counts above.
+
 ## Videos and local preview
 
 LIBERO and RoboTwin MP4s and all JPEG posters are stored in the repository. All 365 RoboCasa presentation MP4s are also kept locally under `media/robocasa/` in the export checkout, but are ignored by Git. Public RoboCasa videos are assets of the [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918). Pages stages the existing 450 MP4s, all posters and the catalog, and uses those Release URLs for RoboCasa playback and downloads.
@@ -50,6 +52,8 @@ python3 scripts/validate_gallery.py --require-robocasa --videos
 ```
 
 The first command checks the complete task matrix, native results, CSV, public metadata, media hashes and size limits. The second also uses `ffprobe` to verify every video against its frame and encoding metadata.
+
+Add `--require-demos` to require the task demonstration catalog. When the catalog is present, both validation modes include its available videos and explicit missing-source entries. Pages requires this catalog and includes the training videos locally.
 
 With Release-hosted RoboCasa media:
 
@@ -82,9 +86,11 @@ The release tag must point to the final validated gallery commit. Finish the ful
 
 - `index.html`, `app.js`, `styles.css`: static interface.
 - `data/gallery.json` and `data/episodes.csv`: the complete task and episode catalog.
+- `data/task-demos.json`, `media/demos/`: training demonstration mappings, videos and posters.
 - `data/export-report.json`: source selections, exclusion provenance and media fingerprints.
 - `media/libero/`, `media/robotwin/`, `media/robocasa/`: presentation media; RoboCasa MP4s are local/Release assets and its posters are tracked.
 - `scripts/export_gallery.py`, `scripts/robocasa_export.py`: source selection and export.
+- `scripts/export_training_demos.py`, `scripts/export_robocasa_demos.py`, `scripts/assemble_training_demos.py`: training-video export and catalog assembly.
 - `scripts/validate_gallery.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, Release handling and Pages staging.
 - [METHODOLOGY.md](METHODOLOGY.md): protocol, native scoring, recovery and limitations.
 

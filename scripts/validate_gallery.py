@@ -175,12 +175,87 @@ def check_digest(value, label):
     require(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value), f"Invalid {label} fingerprint")
 
 
-def validate_gallery(root, *, check_interface=True, require_robocasa=False, release_assets=None):
+def validate_training_demos(root, gallery, *, required=False):
+    """Validate separate training references without changing evaluation counts."""
+    catalog_path = root / "data/task-demos.json"
+    if not catalog_path.exists():
+        require(not required, "Training demonstration catalog is required")
+        return None, [], set()
+    catalog = read_json(catalog_path)
+    public_metadata(catalog, "data/task-demos.json")
+    require(catalog.get("schemaVersion") == 1, "Unsupported training demo schema")
+    records = catalog.get("tasks")
+    expected = {task["id"]: (benchmark["id"], task)
+                for benchmark in gallery["benchmarks"] for task in benchmark["tasks"]}
+    require(isinstance(records, dict) and set(records) == set(expected),
+            "Training demo catalog must account for every gallery task exactly once")
+    coverage = {benchmark["id"]: {"tasks": len(benchmark["tasks"]), "available": 0, "unavailable": 0}
+                for benchmark in gallery["benchmarks"]}
+    videos, media_paths = [], set()
+    for task_id, record in records.items():
+        benchmark_id, task = expected[task_id]
+        require(record.get("taskId") == task_id and record.get("benchmark") == benchmark_id,
+                f"Training demo task identity mismatch: {task_id}")
+        status = record.get("status")
+        require(status in {"available", "unavailable"}, f"Invalid training demo status: {task_id}")
+        coverage[benchmark_id][status] += 1
+        source = record.get("source", {})
+        require(isinstance(source, dict) and isinstance(source.get("dataset"), str) and source["dataset"].strip()
+                and isinstance(source.get("url"), str) and source["url"].startswith("https://"),
+                f"Missing training dataset attribution: {task_id}")
+        if status == "unavailable":
+            require(isinstance(record.get("reason"), str) and record["reason"].strip(),
+                    f"Missing unavailable-demo explanation: {task_id}")
+            require(not any(key in record for key in ("video", "poster", "remoteVideo", "frames")),
+                    f"Unavailable training demo must not claim media: {task_id}")
+            continue
+        relative_source = source.get("relativePath")
+        require(isinstance(relative_source, str) and relative_source and
+                not PurePosixPath(relative_source).is_absolute() and ".." not in PurePosixPath(relative_source).parts,
+                f"Missing relative training source path: {task_id}")
+        require(source.get("episode") is not None, f"Missing training episode selection: {task_id}")
+        if benchmark_id in {"robotwin", "robocasa"}:
+            require(isinstance(source.get("taskName"), str) and
+                    f"{benchmark_id}_{source['taskName'].lower()}" == task_id,
+                    f"Training source task differs from gallery task: {task_id}")
+        for key in ("width", "height", "frames"):
+            integer(record.get(key), f"{task_id} demo {key}", 1)
+        fps = record.get("fps")
+        require(type(fps) in (int, float) and math.isfinite(fps) and fps > 0,
+                f"Invalid training demo frame rate: {task_id}")
+        duration = record.get("durationSeconds")
+        require(type(duration) in (int, float) and math.isfinite(duration)
+                and abs(duration - record["frames"] / fps) < .001,
+                f"Training demo duration/frame mismatch: {task_id}")
+        require(isinstance(record.get("cameras"), list) and record["cameras"] and
+                all(isinstance(value, str) and value.strip() for value in record["cameras"]),
+                f"Missing training camera labels: {task_id}")
+        for key, suffix in (("video", ".mp4"), ("poster", ".jpg")):
+            relative = f"media/demos/{benchmark_id}/{task_id}{suffix}"
+            require(record.get(key) == relative and relative not in media_paths,
+                    f"Incorrect training demo asset mapping: {task_id}")
+            path = local_asset(root, relative, f"training {key}")
+            check_digest(record.get(f"{key}Sha256"), f"training {key}")
+            require(sha256(path) == record[f"{key}Sha256"], f"Training media digest mismatch: {relative}")
+            if key == "video" or f"{key}Bytes" in record:
+                require(path.stat().st_size == record.get(f"{key}Bytes"),
+                        f"Training media byte count mismatch: {relative}")
+            media_paths.add(relative)
+        videos.append((root / record["video"], {key: record[key] for key in ("width", "height", "frames", "fps")}))
+    require(catalog.get("coverage") == coverage, "Training demo coverage summary differs from catalog")
+    return coverage, videos, media_paths
+
+
+def validate_gallery(root, *, check_interface=True, require_robocasa=False, release_assets=None,
+                     require_demos=False):
     required_files = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md") if check_interface else ()
     for filename in required_files:
         require((root / filename).is_file(), f"Required public file is missing: {filename}")
+    expected_data_files = {"gallery.json", "episodes.csv", "export-report.json"}
+    if (root / "data/task-demos.json").exists():
+        expected_data_files.add("task-demos.json")
     require({path.relative_to(root / "data").as_posix() for path in (root / "data").rglob("*") if path.is_file()}
-            == {"gallery.json", "episodes.csv", "export-report.json"},
+            == expected_data_files,
             "The public data directory contains missing or unexpected files")
     gallery = read_json(root / "data/gallery.json")
     report = read_json(root / "data/export-report.json")
@@ -463,6 +538,13 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(pages_bytes < 800_000_000, "Pages media exceeds 800 MB")
     require(report["validation"]["decodedFrameCount"] == sum(record["frames"] for record in media),
             "Incorrect mapped frame total")
+    demo_coverage, demo_videos, demo_paths = validate_training_demos(root, gallery, required=require_demos)
+    require(not media_paths.intersection(demo_paths), "Training and evaluation media must have distinct assets")
+    demo_bytes = sum((root / relative).stat().st_size for relative in demo_paths)
+    if has_robocasa:
+        require(pages_bytes + demo_bytes < 800_000_000, "Pages media including training demos exceeds 800 MB")
+    media_paths.update(demo_paths)
+    videos.extend(demo_videos)
     actual_media = {path.relative_to(root).as_posix() for path in (root / "media").rglob("*") if path.is_file()}
     require(actual_media == media_paths if release_assets is None else
             media_paths - external_media <= actual_media <= media_paths,
@@ -483,7 +565,9 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(row == {key: "" if value is None else str(value) for key, value in expected_row.items()},
                 f"CSV/JSON mismatch: {row['episode']}")
     return {"benchmarks": summaries, "episodes": len(episodes), "tasks": len(task_ids),
-            "media_files": len(media_paths), "media_bytes": video_bytes + poster_bytes,
+            "training_demos": demo_coverage,
+            "training_demo_bytes": demo_bytes,
+            "media_files": len(media_paths), "media_bytes": video_bytes + poster_bytes + demo_bytes,
             "repository_files": tree["files"], "repository_bytes": tree["bytes"], "pages_bytes": tree["siteBytes"]}, videos
 
 
@@ -492,6 +576,7 @@ def main():
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="Gallery repository root")
     parser.add_argument("--videos", action="store_true", help="Decode and validate every video with ffprobe")
     parser.add_argument("--require-robocasa", action="store_true", help="Require all 365 RoboCasa episodes in addition to LIBERO and RoboTwin")
+    parser.add_argument("--require-demos", action="store_true", help="Require a training demonstration or explicit unavailable entry for every task")
     parser.add_argument("--release-media", action="store_true", help="Verify RoboCasa videos through the public Release asset SHA256/size registry")
     parser.add_argument("--workers", type=int, default=4, help="Concurrent ffprobe processes (default: 4)")
     args = parser.parse_args()
@@ -503,7 +588,7 @@ def main():
             from release_media import fetch_release_assets
             release_assets = fetch_release_assets()
         result, videos = validate_gallery(args.root.resolve(), require_robocasa=args.require_robocasa,
-                                         release_assets=release_assets)
+                                         release_assets=release_assets, require_demos=args.require_demos)
         if args.videos:
             require(shutil.which("ffprobe") is not None, "Install ffprobe to use --videos")
             with ThreadPoolExecutor(max_workers=args.workers) as pool:

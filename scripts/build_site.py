@@ -6,7 +6,7 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATION = ROOT / "_site"
-PUBLIC_FILES = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md")
+PUBLIC_FILES = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md", "TRAINING_DEMOS.md")
 PUBLIC_DIRECTORIES = ("assets", "data", "media")
 
 

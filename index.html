@@ -59,8 +59,37 @@
   </main>
   <footer class="site-footer wrap"><span>Agent as Policy <span class="footer-divider">/</span> Evaluation gallery</span><span id="recorded-dates">Recorded evaluation episodes</span><a href="https://github.com/tianqi-zh/robot-agent-gallery">Data & website on GitHub ↗</a></footer>
   <dialog id="episode-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-top">
     <div class="dialog-heading"><div><p class="eyebrow" id="dialog-eyebrow"></p><h2 id="dialog-title"></h2></div><button class="icon-button" id="close-dialog" aria-label="Close video">✕</button></div>
-    <div class="player-layout"><div class="player-main"><div class="video-stage"><video id="episode-video" controls playsinline preload="none"></video><p id="video-error" hidden role="alert">The video could not load. Try opening or downloading the MP4 below.</p></div><div class="camera-labels" id="camera-labels"></div><div class="player-actions"><div><button class="button secondary" id="previous-episode" aria-label="Previous episode">← Previous</button><button class="button secondary" id="next-episode" aria-label="Next episode">Next →</button></div><label class="speed-label">Speed <select id="playback-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div><p class="video-note" id="video-note"></p></div><aside class="episode-sidebar"><div class="episode-summary"><span class="status-badge" id="episode-status"></span><span id="episode-number"></span></div><p class="sidebar-label">TASK INSTRUCTION</p><p class="task-instruction" id="task-instruction"></p><div class="episode-chooser-heading"><p class="sidebar-label">SELECT EPISODE</p><span id="task-score"></span></div><div class="episode-buttons" id="episode-buttons"></div><dl class="episode-facts" id="episode-facts"></dl><div class="share-actions"><button class="button primary" id="copy-link">Copy episode link <span aria-hidden="true">↗</span></button><a class="button secondary" id="download-video" download>Download MP4 <span aria-hidden="true">↓</span></a></div><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p></aside></div>
+    <div class="player-views" id="player-views" role="tablist" aria-label="Video type">
+      <button id="view-episode" role="tab" aria-controls="player-panel" aria-selected="true">Agent episodes</button>
+      <button id="view-demo" role="tab" aria-controls="player-panel" aria-selected="false" tabindex="-1">Training demo</button>
+    </div>
+    </div>
+    <div class="player-layout" id="player-panel" role="tabpanel" aria-labelledby="view-episode">
+      <div class="player-main">
+        <div class="video-stage">
+          <video id="episode-video" controls playsinline preload="none"></video>
+          <div id="demo-unavailable" class="demo-unavailable" hidden role="status"><strong>Training demo unavailable</strong><p id="demo-unavailable-reason"></p><p>Agent episodes are available in the tab above.</p></div>
+          <p id="video-error" hidden role="alert">The video could not load. Try opening or downloading the MP4 below.</p>
+        </div>
+        <div class="camera-labels" id="camera-labels"></div>
+        <div class="player-actions" id="playback-controls">
+          <div id="episode-navigation"><button class="button secondary" id="previous-episode" aria-label="Previous episode">← Previous</button><button class="button secondary" id="next-episode" aria-label="Next episode">Next →</button></div>
+          <label class="speed-label">Speed <select id="playback-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+        </div>
+        <p class="video-note" id="video-note"></p>
+      </div>
+      <aside class="episode-sidebar">
+        <div class="episode-summary" id="episode-summary"><span class="status-badge" id="episode-status"></span><span id="episode-number"></span></div>
+        <p class="sidebar-label" id="task-instruction-label">TASK INSTRUCTION</p><p class="task-instruction" id="task-instruction"></p>
+        <div id="episode-chooser"><div class="episode-chooser-heading"><p class="sidebar-label">SELECT EPISODE</p><span id="task-score"></span></div><div class="episode-buttons" id="episode-buttons"></div></div>
+        <div class="demo-source" id="demo-source" hidden><p class="sidebar-label">TRAINING DEMONSTRATION</p><p id="demo-dataset"></p><a id="demo-source-link" target="_blank" rel="noopener noreferrer">View source dataset <span aria-hidden="true">↗</span></a><p id="demo-source-episode"></p></div>
+        <dl class="episode-facts" id="episode-facts"></dl>
+        <div class="share-actions"><button class="button primary" id="copy-link"><span id="copy-link-label">Copy episode link</span> <span aria-hidden="true">↗</span></button><a class="button secondary" id="download-video" download>Download MP4 <span aria-hidden="true">↓</span></a></div>
+        <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
+      </aside>
+    </div>
   </dialog>
   <noscript><p class="noscript">Enable JavaScript to browse and play episodes, or download the <a href="data/episodes.csv">complete results CSV</a>.</p></noscript>
 </body>
