@@ -13,6 +13,16 @@ LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100, and LIBERO-
 
 Videos are compressed presentation copies that retain every recorded frame. LIBERO plays at 20 FPS and includes initialization and warmup. RoboTwin plays at 10 FPS with one frame after each native action; its playback is not physical elapsed time. Read [METHODOLOGY.md](METHODOLOGY.md) for selection, scoring, and limitations.
 
+## Browse and share
+
+Open [LIBERO](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=libero) or [RoboTwin](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robotwin), then:
+
+1. Choose a LIBERO suite, search task names or instructions, and filter tasks by **With failures** or **All successful**. Sort by success rate to explore results.
+2. Open a task or numbered episode. Each LIBERO task has all 10 episodes; each RoboTwin task has one. The player shows the native outcome, instruction, seed, steps, and recorded camera views.
+3. Use **Copy episode link** to share the selected task and episode, or **Download MP4** to save its video. For example: [RoboTwin, stack three blocks, episode 1](https://tianqi-zh.github.io/robot-agent-gallery/#benchmark=robotwin&task=robotwin_stack_blocks_three&episode=stack_blocks_three_r00).
+
+Outcome filters select tasks; they retain every episode within each matching task, including unsuccessful episodes. The complete episode table is available as [CSV](data/episodes.csv).
+
 ## Run locally
 
 From this repository:
@@ -35,7 +45,7 @@ The first command checks completeness, results, public metadata, media reference
 The optional browser check exercises task filters, episode switching, actual playback, share links, history navigation, and mobile layouts. With the local server running:
 
 ```bash
-npm install
+npm ci
 npx playwright install chromium
 npm run test:browser
 ```
@@ -43,6 +53,12 @@ npm run test:browser
 Pass a different website URL after `--` to check a deployment. Screenshots are saved under the ignored `artifacts/browser/` directory. Node dependencies are only needed for this check; the website itself has none.
 
 The gallery exports contain task descriptions, episode results, provenance fingerprints, and local presentation assets. They exclude raw model reasoning, credentials, private logs, and source-machine paths. See [METHODOLOGY.md](METHODOLOGY.md) for what can be verified from this public export.
+
+## Publish to GitHub Pages
+
+[The Pages workflow](.github/workflows/pages.yml) runs on every push to `main`, or manually from **Actions → Deploy evaluation gallery → Run workflow**. It runs the default Python validator, stages the public site with `scripts/build_site.py`, uploads `_site/`, and deploys to the website linked above. Full video decoding and browser checks are separate local checks.
+
+The repository's **Settings → Pages → Source** uses **GitHub Actions**. No model credentials or frontend build dependencies are needed for deployment.
 
 ## Files and rebuilding
 
