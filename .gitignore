@@ -7,3 +7,5 @@ __pycache__/
 *.log
 .gallery-cache/
 artifacts/
+# RoboCasa presentation MP4s stay available locally and are distributed as Release assets.
+/media/robocasa/*.mp4

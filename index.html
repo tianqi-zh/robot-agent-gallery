@@ -5,15 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f6f5f0">
   <title>Agent as Policy — Robot Evaluation Gallery</title>
-  <meta name="description" content="Watch GPT-6-Astra control robots across 90 tasks. All 400 LIBERO and 50 RoboTwin evaluation videos, with successes and failures included.">
+  <meta name="description" content="Watch GPT-6-Astra control robots through visual feedback. Browse recorded evaluation episodes, including successes and failures.">
   <link rel="canonical" href="https://tianqi-zh.github.io/robot-agent-gallery/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Agent as Policy — Watch every outcome">
-  <meta property="og:description" content="90 tasks. 450 complete rollouts. Explore GPT-6-Astra on LIBERO and RoboTwin, including successes and failures.">
+  <meta property="og:description" content="Explore recorded robot evaluation episodes, including successes and failures, with native outcomes and camera views.">
   <meta property="og:url" content="https://tianqi-zh.github.io/robot-agent-gallery/">
-  <meta property="og:image" content="https://tianqi-zh.github.io/robot-agent-gallery/assets/social-preview.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://tianqi-zh.github.io/robot-agent-gallery/assets/social-preview.png">
+  <meta name="twitter:card" content="summary">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
@@ -22,39 +20,28 @@
   <a class="skip-link" href="#collection">Skip to the videos</a>
   <header class="site-header wrap">
     <a class="brand" href="./" aria-label="Agent as Policy home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 24V8h10v16M15 8h12v8H15M5 16h10M21 16v8h6"/></svg><span>Agent as Policy</span></a>
-    <nav aria-label="Main navigation"><a href="#collection">Collection <span class="nav-count">450</span></a><a href="#protocol">Protocol</a><a href="https://github.com/tianqi-zh/robot-agent-gallery" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></nav>
+    <nav aria-label="Main navigation"><a href="#collection">Collection <span class="nav-count" id="nav-count">…</span></a><a href="#protocol">Protocol</a><a href="https://github.com/tianqi-zh/robot-agent-gallery" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></nav>
   </header>
   <main>
     <section class="hero wrap" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow"><span class="signal-dot"></span> ROBOT EVALUATION ARCHIVE · SEPT 2026</p>
+        <p class="eyebrow"><span class="signal-dot"></span> ROBOT EVALUATION ARCHIVE</p>
         <h1 id="hero-title">Watch the policy.<br><em>See every outcome.</em></h1>
-        <p class="hero-description">A coding agent controlling robots through visual feedback. Browse complete rollouts across two benchmarks, from the first move to the final result.</p>
+        <p class="hero-description" id="hero-description">A coding agent controlling robots through visual feedback. Browse recorded rollouts, from the first move to the final result.</p>
         <div class="hero-actions"><a class="button primary" href="#collection">Explore the collection <span aria-hidden="true">↘</span></a><span class="model-label">GPT-6-Astra <small>high reasoning</small></span></div>
-        <div class="hero-facts"><span><strong>90</strong> tasks</span><span><strong>450</strong> rollouts</span><span>Every success. Every failure.</span></div>
+        <div class="hero-facts"><span><strong id="total-tasks">…</strong> tasks</span><span><strong id="total-episodes">…</strong> rollouts</span><span>Every success. Every failure.</span></div>
       </div>
       <div class="hero-visual" id="hero-visual" aria-label="Featured evaluation recordings">
         <div class="visual-placeholder">Loading recorded rollouts…</div>
       </div>
     </section>
-    <section class="benchmark-overview wrap" aria-label="Evaluation results">
-      <button class="benchmark-summary active" data-benchmark="libero" aria-pressed="true">
-        <div class="summary-heading"><span class="eyebrow">01 / LIBERO</span><span class="summary-tag">10 episodes per task</span></div>
-        <div class="summary-main"><strong>80.5<span>%</span></strong><span class="summary-detail">322 / 400 successful<br><small>40 tasks across four suites</small></span><span class="summary-arrow" aria-hidden="true">↗</span></div>
-        <div class="score-track"><span style="width:80.5%"></span></div>
-      </button>
-      <button class="benchmark-summary" data-benchmark="robotwin" aria-pressed="false">
-        <div class="summary-heading"><span class="eyebrow">02 / ROBOTWIN</span><span class="summary-tag">First pass · 1 per task</span></div>
-        <div class="summary-main"><strong>72.0<span>%</span></strong><span class="summary-detail">36 / 50 successful<br><small>50 dual-arm manipulation tasks</small></span><span class="summary-arrow" aria-hidden="true">↗</span></div>
-        <div class="score-track"><span style="width:72%"></span></div>
-      </button>
-    </section>
+    <section class="benchmark-overview wrap" id="benchmark-overview" aria-label="Evaluation results"></section>
     <p class="comparison-note wrap">Separate benchmarks, different tasks and control protocols. Success rates are reported independently.</p>
     <section class="collection wrap" id="collection" aria-labelledby="collection-heading">
       <div class="section-heading"><div><p class="eyebrow">THE COMPLETE RECORD</p><h2 id="collection-heading">The rollout collection<span>.</span></h2></div><a class="text-link" href="data/episodes.csv" download>Download results <span aria-hidden="true">↓</span></a></div>
       <div class="collection-topline">
-        <div class="benchmark-tabs" aria-label="Benchmark"><button class="active" data-benchmark="libero" aria-pressed="true">LIBERO <span>400</span></button><button data-benchmark="robotwin" aria-pressed="false">RoboTwin <span>50</span></button></div>
-        <p class="collection-description" id="collection-description">10 recorded episodes for every task.</p>
+        <div class="benchmark-tabs" id="benchmark-tabs" aria-label="Benchmark"></div>
+        <p class="collection-description" id="collection-description">Loading recorded episodes…</p>
       </div>
       <div class="toolbar">
         <div class="suite-tabs" id="suite-tabs" aria-label="Task suite"></div>
@@ -66,11 +53,11 @@
       <p id="load-error" role="alert" hidden>Unable to load the collection. Please refresh the page. For local use, serve this folder with a static web server.</p>
     </section>
     <section class="protocol wrap" id="protocol" aria-labelledby="protocol-heading">
-      <div><p class="eyebrow">HOW TO READ THIS GALLERY</p><h2 id="protocol-heading">The task is visual.<br><em>The score is native.</em></h2><p>Both evaluations use GPT-6-Astra with high reasoning. Each episode starts with a fresh context and receives its own instruction, RGB camera views, robot state and calibration.</p><a class="text-link" href="https://github.com/tianqi-zh/robot-agent-gallery/blob/main/METHODOLOGY.md" target="_blank" rel="noopener noreferrer">Read the evaluation protocol <span aria-hidden="true">↗</span></a></div>
-      <div class="protocol-notes"><details open><summary>All scored episodes are included</summary><p>400 LIBERO videos and 50 RoboTwin videos, including failures and one RoboTwin timeout. Final attempts follow infrastructure-only retries; policy failures were not retried to improve the score.</p></details><details><summary>Success comes from the simulator</summary><p>Results use each benchmark’s native success condition, not the agent’s written assessment. The policy receives no object ground-truth poses, reward or success labels, demonstrations, or cross-episode memory.</p></details><details><summary>Playback and control time are different</summary><p>LIBERO includes initial and warmup frames, then every control step at 20 FPS. RoboTwin shows the initial frame and each native action’s final view at 10 FPS; these actions have variable physical duration. Thinking time is omitted. Web copies retain all recorded frames and camera views.</p></details><details><summary>A first pass, not a universal score</summary><p>LIBERO uses ten initial states per task. RoboTwin currently has one valid episode per task. Different tasks and protocols prevent direct comparison or pooling across benchmarks.</p></details></div>
+      <div><p class="eyebrow">HOW TO READ THIS GALLERY</p><h2 id="protocol-heading">The task is visual.<br><em>The score is native.</em></h2><p>These evaluations use GPT-6-Astra with high reasoning. Each episode starts with a fresh context and receives its own instruction, RGB camera views, robot state and calibration.</p><a class="text-link" href="https://github.com/tianqi-zh/robot-agent-gallery/blob/main/METHODOLOGY.md" target="_blank" rel="noopener noreferrer">Read the evaluation protocol <span aria-hidden="true">↗</span></a></div>
+      <div class="protocol-notes"><details open><summary>All scored episodes are included</summary><p id="published-episodes-note">The published selection includes successful and unsuccessful episodes. Source selection and infrastructure retries are documented in the evaluation protocol.</p></details><details><summary>Success comes from the simulator</summary><p>Results use each benchmark’s native success condition, not the agent’s written assessment. The policy receives no object ground-truth poses, reward or success labels, demonstrations, or cross-episode memory.</p></details><details><summary>Playback and control time are different</summary><div id="playback-protocol"><p>The player describes each benchmark’s recorded cameras and playback rate. Thinking time is omitted from video playback.</p></div></details><details><summary>Sampling and comparison</summary><p id="sampling-protocol">Sampling is reported separately for each published benchmark. Different tasks and protocols prevent direct comparison or pooling across benchmarks.</p></details></div>
     </section>
   </main>
-  <footer class="site-footer wrap"><span>Agent as Policy <span class="footer-divider">/</span> Evaluation gallery</span><span>Recorded September 17, 2026</span><a href="https://github.com/tianqi-zh/robot-agent-gallery">Data & website on GitHub ↗</a></footer>
+  <footer class="site-footer wrap"><span>Agent as Policy <span class="footer-divider">/</span> Evaluation gallery</span><span id="recorded-dates">Recorded evaluation episodes</span><a href="https://github.com/tianqi-zh/robot-agent-gallery">Data & website on GitHub ↗</a></footer>
   <dialog id="episode-dialog" aria-labelledby="dialog-title">
     <div class="dialog-heading"><div><p class="eyebrow" id="dialog-eyebrow"></p><h2 id="dialog-title"></h2></div><button class="icon-button" id="close-dialog" aria-label="Close video">✕</button></div>
     <div class="player-layout"><div class="player-main"><div class="video-stage"><video id="episode-video" controls playsinline preload="none"></video><p id="video-error" hidden role="alert">The video could not load. Try opening or downloading the MP4 below.</p></div><div class="camera-labels" id="camera-labels"></div><div class="player-actions"><div><button class="button secondary" id="previous-episode" aria-label="Previous episode">← Previous</button><button class="button secondary" id="next-episode" aria-label="Next episode">Next →</button></div><label class="speed-label">Speed <select id="playback-speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div><p class="video-note" id="video-note"></p></div><aside class="episode-sidebar"><div class="episode-summary"><span class="status-badge" id="episode-status"></span><span id="episode-number"></span></div><p class="sidebar-label">TASK INSTRUCTION</p><p class="task-instruction" id="task-instruction"></p><div class="episode-chooser-heading"><p class="sidebar-label">SELECT EPISODE</p><span id="task-score"></span></div><div class="episode-buttons" id="episode-buttons"></div><dl class="episode-facts" id="episode-facts"></dl><div class="share-actions"><button class="button primary" id="copy-link">Copy episode link <span aria-hidden="true">↗</span></button><a class="button secondary" id="download-video" download>Download MP4 <span aria-hidden="true">↓</span></a></div><p class="copy-status" id="copy-status" role="status" aria-live="polite"></p></aside></div>
