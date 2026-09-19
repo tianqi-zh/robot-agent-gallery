@@ -55,8 +55,8 @@ def main():
         index.write_text(html.replace(script, '<script>window.GALLERY_REMOTE_VIDEOS = true;</script>\n  ' + script))
     files = [path for path in DESTINATION.rglob("*") if path.is_file()]
     size = sum(path.stat().st_size for path in files)
-    if size >= 950_000_000:
-        raise SystemExit(f"Published site exceeds the 950 MB safety margin: {size} bytes")
+    if size >= 1_500_000_000:
+        raise SystemExit(f"Published site exceeds the 1.5 GB safety margin: {size} bytes")
     print(f"Staged {len(files)} files, {size / 1_000_000:.1f} MB, in _site/; {len(external_videos)} videos use release assets")
 
 

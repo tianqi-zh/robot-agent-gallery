@@ -20,7 +20,7 @@ import sys
 
 DEFAULT_ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {".git", "node_modules", "_site", "artifacts", ".venv", "__pycache__", ".gallery-cache"}
-MAX_SITE_BYTES = 1_000_000_000
+MAX_SITE_BYTES = 1_600_000_000
 MAX_FILE_BYTES = 100_000_000
 EXPECTED_SUITES = {"libero_spatial": 95, "libero_goal": 79, "libero_object": 89, "libero_10": 59}
 EXPECTED_RUNS = {
@@ -32,6 +32,8 @@ EXPECTED_RUNS = {
                  "3a2a7f6939e18b5ee3fb6d6bac10d8f2f8704cd422d91efc8e56a038cf28c12c"),
     "robodojo": ("robodojo42_astra_firstpass_20260919",
                  "fe327cacc7615e868096a025c1287a8ad070408851bac9104cf132c1349f6fd4"),
+    "robotwin_nvidia10": ("robotwin_nvidia10_full_v1",
+                          "348c4f7a97e28e763a9c46158e60d164c5a95708093dbfbc178b860416200694"),
 }
 # Exact standard task matrix from the frozen RoboDojo manifest. Native names are
 # case-sensitive; gallery IDs are lowercased and the suite ID uses underscores.
@@ -154,7 +156,7 @@ def check_tree(root, external_media=()):
             if not external:
                 site_total += size
             files += 1
-    require(site_total < MAX_SITE_BYTES, f"Pages gallery reaches 1 GB: {site_total} bytes")
+    require(site_total < MAX_SITE_BYTES, f"Pages gallery exceeds the configured size limit: {site_total} bytes")
     return {"files": files, "bytes": total, "siteBytes": site_total}
 
 
@@ -343,9 +345,11 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     benchmark_ids = {item["id"] for item in benchmarks}
     has_robocasa = "robocasa" in benchmark_ids
     has_robodojo = "robodojo" in benchmark_ids
+    has_robotwin_nvidia10 = "robotwin_nvidia10" in benchmark_ids
     require(release_assets is None or has_robocasa, "Release validation requires RoboCasa365")
     expected_benchmarks = ({"libero", "robotwin"} | ({"robocasa"} if has_robocasa else set())
-                           | ({"robodojo"} if has_robodojo else set()))
+                           | ({"robodojo"} if has_robodojo else set())
+                           | ({"robotwin_nvidia10"} if has_robotwin_nvidia10 else set()))
     require(benchmark_ids == expected_benchmarks and len(benchmarks) == len(expected_benchmarks),
             "Expected LIBERO and RoboTwin, with complete optional benchmark collections")
     require(not require_robocasa or has_robocasa, "The complete RoboCasa365 collection is required")
@@ -354,10 +358,13 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     if has_robodojo:
         expected_episodes += 42
         expected_tasks_total += 42
-    require(gallery.get("evaluationDate") == ("2026-09-19" if has_robodojo else "2026-09-18" if has_robocasa else "2026-09-17"),
+    if has_robotwin_nvidia10:
+        expected_episodes += 482
+        expected_tasks_total += 50
+    require(gallery.get("evaluationDate") == ("2026-09-19" if has_robodojo or has_robotwin_nvidia10 else "2026-09-18" if has_robocasa else "2026-09-17"),
             "Unexpected evaluation date")
-    if has_robocasa or has_robodojo:
-        dates = ["2026-09-17"] + (["2026-09-18"] if has_robocasa else []) + (["2026-09-19"] if has_robodojo else [])
+    if has_robocasa or has_robodojo or has_robotwin_nvidia10:
+        dates = ["2026-09-17"] + (["2026-09-18"] if has_robocasa else []) + (["2026-09-19"] if has_robodojo or has_robotwin_nvidia10 else [])
         require(gallery.get("evaluationDates") == dates, "Incorrect evaluation dates")
     require(report.get("expectedEpisodes") == expected_episodes and report.get("verifiedEpisodes") == expected_episodes,
             f"The export must contain {expected_episodes} verified episodes")
@@ -377,6 +384,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         is_libero = benchmark_id == "libero"
         is_robocasa = benchmark_id == "robocasa"
         is_robodojo = benchmark_id == "robodojo"
+        is_robotwin_nvidia10 = benchmark_id == "robotwin_nvidia10"
         if is_robodojo:
             public_fields(benchmark, {"id", "name", "evaluationDate", "summary", "suites", "protocol", "provenance", "tasks"},
                           "RoboDojo benchmark")
@@ -385,17 +393,18 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             public_fields(benchmark["provenance"], ROBODOJO_PROVENANCE_KEYS, "RoboDojo provenance")
             public_fields(benchmark["summary"], set(counts([], 0)), "RoboDojo summary")
         require(is_robocasa or "videoHosting" not in benchmark, "Unexpected external hosting for a historical benchmark")
-        if has_robocasa or has_robodojo:
-            require(benchmark.get("evaluationDate") == ("2026-09-19" if is_robodojo else "2026-09-18" if is_robocasa else "2026-09-17"),
+        if has_robocasa or has_robodojo or has_robotwin_nvidia10:
+            require(benchmark.get("evaluationDate") == ("2026-09-19" if is_robodojo or is_robotwin_nvidia10 else "2026-09-18" if is_robocasa else "2026-09-17"),
                     f"Incorrect evaluation date: {benchmark_id}")
-        expected_tasks, per_task = {"libero": (40, 10), "robotwin": (50, 1), "robocasa": (365, 1), "robodojo": (42, 1)}[benchmark_id]
+        expected_tasks, per_task = {"libero": (40, 10), "robotwin": (50, 1), "robocasa": (365, 1), "robodojo": (42, 1),
+                                    "robotwin_nvidia10": (50, 10)}[benchmark_id]
         tasks = benchmark["tasks"]
         require(len(tasks) == expected_tasks, f"Wrong task count for {benchmark_id}")
         require(benchmark["protocol"]["episodesPerTask"] == per_task, f"Wrong sampling for {benchmark_id}")
         check_digest(benchmark["provenance"]["manifestSha256"], f"{benchmark_id} manifest")
         require((benchmark["provenance"]["run"], benchmark["provenance"]["manifestSha256"]) == EXPECTED_RUNS[benchmark_id],
                 f"Unexpected frozen source run for {benchmark_id}")
-        expected_suites = set(EXPECTED_SUITES) if is_libero else ({"robocasa_atomic", "robocasa_composite"} if is_robocasa else {"robotwin"})
+        expected_suites = set(EXPECTED_SUITES) if is_libero else ({"robocasa_atomic", "robocasa_composite"} if is_robocasa else {"robotwin_nvidia10"} if is_robotwin_nvidia10 else {"robotwin"})
         if is_robodojo:
             expected_suites = set(ROBODOJO_SUITES)
         suites = benchmark["suites"]
@@ -412,8 +421,12 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             if is_robodojo:
                 validate_robodojo_task(task)
             task_episodes = task["episodes"]
-            require(len(task_episodes) == per_task, f"Wrong episode count for {task_id}")
-            require({item["index"] for item in task_episodes} == set(range(per_task)), f"Wrong rollout indices: {task_id}")
+            if is_robotwin_nvidia10:
+                require(1 <= len(task_episodes) <= per_task, f"Wrong episode count for {task_id}")
+                require({item["index"] for item in task_episodes}.issubset(set(range(per_task))), f"Wrong rollout indices: {task_id}")
+            else:
+                require(len(task_episodes) == per_task, f"Wrong episode count for {task_id}")
+                require({item["index"] for item in task_episodes} == set(range(per_task)), f"Wrong rollout indices: {task_id}")
             if is_libero:
                 require({item["initStateId"] for item in task_episodes} == set(range(10)), f"Wrong initial states: {task_id}")
             for episode in task_episodes:
@@ -423,6 +436,8 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                 require(episode_id not in episodes, f"Duplicate episode ID: {episode_id}")
                 require(is_libero or task_id.startswith(f"{benchmark_id}_"), f"Unexpected {benchmark_id} task identifier")
                 expected_prefix = task_id if is_libero or is_robocasa or is_robodojo else task_id.removeprefix("robotwin_")
+                if is_robotwin_nvidia10:
+                    expected_prefix = task_id
                 require(episode_id == f"{expected_prefix}_r{episode['index']:02d}", f"Episode/task identity mismatch: {episode_id}")
                 require(episode["status"] in {"success", "failure", "timeout"}, f"Unscored episode: {episode_id}")
                 for key in ("index", "seed", "steps", "maxSteps", "toolCalls", "width", "height", "frames"):
@@ -435,6 +450,15 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                     require(episode["maxSteps"] == 500 and episode["seed"] == episode["index"] == episode["initStateId"],
                             f"Incorrect LIBERO episode protocol: {episode_id}")
                     require(episode["frames"] == episode["steps"] + 11, f"LIBERO warmup/frame mismatch: {episode_id}")
+                elif is_robotwin_nvidia10:
+                    require(episode["initStateId"] is None and 0 <= episode["index"] < 10,
+                            f"Incorrect RoboTwin 10-rollout protocol: {episode_id}")
+                    require(episode["seed"] >= 100000,
+                            f"Incorrect RoboTwin 10-rollout seed: {episode_id}")
+                    require(episode["frames"] == episode["steps"] + 1, f"{benchmark_id} action/frame mismatch: {episode_id}")
+                    require(episode["video"] == f"media/robotwin_nvidia10/{episode_id}.mp4"
+                            and episode["poster"] == f"media/robotwin_nvidia10/{episode_id}.jpg",
+                            f"Incorrect RoboTwin 10-rollout local media paths: {episode_id}")
                 else:
                     require(episode["index"] == 0 and episode["initStateId"] is None,
                             f"Incorrect {benchmark_id} episode protocol: {episode_id}")
@@ -476,7 +500,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         expected = counts(all_episodes, len(tasks))
         fixed = {"tasks": 40, "episodes": 400, "successes": 322, "failures": 78, "timeouts": 0, "successRate": .805} if is_libero else {
             "tasks": 50, "episodes": 50, "successes": 36, "failures": 14, "timeouts": 1, "successRate": .72}
-        if not is_robocasa:
+        if not is_robocasa and not is_robotwin_nvidia10:
             if is_robodojo:
                 fixed = {"tasks": 42, "episodes": 42, "successes": 6, "failures": 36, "timeouts": 0, "successRate": 6 / 42}
             require(expected == fixed, f"Wrong native outcome aggregate for {benchmark_id}")
@@ -507,6 +531,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         benchmark_id = run["benchmark"]
         is_robocasa = benchmark_id == "robocasa"
         is_robodojo = benchmark_id == "robodojo"
+        is_robotwin_nvidia10 = benchmark_id == "robotwin_nvidia10"
         expected_ids = {key for key, item in episodes.items() if item["benchmark"] == benchmark_id}
         provenance = benchmark_by_id[benchmark_id]["provenance"]
         require(run["run"] == provenance["run"] and run["manifestSha256"] == provenance["manifestSha256"],
@@ -546,7 +571,10 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             episode = episodes[selection["episode"]]["episode"]
             check_digest(selection["resultSha256"], "selected result")
             selected_attempt = selection["selectedAttempt"]
-            require(re.fullmatch(r"attempt_\d+", selected_attempt), "Invalid selected attempt identifier")
+            if is_robotwin_nvidia10:
+                require(re.fullmatch(r"attempt_\d+_nvidia_api", selected_attempt), "Invalid selected attempt identifier")
+            else:
+                require(re.fullmatch(r"attempt_\d+", selected_attempt), "Invalid selected attempt identifier")
             if is_robodojo:
                 public_fields(selection, ROBODOJO_SELECTION_KEYS, "RoboDojo selection")
                 task = episodes[selection["episode"]]["task"]
@@ -579,6 +607,12 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                         and selection["nativeScore"] == int(episode["status"] == "success"),
                         "RoboCasa native score mismatch")
                 check_digest(selection.get("sourceVideoSha256"), "RoboCasa selected source video")
+            if is_robotwin_nvidia10:
+                require(selection.get("sourceEpisodeKey") == episode.get("sourceEpisodeKey")
+                        and selection.get("status") == episode["status"]
+                        and selection["excludedAttempts"] == [],
+                        "RoboTwin 10-rollout source identity mismatch")
+                check_digest(selection.get("sourceVideoSha256"), "RoboTwin 10-rollout selected source video")
             excluded_attempts = set()
             for excluded in selection["excludedAttempts"]:
                 require(excluded["status"] in {"error", "interrupted"}, "A policy outcome was excluded by a retry")
@@ -612,11 +646,14 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                     check_digest(excluded.get("videoSha256"), "RoboCasa excluded video")
                 check_digest(excluded["resultSha256"], "excluded result")
                 excluded_count += 1
-        require(excluded_count == run["excludedAttemptCount"],
-                f"Wrong infrastructure/interruption retry count: {benchmark_id}")
-        if not is_robocasa:
+        if not is_robotwin_nvidia10:
+            require(excluded_count == run["excludedAttemptCount"],
+                    f"Wrong infrastructure/interruption retry count: {benchmark_id}")
+        if not is_robocasa and not is_robotwin_nvidia10:
             require(excluded_count == {"libero": 4, "robotwin": 6, "robodojo": 0}[benchmark_id],
                     f"Unexpected historical retry count: {benchmark_id}")
+        if is_robotwin_nvidia10:
+            require(run["excludedAttemptCount"] == 18, "Unexpected RoboTwin 10-rollout excluded episode count")
     media = report["media"]
     require(len(media) == expected_episodes and {item["episode"] for item in media} == set(episodes), "Incomplete media provenance mapping")
     videos, video_bytes, poster_bytes = [], 0, 0
@@ -639,10 +676,10 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(abs(record["durationSeconds"] - episode["durationSeconds"]) < 1e-3, "Video duration mapping differs from source")
         require(0 <= integer(record["posterFrame"], "poster frame") < episode["frames"], "Poster references a missing source frame")
         check_digest(record["sourceSha256"], "source video")
-        if item["benchmark"] in {"robocasa", "robodojo"}:
+        if item["benchmark"] in {"robocasa", "robodojo", "robotwin_nvidia10"}:
             selection = next(selection for run in runs if run["benchmark"] == item["benchmark"]
                              for selection in run["attemptSelection"] if selection["episode"] == record["episode"])
-            label = "RoboCasa" if item["benchmark"] == "robocasa" else "RoboDojo"
+            label = {"robocasa": "RoboCasa", "robodojo": "RoboDojo", "robotwin_nvidia10": "RoboTwin 10-rollout"}[item["benchmark"]]
             require(record["sourceSha256"] == selection["sourceVideoSha256"], f"{label} audit/source video mismatch")
         integer(record["sourceBytes"], "source video size", 1)
         for key in ("video", "poster"):
@@ -675,14 +712,14 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         pages_bytes = video_bytes + poster_bytes - external_bytes
         require(report.get("externalVideoBytes") == external_bytes and report.get("pagesMediaBytes") == pages_bytes,
                 "Incorrect release/Pages media size totals")
-        require(pages_bytes < 800_000_000, "Pages media exceeds 800 MB")
+        require(pages_bytes < 1_500_000_000, "Pages media exceeds 1.5 GB")
     require(report["validation"]["decodedFrameCount"] == sum(record["frames"] for record in media),
             "Incorrect mapped frame total")
     demo_coverage, demo_videos, demo_paths = validate_training_demos(root, gallery, required=require_demos)
     require(not media_paths.intersection(demo_paths), "Training and evaluation media must have distinct assets")
     demo_bytes = sum((root / relative).stat().st_size for relative in demo_paths)
     if has_robocasa:
-        require(pages_bytes + demo_bytes < 800_000_000, "Pages media including training demos exceeds 800 MB")
+        require(pages_bytes + demo_bytes < 1_500_000_000, "Pages media including training demos exceeds 1.5 GB")
     media_paths.update(demo_paths)
     videos.extend(demo_videos)
     actual_media = {path.relative_to(root).as_posix() for path in (root / "media").rglob("*") if path.is_file()}

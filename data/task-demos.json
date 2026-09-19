@@ -21,6 +21,11 @@
       "tasks": 42,
       "available": 34,
       "unavailable": 8
+    },
+    "robotwin_nvidia10": {
+      "tasks": 50,
+      "available": 0,
+      "unavailable": 50
     }
   },
   "tasks": {
@@ -14352,6 +14357,506 @@
         "repoId": "RoboDojo-Benchmark/RoboDojo",
         "revision": "91f76c28d93dd20c5fa46ce6a5a1d96a4f384acd",
         "taskName": "pour_by_language"
+      }
+    },
+    "robotwin_nvidia10_adjust_bottle": {
+      "taskId": "robotwin_nvidia10_adjust_bottle",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_beat_block_hammer": {
+      "taskId": "robotwin_nvidia10_beat_block_hammer",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_blocks_ranking_rgb": {
+      "taskId": "robotwin_nvidia10_blocks_ranking_rgb",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_blocks_ranking_size": {
+      "taskId": "robotwin_nvidia10_blocks_ranking_size",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_click_alarmclock": {
+      "taskId": "robotwin_nvidia10_click_alarmclock",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_click_bell": {
+      "taskId": "robotwin_nvidia10_click_bell",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_dump_bin_bigbin": {
+      "taskId": "robotwin_nvidia10_dump_bin_bigbin",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_grab_roller": {
+      "taskId": "robotwin_nvidia10_grab_roller",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_handover_block": {
+      "taskId": "robotwin_nvidia10_handover_block",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_handover_mic": {
+      "taskId": "robotwin_nvidia10_handover_mic",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_hanging_mug": {
+      "taskId": "robotwin_nvidia10_hanging_mug",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_lift_pot": {
+      "taskId": "robotwin_nvidia10_lift_pot",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_move_can_pot": {
+      "taskId": "robotwin_nvidia10_move_can_pot",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_move_pillbottle_pad": {
+      "taskId": "robotwin_nvidia10_move_pillbottle_pad",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_move_playingcard_away": {
+      "taskId": "robotwin_nvidia10_move_playingcard_away",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_move_stapler_pad": {
+      "taskId": "robotwin_nvidia10_move_stapler_pad",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_open_laptop": {
+      "taskId": "robotwin_nvidia10_open_laptop",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_open_microwave": {
+      "taskId": "robotwin_nvidia10_open_microwave",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_pick_diverse_bottles": {
+      "taskId": "robotwin_nvidia10_pick_diverse_bottles",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_pick_dual_bottles": {
+      "taskId": "robotwin_nvidia10_pick_dual_bottles",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_a2b_left": {
+      "taskId": "robotwin_nvidia10_place_a2b_left",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_a2b_right": {
+      "taskId": "robotwin_nvidia10_place_a2b_right",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_bread_basket": {
+      "taskId": "robotwin_nvidia10_place_bread_basket",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_bread_skillet": {
+      "taskId": "robotwin_nvidia10_place_bread_skillet",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_burger_fries": {
+      "taskId": "robotwin_nvidia10_place_burger_fries",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_can_basket": {
+      "taskId": "robotwin_nvidia10_place_can_basket",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_cans_plasticbox": {
+      "taskId": "robotwin_nvidia10_place_cans_plasticbox",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_container_plate": {
+      "taskId": "robotwin_nvidia10_place_container_plate",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_dual_shoes": {
+      "taskId": "robotwin_nvidia10_place_dual_shoes",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_empty_cup": {
+      "taskId": "robotwin_nvidia10_place_empty_cup",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_fan": {
+      "taskId": "robotwin_nvidia10_place_fan",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_mouse_pad": {
+      "taskId": "robotwin_nvidia10_place_mouse_pad",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_object_basket": {
+      "taskId": "robotwin_nvidia10_place_object_basket",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_object_scale": {
+      "taskId": "robotwin_nvidia10_place_object_scale",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_object_stand": {
+      "taskId": "robotwin_nvidia10_place_object_stand",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_phone_stand": {
+      "taskId": "robotwin_nvidia10_place_phone_stand",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_place_shoe": {
+      "taskId": "robotwin_nvidia10_place_shoe",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_press_stapler": {
+      "taskId": "robotwin_nvidia10_press_stapler",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_put_bottles_dustbin": {
+      "taskId": "robotwin_nvidia10_put_bottles_dustbin",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_put_object_cabinet": {
+      "taskId": "robotwin_nvidia10_put_object_cabinet",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_rotate_qrcode": {
+      "taskId": "robotwin_nvidia10_rotate_qrcode",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_scan_object": {
+      "taskId": "robotwin_nvidia10_scan_object",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_shake_bottle": {
+      "taskId": "robotwin_nvidia10_shake_bottle",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_shake_bottle_horizontally": {
+      "taskId": "robotwin_nvidia10_shake_bottle_horizontally",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_stack_blocks_three": {
+      "taskId": "robotwin_nvidia10_stack_blocks_three",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_stack_blocks_two": {
+      "taskId": "robotwin_nvidia10_stack_blocks_two",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_stack_bowls_three": {
+      "taskId": "robotwin_nvidia10_stack_bowls_three",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_stack_bowls_two": {
+      "taskId": "robotwin_nvidia10_stack_bowls_two",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_stamp_seal": {
+      "taskId": "robotwin_nvidia10_stamp_seal",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
+      }
+    },
+    "robotwin_nvidia10_turn_switch": {
+      "taskId": "robotwin_nvidia10_turn_switch",
+      "benchmark": "robotwin_nvidia10",
+      "status": "unavailable",
+      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "source": {
+        "dataset": "RoboTwin 2.0 demonstrations",
+        "url": "https://robotwin-platform.github.io/"
       }
     }
   }

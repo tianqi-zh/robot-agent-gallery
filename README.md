@@ -1,8 +1,8 @@
 # Robot Agent Gallery
 
-Browse all **857 scored episodes from 497 tasks** across four coding-agent robot evaluations, including failures and timeouts. Each policy requests `gpt-6-astra` with `high` reasoning and controls the robot from RGB images and robot proprioception. Calibration inputs depend on the benchmark; RoboDojo receives no camera calibration.
+Browse all **1,339 scored playable episodes from 547 task entries** across five coding-agent robot evaluation collections, including failures and timeouts. Each policy requests `gpt-6-astra` with `high` reasoning and controls the robot from RGB images and robot proprioception. Calibration inputs depend on the benchmark; RoboDojo receives no camera calibration.
 
-**Website:** [tianqi-zh.github.io/robot-agent-gallery](https://tianqi-zh.github.io/robot-agent-gallery/). This revision adds 42 RoboDojo evaluation episodes and 34 training demonstrations to the earlier 815-episode / 455-task release. A push to `main` triggers GitHub Pages; deployment success and the live catalog must be verified separately.
+**Website:** [tianqi-zh.github.io/robot-agent-gallery](https://tianqi-zh.github.io/robot-agent-gallery/). This revision includes the RoboDojo evaluation and adds a RoboTwin 10-rollout NVIDIA API collection with 482 playable scored episodes. A push to `main` triggers GitHub Pages; deployment success and the live catalog must be verified separately.
 
 | Evaluation | Experiment date | Tasks | Episodes | Successes | Failures, including timeouts | Success rate |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
@@ -10,8 +10,9 @@ Browse all **857 scored episodes from 497 tasks** across four coding-agent robot
 | RoboTwin first pass | 2026-09-17 | 50 | 50 | 36 | 14 | 72.0% |
 | RoboCasa365 | 2026-09-18 | 365 | 365 | 165 | 200 | 45.2% |
 | RoboDojo first pass, local | 2026-09-19 | 42 | 42 | 6 | 36 | 14.29% |
+| RoboTwin 10-rollout NVIDIA API | 2026-09-19 | 50 | 482 | 320 | 162 | 66.39% |
 
-LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes all 65 atomic tasks (28 successes) and 300 composite tasks (137 successes). RoboTwin's failures include one timeout; RoboCasa's include two. RoboDojo has zero timeouts and zero infrastructure errors. RoboTwin, RoboCasa and RoboDojo each have one valid sampled episode per task. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
+LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes all 65 atomic tasks (28 successes) and 300 composite tasks (137 successes). RoboTwin's failures include one timeout; RoboCasa's include two. RoboDojo has zero timeouts and zero infrastructure errors. The original RoboTwin, RoboCasa and RoboDojo collections each have one valid sampled episode per task; the RoboTwin 10-rollout collection publishes the scored success/failure episodes that produced complete MP4s. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
 
 Success is the benchmark's native score. It is separate from the policy's written assessment or an independent visual judgment; the [methodology](METHODOLOGY.md) explains the known StackCans criterion limitation and how invalid initial scenes are excluded.
 
@@ -33,7 +34,7 @@ Open [localhost:8080](http://localhost:8080/) or the [local RoboDojo view](http:
 2. Open a task or episode. LIBERO retains all ten episodes per task; RoboTwin, RoboCasa and RoboDojo each show one. The player displays the native outcome, instruction, seed, action count and recorded camera views.
 3. Use **Copy episode link** or **Download MP4**. Share links use the current server address. Public RoboDojo links require a completed deployment containing this revision.
 
-Outcome filters select tasks and retain all episodes within each matching task. The [episode CSV](data/episodes.csv) contains the complete 857-episode set. Its `video` column is the local path; `remoteVideo` retains RoboCasa's public MP4 URL. RoboDojo uses relative paths to repository media.
+Outcome filters select tasks and retain all episodes within each matching task. The [episode CSV](data/episodes.csv) contains the complete 1,339-episode playable set. Its `video` column is the local path; `remoteVideo` retains RoboCasa's public MP4 URL. RoboDojo uses relative paths to repository media.
 
 There are 440 training reference videos: 40 LIBERO, 50 RoboTwin, 316 RoboCasa and 34 RoboDojo. The other 49 RoboCasa tasks and eight RoboDojo Open tasks display an explicit unavailable state because the released training data has no matching demonstration. RoboDojo references use complete official episode-zero head-camera previews; only those previews and source metadata are downloaded. All 497 tasks have a training-catalog record. See [training sources and export details](TRAINING_DEMOS.md). Demo videos have their own share links and do not contribute to evaluation counts.
 
