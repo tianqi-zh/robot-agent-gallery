@@ -352,6 +352,9 @@ def main():
             and not args.source_root.is_relative_to(args.output)
             and not args.output.is_relative_to(args.source_root)), "Source and output directories must be separate"
     existing_gallery = args.output / "data/gallery.json"
+    if (existing_gallery.is_file()
+            and any(benchmark["id"] == "robodojo" for benchmark in read_json(existing_gallery)["benchmarks"])):
+        parser.error("This gallery contains RoboDojo; rebuild the earlier benchmarks in a separate directory, then append RoboDojo with robodojo_export.py")
     if (args.robocasa_audit is None and existing_gallery.is_file()
             and any(benchmark["id"] == "robocasa" for benchmark in read_json(existing_gallery)["benchmarks"])):
         parser.error("This gallery already contains RoboCasa365; supply --robocasa-audit to retain its complete collection")
