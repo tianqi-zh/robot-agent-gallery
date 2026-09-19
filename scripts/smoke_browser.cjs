@@ -155,6 +155,37 @@ fs.mkdirSync(output, {recursive:true});
           assert.ok((await page.locator(`[data-suite="${suite}"]`).textContent()).includes(String(expected)));
         }
       }
+      if (b.id === 'robodojo') {
+        assert.equal(b.tasks.length, 42);
+        assert.equal(b.summary.episodes, 42);
+        assert.equal(b.summary.successes, 6);
+        assert.equal(b.summary.failures, 36);
+        assert.equal(b.protocol.episodesPerTask, 1);
+        assert.equal(b.suites.length, 5);
+        for (const [group,expected] of [['generalization',12],['memory',6],['precision',8],['long_horizon',8],['open',8]]) {
+          const suite = `robodojo_${group}`;
+          assert.equal(b.tasks.filter(task => task.suite === suite).length, expected);
+          assert.ok((await page.locator(`[data-suite="${suite}"]`).textContent()).includes(String(expected)));
+        }
+        const coverage = demos.coverage?.robodojo;
+        if (coverage) {
+          assert.equal(coverage.tasks, 42);
+          assert.equal(await page.locator('.task-demo:not(.unavailable)').count(), coverage.available);
+          assert.equal(await page.locator('.task-demo.unavailable').count(), coverage.unavailable);
+          assert.ok(b.tasks.every(task => demos.tasks[task.id]));
+          assert.ok((await page.locator('#collection-demo-note').textContent()).includes(`${coverage.available} of 42`));
+          assert.ok(!(await page.locator('.demo-card-status').allTextContents()).includes('Not imported'));
+        } else {
+          assert.equal(await page.locator('#collection-demo-note').textContent(), b.protocol.trainingDemoNote);
+          assert.deepEqual(await page.locator('.demo-card-status').allTextContents(), Array(42).fill('Not imported'));
+          assert.ok(b.tasks.every(task => !demos.tasks[task.id]));
+        }
+        assert.ok(b.tasks.every(task => task.episodes.length === 1));
+        const instruction = b.tasks[0].instruction;
+        await page.fill('#task-search', instruction);
+        await count(b.tasks.filter(task => `${task.name} ${task.instruction} ${task.suiteName} ${task.id}`.toLowerCase().includes(instruction.toLowerCase())).length);
+        await page.fill('#task-search', '');
+      }
       await page.selectOption('#outcome-filter', 'failures');
       await count(b.tasks.filter(task => task.failures > 0).length);
       await page.selectOption('#outcome-filter', 'perfect');
@@ -178,10 +209,19 @@ fs.mkdirSync(output, {recursive:true});
       await page.locator(`.media-thumb[data-task="${task.id}"]`).click();
       await ready(page, episode);
       assert.equal(await page.locator('.episode-button').count(), task.episodes.length);
+      assert.equal(await page.locator('#task-instruction').textContent(), task.instruction);
       assert.deepEqual(await page.locator('#camera-labels span').allTextContents(), b.protocol.cameras);
       assert.ok((await page.locator('#video-note').textContent()).startsWith(b.protocol.videoNote));
       assert.ok((await page.locator('#episode-facts').textContent()).includes(`${episode.steps} / ${episode.maxSteps}`));
       assert.equal(await page.locator('#episode-status').textContent(), {success:'Success',failure:'Failure',timeout:'Timeout'}[episode.status]);
+      if (Number.isFinite(episode.nativeScore)) {
+        assert.equal(await page.locator('#episode-facts div').filter({has:page.getByText('Native score', {exact:true})}).locator('dd').textContent(), `${(episode.nativeScore * 100).toFixed(1)}%`);
+      }
+      if (b.id === 'robodojo') {
+        assert.deepEqual([episode.width,episode.height], [1920,480]);
+        assert.equal(b.protocol.cameras.length, 3);
+        assert.match(await page.locator('#video-note').textContent(), /25\s*fps/i);
+      }
       await page.locator('#episode-video').evaluate(async video => { video.muted = true; await video.play(); });
       await page.waitForFunction(() => document.querySelector('#episode-video').currentTime > .15);
       await page.locator('#episode-video').evaluate(video => video.pause());
@@ -268,13 +308,31 @@ fs.mkdirSync(output, {recursive:true});
         await close(directDemo);
         await directDemo.close();
       }
-      const unavailableTask = b.tasks.find(task => demos.tasks[task.id]?.status === 'unavailable');
+      const unavailableTask = b.tasks.find(task => demos.tasks[task.id]?.status !== 'available');
       if (unavailableTask) {
         await page.locator(`.task-demo[data-task="${unavailableTask.id}"]`).click();
         await page.waitForSelector('#demo-unavailable');
-        assert.equal(await page.locator('#demo-unavailable-reason').textContent(), demos.tasks[unavailableTask.id].reason);
+        const reason = demos.tasks[unavailableTask.id]?.reason || b.protocol.trainingDemoNote || 'A training demonstration is not available for this task yet.';
+        assert.equal(await page.locator('#demo-unavailable-reason').textContent(), reason);
         assert.equal(await page.locator('#episode-video').getAttribute('src'), null);
         assert.equal(await page.locator('#episode-status').isVisible(), false);
+        if (b.id === 'robodojo') {
+          const imported = Boolean(demos.tasks[unavailableTask.id]);
+          assert.equal(await page.locator('#demo-unavailable-title').textContent(), imported ? 'Training demo unavailable' : 'Training demo not imported');
+          assert.equal(await page.locator('#download-video').isVisible(), false);
+          if (!imported) assert.match(reason, /have not been imported/);
+          await page.locator('#copy-link').click();
+          await page.waitForFunction(() => document.querySelector('#copy-status').textContent.length > 0);
+          const demoUrl = page.url(), directDemo = await context.newPage();
+          assert.equal(new URLSearchParams(new URL(demoUrl).hash.slice(1)).get('view'), 'demo');
+          await directDemo.goto(demoUrl);
+          await directDemo.waitForSelector('#demo-unavailable');
+          assert.equal(await directDemo.locator('#demo-unavailable-reason').textContent(), reason);
+          assert.equal(await directDemo.locator('#episode-video').getAttribute('src'), null);
+          await directDemo.locator('#view-episode').click();
+          await ready(directDemo, unavailableTask.episodes[0]);
+          await directDemo.close();
+        }
         await fits(1440);
         await page.screenshot({path:path.join(output, `training-unavailable-${b.id}-desktop.png`)});
         await fits(390);
@@ -322,10 +380,11 @@ fs.mkdirSync(output, {recursive:true});
     } finally { await missingContext.close(); }
     assert.deepEqual(errors, []);
     assert.deepEqual(badResponses, []);
-    const report = {passed:true,dataSource:fixturePath ? 'isolated UI fixture; not evaluation results' : 'published gallery data',demoSource:demoFixturePath ? 'isolated UI fixture; not training demonstrations' : 'published training demo catalog',
+    const report = {passed:true,dataSource:fixturePath ? 'isolated UI fixture; not evaluation results' : new URL('data/gallery.json', base).href,demoSource:demoFixturePath ? 'isolated UI fixture; not training demonstrations' : new URL('data/task-demos.json', base).href,
       benchmarks:benchmarks.map(b => b.id),tasks:totalTasks,episodes:totalEpisodes,
       desktopAndMobile:true,filters:true,suites:true,allEpisodeSelection:true,playback:true,deepLinks:true,
-      backCloseReopen:true,zeroEagerVideos:true,trainingDemos:true,demoKeyboardTabs:true,demoDeepLinks:true,missingDemo:true,missingCatalogFallback:true,errors,badResponses,mediaRequests:mediaRequests.length};
+      backCloseReopen:true,zeroEagerVideos:true,trainingDemos:true,demoKeyboardTabs:true,demoDeepLinks:true,missingDemo:true,missingCatalogFallback:true,
+      robodojoNativeScoreAndDemoNotice:benchmarks.some(b => b.id === 'robodojo'),errors,badResponses,mediaRequests:mediaRequests.length};
     fs.writeFileSync(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify(report, null, 2));
   } finally {

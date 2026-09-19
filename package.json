@@ -2,7 +2,7 @@
   "name": "robot-agent-gallery",
   "version": "1.0.0",
   "private": true,
-  "description": "Static gallery of complete LIBERO, RoboTwin and RoboCasa365 agent evaluation videos",
+  "description": "Static gallery of complete LIBERO, RoboTwin, RoboCasa365 and RoboDojo agent evaluation videos",
   "scripts": {
     "test:browser": "node scripts/smoke_browser.cjs"
   },

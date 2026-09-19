@@ -30,7 +30,39 @@ EXPECTED_RUNS = {
                  "8f0b9bfc28b7e2dccc7fe7a056114f1b7d2fdbf36e4bcbf72771931c5a9c6c38"),
     "robocasa": ("robocasa365_astra_firstpass_20260918",
                  "3a2a7f6939e18b5ee3fb6d6bac10d8f2f8704cd422d91efc8e56a038cf28c12c"),
+    "robodojo": ("robodojo42_astra_firstpass_20260919",
+                 "fe327cacc7615e868096a025c1287a8ad070408851bac9104cf132c1349f6fd4"),
 }
+# Exact standard task matrix from the frozen RoboDojo manifest. Native names are
+# case-sensitive; gallery IDs are lowercased and the suite ID uses underscores.
+ROBODOJO_TASKS = {
+    "generalization": ("stack_bowls", "push_T", "pack_objects_into_box", "fold_clothes", "hang_mugs",
+                       "sweep_blocks", "pour_liquid_into_cup", "make_toast", "arrange_largest_number",
+                       "sort_nesting_dolls_by_size", "store_laptop_and_headphones", "stack_blocks"),
+    "memory": ("cover_blocks", "match_and_pick_from_conveyor", "swap_blocks", "swap_T", "press_by_number",
+               "imitate_sorting_sequence"),
+    "precision": ("fasten_screws", "plug_in_charger", "insert_tubes", "pour_balls_into_vase", "play_Xylophone",
+                  "deposit_coin", "insert_key", "build_tower"),
+    "long-horizon": ("fill_pen_holder", "classify_objects", "put_bottles_into_dustbin", "play_tic_tac_toe",
+                     "fill_egg_holder", "organize_table", "make_kong", "play_stacking_toy"),
+    "open": ("align_blocks", "general_pickup", "solve_equation", "stack_blocks_by_language",
+             "classify_objects_by_language", "pick_from_conveyor_by_image", "store_tools_in_toolbox",
+             "pour_by_language"),
+}
+ROBODOJO_SUITES = {"robodojo_" + group.replace("-", "_"): names for group, names in ROBODOJO_TASKS.items()}
+ROBODOJO_HORIZONS = dict(zip(
+    (name for names in ROBODOJO_TASKS.values() for name in names),
+    (800, 600, 1300, 500, 800, 1000, 400, 1400, 1050, 1050, 800, 550,
+     800, 700, 700, 400, 700, 1600, 1900, 400, 500, 600, 500, 300, 300, 1050,
+     1100, 1100, 700, 1100, 700, 1000, 600, 1200, 200, 200, 300, 400, 1100, 700, 900, 800),
+))
+ROBODOJO_PROVENANCE_KEYS = {"run", "manifestSha256", "auditKind", "auditSha256", "policyBoundaryAuditSha256"}
+ROBODOJO_EPISODE_KEYS = {"id", "index", "status", "seed", "initStateId", "steps", "maxSteps", "toolCalls",
+                       "wallSeconds", "durationSeconds", "video", "poster", "width", "height", "frames",
+                       "nativeScore", "terminationReason", "layoutId"}
+ROBODOJO_SELECTION_KEYS = {"episode", "sourceEpisodeKey", "seed", "selectedAttempt", "resultSha256",
+                         "sourceVideoSha256", "instructionSha256", "nativeSuccess", "nativeScore",
+                         "status", "steps", "excludedAttempts", "nativeStateSha256"}
 PRIVATE_KEYS = {
     "auth", "authorization", "authentication", "credentials", "credential", "apikey",
     "accesstoken", "refreshtoken", "idtoken", "bearertoken", "secret", "password",
@@ -175,6 +207,40 @@ def check_digest(value, label):
     require(isinstance(value, str) and re.fullmatch(r"[0-9a-f]{64}", value), f"Invalid {label} fingerprint")
 
 
+def public_fields(value, allowed, label):
+    require(isinstance(value, dict) and set(value) <= allowed, f"Unexpected public {label} fields")
+
+
+def validate_robodojo_task(task):
+    public_fields(task, {"id", "name", "instruction", "instructionSha256", "suite", "suiteName", "episodes",
+                         "successes", "failures", "successRate", "nativeTaskName", "taskGroup"}, "RoboDojo task")
+    native_name = task.get("nativeTaskName")
+    group = task.get("taskGroup")
+    require(group in ROBODOJO_TASKS and native_name in ROBODOJO_TASKS[group]
+            and task["id"] == "robodojo_" + native_name.lower()
+            and task["suite"] == "robodojo_" + group.replace("-", "_"),
+            "RoboDojo native task/group identity mismatch")
+    digest = hashlib.sha256(task["instruction"].encode("utf-8")).hexdigest()
+    require(task.get("instructionSha256") == digest, "RoboDojo native instruction fingerprint mismatch")
+
+
+def validate_robodojo_episode(episode, task):
+    public_fields(episode, ROBODOJO_EPISODE_KEYS, "RoboDojo episode")
+    require(episode["seed"] == 0 and episode["maxSteps"] == ROBODOJO_HORIZONS[task["nativeTaskName"]],
+            "Incorrect RoboDojo seed or native horizon")
+    require(type(episode.get("layoutId")) is int and episode["layoutId"] == 0, "Incorrect RoboDojo native layout")
+    score = episode.get("nativeScore")
+    require(type(score) in (int, float) and math.isfinite(score) and 0 <= score <= 1,
+            "Invalid RoboDojo native score")
+    reason = episode.get("terminationReason")
+    require(reason in {"step_budget", "agent_finished", "robodojo_success", "environment_done"},
+            "Invalid RoboDojo termination reason")
+    require((reason == "robodojo_success") == (episode["status"] == "success"),
+            "RoboDojo termination/outcome mismatch")
+    if reason == "step_budget":
+        require(episode["steps"] == episode["maxSteps"], "RoboDojo exhausted horizon mismatch")
+
+
 def validate_training_demos(root, gallery, *, required=False):
     """Validate separate training references without changing evaluation counts."""
     catalog_path = root / "data/task-demos.json"
@@ -187,10 +253,16 @@ def validate_training_demos(root, gallery, *, required=False):
     records = catalog.get("tasks")
     expected = {task["id"]: (benchmark["id"], task)
                 for benchmark in gallery["benchmarks"] for task in benchmark["tasks"]}
+    # Older evaluation-only RoboDojo imports may have no demonstration group.
+    # Once imported, every task needs an available or unavailable source record.
+    if isinstance(records, dict) and not any(task_id in records for task_id, (benchmark_id, _) in expected.items()
+                                            if benchmark_id == "robodojo"):
+        expected = {task_id: value for task_id, value in expected.items() if value[0] != "robodojo"}
     require(isinstance(records, dict) and set(records) == set(expected),
             "Training demo catalog must account for every gallery task exactly once")
     coverage = {benchmark["id"]: {"tasks": len(benchmark["tasks"]), "available": 0, "unavailable": 0}
-                for benchmark in gallery["benchmarks"]}
+                for benchmark in gallery["benchmarks"]
+                if any(value[0] == benchmark["id"] for value in expected.values())}
     videos, media_paths = [], set()
     for task_id, record in records.items():
         benchmark_id, task = expected[task_id]
@@ -214,10 +286,13 @@ def validate_training_demos(root, gallery, *, required=False):
                 not PurePosixPath(relative_source).is_absolute() and ".." not in PurePosixPath(relative_source).parts,
                 f"Missing relative training source path: {task_id}")
         require(source.get("episode") is not None, f"Missing training episode selection: {task_id}")
-        if benchmark_id in {"robotwin", "robocasa"}:
+        if benchmark_id in {"robotwin", "robocasa", "robodojo"}:
             require(isinstance(source.get("taskName"), str) and
                     f"{benchmark_id}_{source['taskName'].lower()}" == task_id,
                     f"Training source task differs from gallery task: {task_id}")
+        if benchmark_id == "robodojo":
+            require(source["taskName"] == task.get("nativeTaskName"),
+                    f"Training source native task differs from gallery task: {task_id}")
         for key in ("width", "height", "frames"):
             integer(record.get(key), f"{task_id} demo {key}", 1)
         fps = record.get("fps")
@@ -247,7 +322,7 @@ def validate_training_demos(root, gallery, *, required=False):
 
 
 def validate_gallery(root, *, check_interface=True, require_robocasa=False, release_assets=None,
-                     require_demos=False):
+                     require_demos=False, require_robodojo=False):
     required_files = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md") if check_interface else ()
     for filename in required_files:
         require((root / filename).is_file(), f"Required public file is missing: {filename}")
@@ -267,16 +342,23 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     benchmarks = gallery["benchmarks"]
     benchmark_ids = {item["id"] for item in benchmarks}
     has_robocasa = "robocasa" in benchmark_ids
+    has_robodojo = "robodojo" in benchmark_ids
     require(release_assets is None or has_robocasa, "Release validation requires RoboCasa365")
-    expected_benchmarks = {"libero", "robotwin"} | ({"robocasa"} if has_robocasa else set())
+    expected_benchmarks = ({"libero", "robotwin"} | ({"robocasa"} if has_robocasa else set())
+                           | ({"robodojo"} if has_robodojo else set()))
     require(benchmark_ids == expected_benchmarks and len(benchmarks) == len(expected_benchmarks),
-            "Expected LIBERO and RoboTwin, with the complete RoboCasa365 collection when present")
+            "Expected LIBERO and RoboTwin, with complete optional benchmark collections")
     require(not require_robocasa or has_robocasa, "The complete RoboCasa365 collection is required")
+    require(not require_robodojo or has_robodojo, "The complete RoboDojo42 collection is required")
     expected_episodes, expected_tasks_total = (815, 455) if has_robocasa else (450, 90)
-    require(gallery.get("evaluationDate") == ("2026-09-18" if has_robocasa else "2026-09-17"),
+    if has_robodojo:
+        expected_episodes += 42
+        expected_tasks_total += 42
+    require(gallery.get("evaluationDate") == ("2026-09-19" if has_robodojo else "2026-09-18" if has_robocasa else "2026-09-17"),
             "Unexpected evaluation date")
-    if has_robocasa:
-        require(gallery.get("evaluationDates") == ["2026-09-17", "2026-09-18"], "Incorrect evaluation dates")
+    if has_robocasa or has_robodojo:
+        dates = ["2026-09-17"] + (["2026-09-18"] if has_robocasa else []) + (["2026-09-19"] if has_robodojo else [])
+        require(gallery.get("evaluationDates") == dates, "Incorrect evaluation dates")
     require(report.get("expectedEpisodes") == expected_episodes and report.get("verifiedEpisodes") == expected_episodes,
             f"The export must contain {expected_episodes} verified episodes")
     episodes, task_ids, media_paths, summaries = {}, set(), set(), {}
@@ -294,11 +376,19 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         benchmark_id = benchmark["id"]
         is_libero = benchmark_id == "libero"
         is_robocasa = benchmark_id == "robocasa"
+        is_robodojo = benchmark_id == "robodojo"
+        if is_robodojo:
+            public_fields(benchmark, {"id", "name", "evaluationDate", "summary", "suites", "protocol", "provenance", "tasks"},
+                          "RoboDojo benchmark")
+            public_fields(benchmark["protocol"], {"label", "description", "cameras", "videoNote", "stepsLabel", "episodesPerTask", "trainingDemoNote"},
+                          "RoboDojo protocol")
+            public_fields(benchmark["provenance"], ROBODOJO_PROVENANCE_KEYS, "RoboDojo provenance")
+            public_fields(benchmark["summary"], set(counts([], 0)), "RoboDojo summary")
         require(is_robocasa or "videoHosting" not in benchmark, "Unexpected external hosting for a historical benchmark")
-        if has_robocasa:
-            require(benchmark.get("evaluationDate") == ("2026-09-18" if is_robocasa else "2026-09-17"),
+        if has_robocasa or has_robodojo:
+            require(benchmark.get("evaluationDate") == ("2026-09-19" if is_robodojo else "2026-09-18" if is_robocasa else "2026-09-17"),
                     f"Incorrect evaluation date: {benchmark_id}")
-        expected_tasks, per_task = {"libero": (40, 10), "robotwin": (50, 1), "robocasa": (365, 1)}[benchmark_id]
+        expected_tasks, per_task = {"libero": (40, 10), "robotwin": (50, 1), "robocasa": (365, 1), "robodojo": (42, 1)}[benchmark_id]
         tasks = benchmark["tasks"]
         require(len(tasks) == expected_tasks, f"Wrong task count for {benchmark_id}")
         require(benchmark["protocol"]["episodesPerTask"] == per_task, f"Wrong sampling for {benchmark_id}")
@@ -306,6 +396,8 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require((benchmark["provenance"]["run"], benchmark["provenance"]["manifestSha256"]) == EXPECTED_RUNS[benchmark_id],
                 f"Unexpected frozen source run for {benchmark_id}")
         expected_suites = set(EXPECTED_SUITES) if is_libero else ({"robocasa_atomic", "robocasa_composite"} if is_robocasa else {"robotwin"})
+        if is_robodojo:
+            expected_suites = set(ROBODOJO_SUITES)
         suites = benchmark["suites"]
         require(len(suites) == len(expected_suites) and {item["id"] for item in suites} == expected_suites,
                 f"Wrong suites for {benchmark_id}")
@@ -316,7 +408,9 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             require(task_id not in task_ids, f"Duplicate task ID: {task_id}")
             task_ids.add(task_id)
             require(task["suite"] in expected_suites, f"Wrong suite for {task_id}")
-            require(isinstance(task["instruction"], str) and task["instruction"].strip(), f"Missing instruction: {task_id}")
+            require(isinstance(task["instruction"], str) and (is_robodojo or task["instruction"].strip()), f"Missing instruction: {task_id}")
+            if is_robodojo:
+                validate_robodojo_task(task)
             task_episodes = task["episodes"]
             require(len(task_episodes) == per_task, f"Wrong episode count for {task_id}")
             require({item["index"] for item in task_episodes} == set(range(per_task)), f"Wrong rollout indices: {task_id}")
@@ -328,15 +422,15 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                 require(isinstance(episode_id, str) and re.fullmatch(r"[a-z0-9_]+", episode_id), "Invalid episode ID")
                 require(episode_id not in episodes, f"Duplicate episode ID: {episode_id}")
                 require(is_libero or task_id.startswith(f"{benchmark_id}_"), f"Unexpected {benchmark_id} task identifier")
-                expected_prefix = task_id if is_libero or is_robocasa else task_id.removeprefix("robotwin_")
+                expected_prefix = task_id if is_libero or is_robocasa or is_robodojo else task_id.removeprefix("robotwin_")
                 require(episode_id == f"{expected_prefix}_r{episode['index']:02d}", f"Episode/task identity mismatch: {episode_id}")
                 require(episode["status"] in {"success", "failure", "timeout"}, f"Unscored episode: {episode_id}")
                 for key in ("index", "seed", "steps", "maxSteps", "toolCalls", "width", "height", "frames"):
                     integer(episode[key], f"{episode_id}.{key}", 1 if key in {"width", "height", "frames", "maxSteps"} else 0)
-                require(episode["steps"] <= episode["maxSteps"] and episode["toolCalls"] <= (1500 if is_robocasa else 750),
+                require(episode["steps"] <= episode["maxSteps"] and episode["toolCalls"] <= (1500 if is_robocasa or is_robodojo else 750),
                         f"Recorded controls exceed the protocol: {episode_id}")
                 require(episode["steps"] > 0, f"Episode has no recorded action: {episode_id}")
-                fps = 20 if is_libero or is_robocasa else 10
+                fps = 25 if is_robodojo else 20 if is_libero or is_robocasa else 10
                 if is_libero:
                     require(episode["maxSteps"] == 500 and episode["seed"] == episode["index"] == episode["initStateId"],
                             f"Incorrect LIBERO episode protocol: {episode_id}")
@@ -345,6 +439,13 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                     require(episode["index"] == 0 and episode["initStateId"] is None,
                             f"Incorrect {benchmark_id} episode protocol: {episode_id}")
                     require(episode["frames"] == episode["steps"] + 1, f"{benchmark_id} action/frame mismatch: {episode_id}")
+                    if is_robodojo:
+                        validate_robodojo_episode(episode, task)
+                        require((episode["width"], episode["height"]) == (1920, 480),
+                                f"Incorrect RoboDojo native camera layout: {episode_id}")
+                        require(episode["video"] == f"media/robodojo/{episode_id}.mp4"
+                                and episode["poster"] == f"media/robodojo/{episode_id}.jpg",
+                                f"Incorrect RoboDojo local media paths: {episode_id}")
                     if is_robocasa:
                         require(episode["seed"] >= 100000 and episode["maxSteps"] <= 7200,
                                 f"Incorrect RoboCasa365 seed or step budget: {episode_id}")
@@ -376,6 +477,8 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         fixed = {"tasks": 40, "episodes": 400, "successes": 322, "failures": 78, "timeouts": 0, "successRate": .805} if is_libero else {
             "tasks": 50, "episodes": 50, "successes": 36, "failures": 14, "timeouts": 1, "successRate": .72}
         if not is_robocasa:
+            if is_robodojo:
+                fixed = {"tasks": 42, "episodes": 42, "successes": 6, "failures": 36, "timeouts": 0, "successRate": 6 / 42}
             require(expected == fixed, f"Wrong native outcome aggregate for {benchmark_id}")
         check_summary(benchmark["summary"], expected, f"{benchmark_id} summary")
         summaries[benchmark_id] = expected
@@ -389,6 +492,11 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             elif is_robocasa:
                 require(expected["tasks"] == expected["episodes"] == (65 if suite["id"] == "robocasa_atomic" else 300),
                         f"Wrong RoboCasa365 task group: {suite['id']}")
+            elif is_robodojo:
+                public_fields(suite, {"id", "name", *counts([], 0)}, "RoboDojo suite")
+                require({task["id"] for task in suite_tasks} ==
+                        {"robodojo_" + name.lower() for name in ROBODOJO_SUITES[suite["id"]]},
+                        f"Wrong RoboDojo standard task matrix: {suite['id']}")
             check_summary(suite, expected, f"{suite['id']} summary")
     require(len(episodes) == expected_episodes and len(task_ids) == expected_tasks_total,
             f"Expected {expected_episodes} unique episodes across {expected_tasks_total} tasks")
@@ -398,11 +506,20 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     for run in runs:
         benchmark_id = run["benchmark"]
         is_robocasa = benchmark_id == "robocasa"
+        is_robodojo = benchmark_id == "robodojo"
         expected_ids = {key for key, item in episodes.items() if item["benchmark"] == benchmark_id}
         provenance = benchmark_by_id[benchmark_id]["provenance"]
         require(run["run"] == provenance["run"] and run["manifestSha256"] == provenance["manifestSha256"],
                 f"Provenance mismatch: {benchmark_id}")
         sources = {}
+        if is_robodojo:
+            public_fields(run, ROBODOJO_PROVENANCE_KEYS | {"benchmark", "selectedEpisodes", "excludedAttemptCount", "attemptSelection"},
+                          "RoboDojo run")
+            require(run.get("auditKind") == provenance.get("auditKind") == "robodojo_firstpass",
+                    "RoboDojo requires the complete first-pass audits")
+            for key in ("auditSha256", "policyBoundaryAuditSha256"):
+                check_digest(run.get(key), f"RoboDojo {key}")
+                require(run[key] == provenance.get(key), f"RoboDojo {key} mismatch")
         if is_robocasa:
             require(run.get("auditKind") == provenance.get("auditKind") == "robocasa_collection",
                     "RoboCasa requires a complete collection audit")
@@ -430,6 +547,24 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             check_digest(selection["resultSha256"], "selected result")
             selected_attempt = selection["selectedAttempt"]
             require(re.fullmatch(r"attempt_\d+", selected_attempt), "Invalid selected attempt identifier")
+            if is_robodojo:
+                public_fields(selection, ROBODOJO_SELECTION_KEYS, "RoboDojo selection")
+                task = episodes[selection["episode"]]["task"]
+                require(selection.get("sourceEpisodeKey") == task["nativeTaskName"] + "_r00"
+                        and selected_attempt == "attempt_001" and selection["excludedAttempts"] == [],
+                        "RoboDojo first-pass source identity mismatch")
+                require(selection.get("seed") == episode["seed"]
+                        and selection.get("status") == episode["status"]
+                        and selection.get("steps") == episode["steps"], "RoboDojo selected outcome mismatch")
+                require(type(selection.get("nativeSuccess")) is bool
+                        and selection["nativeSuccess"] == (episode["status"] == "success"),
+                        "RoboDojo native success mismatch")
+                require(type(selection.get("nativeScore")) in (int, float)
+                        and selection["nativeScore"] == episode["nativeScore"], "RoboDojo native score mismatch")
+                require(selection.get("instructionSha256") == task["instructionSha256"],
+                        "RoboDojo selected native instruction fingerprint mismatch")
+                check_digest(selection.get("sourceVideoSha256"), "RoboDojo selected source video")
+                check_digest(selection.get("nativeStateSha256"), "RoboDojo selected native state")
             if is_robocasa:
                 source = sources.get(selection.get("run"))
                 require(source is not None and source["manifestSha256"] == selection.get("manifestSha256")
@@ -480,7 +615,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(excluded_count == run["excludedAttemptCount"],
                 f"Wrong infrastructure/interruption retry count: {benchmark_id}")
         if not is_robocasa:
-            require(excluded_count == (4 if benchmark_id == "libero" else 6),
+            require(excluded_count == {"libero": 4, "robotwin": 6, "robodojo": 0}[benchmark_id],
                     f"Unexpected historical retry count: {benchmark_id}")
     media = report["media"]
     require(len(media) == expected_episodes and {item["episode"] for item in media} == set(episodes), "Incomplete media provenance mapping")
@@ -491,6 +626,10 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     for record in media:
         item = episodes[record["episode"]]
         episode = item["episode"]
+        if item["benchmark"] == "robodojo":
+            public_fields(record, {"episode", "benchmark", "sourceSha256", "sourceBytes", "video", "videoSha256", "videoBytes",
+                                   "poster", "posterSha256", "posterBytes", "posterFrame", "codec", "pixelFormat", "width",
+                                   "height", "fps", "frames", "durationSeconds", "fastStart", "verified"}, "RoboDojo media")
         require(record["benchmark"] == item["benchmark"], "Wrong media benchmark mapping")
         for key in ("video", "poster", "width", "height", "frames"):
             require(record[key] == episode[key], f"Media/source mapping mismatch: {record['episode']}.{key}")
@@ -500,10 +639,11 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(abs(record["durationSeconds"] - episode["durationSeconds"]) < 1e-3, "Video duration mapping differs from source")
         require(0 <= integer(record["posterFrame"], "poster frame") < episode["frames"], "Poster references a missing source frame")
         check_digest(record["sourceSha256"], "source video")
-        if item["benchmark"] == "robocasa":
-            selection = next(selection for run in runs if run["benchmark"] == "robocasa"
+        if item["benchmark"] in {"robocasa", "robodojo"}:
+            selection = next(selection for run in runs if run["benchmark"] == item["benchmark"]
                              for selection in run["attemptSelection"] if selection["episode"] == record["episode"])
-            require(record["sourceSha256"] == selection["sourceVideoSha256"], "RoboCasa audit/source video mismatch")
+            label = "RoboCasa" if item["benchmark"] == "robocasa" else "RoboDojo"
+            require(record["sourceSha256"] == selection["sourceVideoSha256"], f"{label} audit/source video mismatch")
         integer(record["sourceBytes"], "source video size", 1)
         for key in ("video", "poster"):
             check_digest(record[f"{key}Sha256"], f"{key} export")
@@ -576,7 +716,8 @@ def main():
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT, help="Gallery repository root")
     parser.add_argument("--videos", action="store_true", help="Decode and validate every video with ffprobe")
     parser.add_argument("--require-robocasa", action="store_true", help="Require all 365 RoboCasa episodes in addition to LIBERO and RoboTwin")
-    parser.add_argument("--require-demos", action="store_true", help="Require a training demonstration or explicit unavailable entry for every task")
+    parser.add_argument("--require-robodojo", action="store_true", help="Require all 42 standard RoboDojo episodes")
+    parser.add_argument("--require-demos", action="store_true", help="Require the training catalog; RoboDojo may remain wholly unimported")
     parser.add_argument("--release-media", action="store_true", help="Verify RoboCasa videos through the public Release asset SHA256/size registry")
     parser.add_argument("--workers", type=int, default=4, help="Concurrent ffprobe processes (default: 4)")
     args = parser.parse_args()
@@ -588,7 +729,8 @@ def main():
             from release_media import fetch_release_assets
             release_assets = fetch_release_assets()
         result, videos = validate_gallery(args.root.resolve(), require_robocasa=args.require_robocasa,
-                                         release_assets=release_assets, require_demos=args.require_demos)
+                                         release_assets=release_assets, require_demos=args.require_demos,
+                                         require_robodojo=args.require_robodojo)
         if args.videos:
             require(shutil.which("ffprobe") is not None, "Install ffprobe to use --videos")
             with ThreadPoolExecutor(max_workers=args.workers) as pool:

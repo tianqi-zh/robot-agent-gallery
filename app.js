@@ -10,10 +10,19 @@ let routeRendering = false;
 let lastRenderedUrl = null;
 
 function benchmark(id = state.benchmark) { return state.data.benchmarks.find(item => item.id === id); }
-function prettySuite(suite) { return ({libero_spatial:'Spatial',libero_goal:'Goal',libero_object:'Object',libero_10:'LIBERO-10',robotwin:'All tasks',robocasa_atomic:'Atomic',robocasa_composite:'Composite'}[suite] || suite); }
+function prettySuite(suite) { return ({libero_spatial:'Spatial',libero_goal:'Goal',libero_object:'Object',libero_10:'LIBERO-10',robotwin:'All tasks',robocasa_atomic:'Atomic',robocasa_composite:'Composite'}[suite] || benchmark()?.suites.find(item => item.id === suite)?.name || suite); }
 function elapsed(seconds) { return seconds < 60 ? `${Math.round(seconds)}s` : `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`; }
 function duration(seconds) { return `${Math.floor(seconds / 60)}:${pad(Math.floor(seconds % 60))}`; }
-function taskDemo(task) { return state.demos.tasks[task.id] || {status:'unavailable',reason:state.demos.unavailableReason || 'A training demonstration is not available for this task yet.'}; }
+function trainingDemoNote(b = benchmark()) {
+  const coverage = state.demos.coverage?.[b.id];
+  if (b.id === 'robodojo' && coverage) return `${coverage.available} of ${coverage.tasks} tasks have a released training demonstration. ${coverage.unavailable} tasks have no matching demonstration in the source dataset.`;
+  return b.protocol.trainingDemoNote || (b.id === 'robodojo' ? 'RoboDojo training demonstrations have not been imported into this gallery.' : '');
+}
+function taskDemo(task) {
+  const demo = state.demos.tasks[task.id], note = trainingDemoNote();
+  if (demo) return demo;
+  return {status:'unavailable',notImported:Boolean(note) && !state.demos.coverage?.[state.benchmark],reason:state.demos.unavailableReason || note || 'A training demonstration is not available for this task yet.'};
+}
 function demoAvailable(demo) { return demo.status === 'available' && Boolean(demo.video); }
 function resolveVideoSource(episode) {
   return window.GALLERY_REMOTE_VIDEOS === true && typeof episode.remoteVideo === 'string' && episode.remoteVideo
@@ -35,12 +44,13 @@ function renderOverview() {
   $('hero-description').textContent = `A coding agent controlling robots through visual feedback. Browse recorded rollouts from ${list(benchmarks.map(b => b.name))}, from the first move to the final result.`;
   const overview = $('benchmark-overview');
   overview.dataset.count = benchmarks.length;
-  overview.style.setProperty('--benchmark-columns', Math.min(3, benchmarks.length));
+  overview.style.setProperty('--benchmark-columns', benchmarks.length === 4 ? 2 : Math.min(3, benchmarks.length));
   overview.innerHTML = benchmarks.map((b,index) => {
     const rate = (b.summary.successRate * 100).toFixed(1);
     const groups = b.suites.length > 1 ? ` across ${b.suites.length} task groups` : '';
     return `<button class="benchmark-summary" data-benchmark="${escapeHtml(b.id)}" aria-pressed="false"><div class="summary-heading"><span class="eyebrow">${pad(index+1)} / ${escapeHtml(b.name.toUpperCase())}</span><span class="summary-tag">${escapeHtml(sampling(b))}</span></div><div class="summary-main"><strong>${rate}<span>%</span></strong><span class="summary-detail">${b.summary.successes} / ${episodeCount(b)} successful<br><small>${b.tasks.length} tasks${groups}</small></span><span class="summary-arrow" aria-hidden="true">↗</span></div><div class="score-track"><span style="width:${rate}%"></span></div></button>`;
   }).join('');
+  $('benchmark-tabs').dataset.count = benchmarks.length;
   $('benchmark-tabs').innerHTML = benchmarks.map(b => `<button data-benchmark="${escapeHtml(b.id)}" aria-pressed="false">${escapeHtml(b.name)} <span>${episodeCount(b)}</span></button>`).join('');
   $('published-episodes-note').textContent = `${list(benchmarks.map(b => `${episodeCount(b)} ${b.name} videos`))}, including every selected success, failure and timeout. Infrastructure retries and source selection are documented in the evaluation protocol.`;
   $('playback-protocol').innerHTML = benchmarks.map(b => `<p><strong>${escapeHtml(b.name)}.</strong> ${escapeHtml(b.protocol.videoNote)}</p>`).join('');
@@ -124,7 +134,7 @@ function applyRoute(event) {
   routeRendering = false;
 }
 function renderFeatured() {
-  const preferred = {libero:{task:'libero_spatial_t00',label:'Spatial reasoning'},robotwin:{task:'robotwin_stack_blocks_three',label:'Building with two arms'},robocasa:{label:'Around the kitchen'}};
+  const preferred = {libero:{task:'libero_spatial_t00',label:'Spatial reasoning'},robotwin:{task:'robotwin_stack_blocks_three',label:'Building with two arms'},robocasa:{label:'Around the kitchen'},robodojo:{label:'Three views of every action'}};
   const available = state.data.benchmarks;
   const selections = [available[0], ...(available.length > 1 ? [available.at(-1)] : [])].map((b,index) => ({benchmark:b.id,...preferred[b.id],secondary:index > 0}));
   $('hero-visual').innerHTML = selections.map(item => {
@@ -152,13 +162,15 @@ function renderCollection() {
   const suiteButtons = [{id:'all',name:'All tasks'}, ...(b.suites.length > 1 ? b.suites.map(suite => ({id:suite.id,name:prettySuite(suite.id),tasks:suite.tasks})) : [])];
   $('suite-tabs').innerHTML = suiteButtons.map(suite => `<button class="${state.suite === suite.id ? 'active' : ''}" data-suite="${escapeHtml(suite.id)}" aria-pressed="${state.suite === suite.id}">${escapeHtml(suite.name)}${suite.tasks !== undefined ? ` <span>${suite.tasks}</span>` : ''}</button>`).join('');
   $('collection-description').textContent = `${sampling(b)}. All selected outcomes included.`;
+  $('collection-demo-note').textContent = trainingDemoNote(b);
+  $('collection-demo-note').hidden = !trainingDemoNote(b);
   const tasks = filteredTasks();
   const totalEpisodes = tasks.reduce((total,task) => total + task.episodes.length, 0);
   $('results-count').textContent = `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'} · ${totalEpisodes} ${totalEpisodes === 1 ? 'rollout' : 'rollouts'}`;
   $('empty-state').hidden = tasks.length > 0;
   $('task-grid').innerHTML = tasks.map(task => {
-    const episode = task.episodes[0], count = task.episodes.length, available = demoAvailable(taskDemo(task));
-    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${episode.poster}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div><button class="task-demo ${available ? '' : 'unavailable'}" data-open-demo="${b.id}" data-task="${task.id}" aria-label="Training demo for ${escapeHtml(task.name)}${available ? '' : ', unavailable'}"><span><span aria-hidden="true">${available ? '▷' : '○'}</span> Training demo</span><span class="demo-card-status">${available ? 'Watch ↗' : 'Unavailable'}</span></button></div></article>`;
+    const episode = task.episodes[0], count = task.episodes.length, demo = taskDemo(task), available = demoAvailable(demo);
+    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${episode.poster}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div><button class="task-demo ${available ? '' : 'unavailable'}" data-open-demo="${b.id}" data-task="${task.id}" aria-label="Training demo for ${escapeHtml(task.name)}${available ? '' : demo.notImported ? ', not imported' : ', unavailable'}"><span><span aria-hidden="true">${available ? '▷' : '○'}</span> Training demo</span><span class="demo-card-status">${available ? 'Watch ↗' : demo.notImported ? 'Not imported' : 'Unavailable'}</span></button></div></article>`;
   }).join('');
 }
 function renderPlayer() {
@@ -176,6 +188,7 @@ function renderPlayer() {
   $('episode-navigation').hidden = isDemo;
   $('demo-source').hidden = !isDemo;
   $('demo-unavailable').hidden = available;
+  $('demo-unavailable-title').textContent = demo.notImported ? 'Training demo not imported' : 'Training demo unavailable';
   video.hidden = !available;
   $('playback-controls').hidden = !available;
   $('camera-labels').hidden = !available;
@@ -189,13 +202,13 @@ function renderPlayer() {
   if (isDemo) {
     $('dialog-eyebrow').textContent = `${b.name.toUpperCase()} / TRAINING DEMONSTRATION`;
     const source = demo.source || {};
-    $('demo-dataset').textContent = source.dataset || `${b.name} training dataset`;
+    $('demo-dataset').textContent = source.dataset || (demo.notImported ? 'No training demonstration has been imported for this task.' : `${b.name} training dataset`);
     $('demo-source-link').hidden = !source.url;
     if (source.url) $('demo-source-link').href = source.url;
     else $('demo-source-link').removeAttribute('href');
     $('demo-source-episode').textContent = source.episode != null ? `Source episode: ${source.episode}${source.split ? ` · ${source.split}` : ''}` : '';
     $('demo-source-episode').hidden = source.episode == null;
-    $('video-note').textContent = 'A demonstration from the benchmark’s training dataset. Training demos are separate from the agent evaluation results.';
+    $('video-note').textContent = available ? 'A demonstration from the benchmark’s training dataset. Training demos are separate from the agent evaluation results.' : 'Training demonstrations are separate from the agent evaluation results.';
     if (!available) {
       $('demo-unavailable-reason').textContent = demo.reason || 'A training demonstration is not available for this task yet.';
       $('episode-facts').innerHTML = ''; $('camera-labels').innerHTML = '';
@@ -217,7 +230,9 @@ function renderPlayer() {
   $('task-score').textContent = `${task.successes}/${task.episodes.length} successful`;
   $('episode-buttons').innerHTML = task.episodes.map(ep => `<button class="episode-button ${ep.status} ${ep.id === episode.id ? 'active' : ''}" data-select-episode="${ep.id}" aria-pressed="${ep.id === episode.id}" aria-label="Episode ${ep.index+1}: ${statusName(ep.status)}">${pad(ep.index+1)}</button>`).join('');
   const facts = [['Seed',episode.seed],[b.protocol.stepsLabel,`${episode.steps} / ${episode.maxSteps}`],['Tool calls',episode.toolCalls],['Video length',duration(episode.durationSeconds)],['Episode wall time',elapsed(episode.wallSeconds)]];
-  if (episode.initStateId !== null) facts.splice(1,0,['Initial state',episode.initStateId]);
+  if (episode.initStateId != null) facts.splice(1,0,['Initial state',episode.initStateId]);
+  if (Number.isFinite(episode.nativeScore)) facts.push(['Native score',`${(episode.nativeScore * 100).toFixed(1)}%`]);
+  if (Number.isInteger(episode.layoutId)) facts.splice(1,0,['Layout',episode.layoutId]);
   $('episode-facts').innerHTML = facts.map(([label,value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('');
   setCameras(b.protocol.cameras);
   $('video-note').textContent = `${b.protocol.videoNote} Episode wall time includes preparation and cleanup.`;

@@ -29,11 +29,11 @@ class RoboCasaPublicationTests(unittest.TestCase):
         gallery = json.loads((ROOT / "data/gallery.json").read_text())
         report = json.loads((ROOT / "data/export-report.json").read_text())
         # These regression inputs are the two historical, unchanged exports.
-        gallery["benchmarks"] = [b for b in gallery["benchmarks"] if b["id"] != "robocasa"]
+        gallery["benchmarks"] = [b for b in gallery["benchmarks"] if b["id"] in {"libero", "robotwin"}]
         for benchmark in gallery["benchmarks"]:
             benchmark["evaluationDate"] = "2026-09-17"
-        report["runs"] = [r for r in report["runs"] if r["benchmark"] != "robocasa"]
-        report["media"] = [m for m in report["media"] if m["benchmark"] != "robocasa"]
+        report["runs"] = [r for r in report["runs"] if r["benchmark"] in {"libero", "robotwin"}]
+        report["media"] = [m for m in report["media"] if m["benchmark"] in {"libero", "robotwin"}]
         for item in report["media"]:
             for key in ("video", "poster"):
                 target = cls.root / item[key]
