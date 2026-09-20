@@ -183,7 +183,7 @@ fs.mkdirSync(output, {recursive:true});
         assert.ok(b.tasks.every(task => task.episodes.length === 1));
         const instruction = b.tasks[0].instruction;
         await page.fill('#task-search', instruction);
-        await count(b.tasks.filter(task => `${task.name} ${task.instruction} ${task.suiteName} ${task.id}`.toLowerCase().includes(instruction.toLowerCase())).length);
+        await count(b.tasks.filter(task => `${task.name} ${task.instruction} ${task.episodes.map(episode => episode.instruction || '').join(' ')} ${task.suiteName} ${task.id}`.toLowerCase().includes(instruction.toLowerCase())).length);
         await page.fill('#task-search', '');
       }
       await page.selectOption('#outcome-filter', 'failures');
@@ -193,7 +193,7 @@ fs.mkdirSync(output, {recursive:true});
       await page.selectOption('#outcome-filter', 'all');
       const search = b.tasks[0].id.toLowerCase();
       await page.fill('#task-search', search);
-      await count(b.tasks.filter(task => `${task.name} ${task.instruction} ${task.suiteName} ${task.id}`.toLowerCase().includes(search)).length);
+      await count(b.tasks.filter(task => `${task.name} ${task.instruction} ${task.episodes.map(episode => episode.instruction || '').join(' ')} ${task.suiteName} ${task.id}`.toLowerCase().includes(search)).length);
       await page.fill('#task-search', 'no-such-task-xyz');
       await count(0);
       assert.equal(await page.locator('#empty-state').isVisible(), true);
@@ -209,7 +209,7 @@ fs.mkdirSync(output, {recursive:true});
       await page.locator(`.media-thumb[data-task="${task.id}"]`).click();
       await ready(page, episode);
       assert.equal(await page.locator('.episode-button').count(), task.episodes.length);
-      assert.equal(await page.locator('#task-instruction').textContent(), task.instruction);
+      assert.equal(await page.locator('#task-instruction').textContent(), episode.instruction || task.instruction);
       assert.deepEqual(await page.locator('#camera-labels span').allTextContents(), b.protocol.cameras);
       assert.ok((await page.locator('#video-note').textContent()).startsWith(b.protocol.videoNote));
       assert.ok((await page.locator('#episode-facts').textContent()).includes(`${episode.steps} / ${episode.maxSteps}`));
@@ -230,9 +230,11 @@ fs.mkdirSync(output, {recursive:true});
       if (task.episodes.length > 1) {
         await page.locator('#next-episode').click();
         await ready(page, task.episodes[1]);
+        assert.equal(await page.locator('#task-instruction').textContent(), task.episodes[1].instruction || task.instruction);
         episode = task.episodes.at(-1);
         await page.locator('.episode-button').last().click();
         await ready(page, episode);
+        assert.equal(await page.locator('#task-instruction').textContent(), episode.instruction || task.instruction);
         assert.equal(await page.evaluate(() => document.activeElement.dataset.selectEpisode), episode.id);
       } else {
         assert.equal(await page.locator('#previous-episode').isDisabled(), true);

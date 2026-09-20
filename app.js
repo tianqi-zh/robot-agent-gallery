@@ -146,7 +146,7 @@ function filteredTasks() {
   const query = state.search.trim().toLowerCase();
   const tasks = benchmark().tasks.filter(task =>
     (state.suite === 'all' || task.suite === state.suite) &&
-    (!query || `${task.name} ${task.instruction} ${task.suiteName} ${task.id}`.toLowerCase().includes(query)) &&
+    (!query || `${task.name} ${task.instruction} ${task.episodes.map(episode => episode.instruction || '').join(' ')} ${task.suiteName} ${task.id}`.toLowerCase().includes(query)) &&
     (state.outcome === 'all' || (state.outcome === 'failures' ? task.failures > 0 : task.failures === 0))
   );
   if (state.sort !== 'default') tasks.sort((a,b) => state.sort === 'best' ? b.successRate - a.successRate : a.successRate - b.successRate);
@@ -198,7 +198,7 @@ function renderPlayer() {
   $('copy-status').textContent = ''; $('video-error').hidden = true;
   $('dialog-title').textContent = task.name;
   $('task-instruction-label').textContent = isDemo ? 'TRAINING TASK' : 'TASK INSTRUCTION';
-  $('task-instruction').textContent = isDemo ? (demo.instruction || task.name) : task.instruction;
+  $('task-instruction').textContent = isDemo ? (demo.instruction || task.name) : (episode.instruction || task.instruction);
   if (isDemo) {
     $('dialog-eyebrow').textContent = `${b.name.toUpperCase()} / TRAINING DEMONSTRATION`;
     const source = demo.source || {};

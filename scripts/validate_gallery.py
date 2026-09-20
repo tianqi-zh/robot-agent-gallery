@@ -440,6 +440,9 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
                     expected_prefix = task_id
                 require(episode_id == f"{expected_prefix}_r{episode['index']:02d}", f"Episode/task identity mismatch: {episode_id}")
                 require(episode["status"] in {"success", "failure", "timeout"}, f"Unscored episode: {episode_id}")
+                if is_robotwin_nvidia10:
+                    require(isinstance(episode.get("instruction"), str) and episode["instruction"].strip(),
+                            f"Missing episode instruction: {episode_id}")
                 for key in ("index", "seed", "steps", "maxSteps", "toolCalls", "width", "height", "frames"):
                     integer(episode[key], f"{episode_id}.{key}", 1 if key in {"width", "height", "frames", "maxSteps"} else 0)
                 require(episode["steps"] <= episode["maxSteps"] and episode["toolCalls"] <= (1500 if is_robocasa or is_robodojo else 750),
@@ -733,7 +736,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         public_metadata(row, "episodes.csv")
         item = episodes[row["episode"]]
         expected_row = {"benchmark": item["benchmark"], "suite": item["task"]["suite"], "task": item["task"]["id"],
-                        "instruction": item["task"]["instruction"], "episode": row["episode"],
+                        "instruction": item["episode"].get("instruction", item["task"]["instruction"]), "episode": row["episode"],
                         **{key: item["episode"][key] for key in ("status", "seed", "initStateId", "steps", "maxSteps",
                            "toolCalls", "wallSeconds", "durationSeconds", "frames", "video", "poster")},
                         "rolloutIndex": item["episode"]["index"]}

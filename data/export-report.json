@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-19T17:44:19.260015+00:00",
+  "generatedAt": "2026-09-20T16:15:48.826089+00:00",
   "complete": true,
-  "selectionRule": "Latest valid attempt for LIBERO and RoboTwin; RoboCasa365 uses the unique source selected by its complete collection audit. Policy failures and timeouts are included. Only documented infrastructure/interruption attempts and zero-action invalid initial scenes are excluded. RoboDojo uses exactly one attempt for each of its 42 basic tasks, verified by the complete native/video and policy-boundary audits. RoboTwin 10-rollout publishes every scored success/failure episode from robotwin_nvidia10_full_v1 that produced a complete MP4; simulator/API infrastructure errors are excluded from playable media.",
+  "selectionRule": "Latest valid attempt for LIBERO and RoboTwin; RoboCasa365 uses the unique source selected by its complete collection audit. Policy failures and timeouts are included. Only documented infrastructure/interruption attempts and zero-action invalid initial scenes are excluded. RoboDojo uses exactly one attempt for each of its 42 basic tasks, verified by the complete native/video and policy-boundary audits. RoboTwin 10-rollout publishes every scored success/failure episode from robotwin_nvidia10_full_v1 that produced a complete MP4; simulator/API infrastructure errors are excluded from playable media. RoboTwin 10-rollout publishes every scored success/failure episode from robotwin_nvidia10_full_v1 that produced a complete MP4; simulator/API infrastructure errors are excluded from playable media.",
   "encoding": {
     "codec": "h264",
     "pixelFormat": "yuv420p",
@@ -13286,7 +13286,8 @@
           "status": "failure",
           "excludedAttempts": []
         }
-      ]
+      ],
+      "instructionSource": "Episode-specific RoboTwin resolved language from frames/*/result.json field language."
     }
   ],
   "media": [

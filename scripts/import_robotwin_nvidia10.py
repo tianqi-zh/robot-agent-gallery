@@ -16,6 +16,7 @@ from fractions import Fraction
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import struct
 import subprocess
@@ -153,6 +154,20 @@ def selected_attempt(result_path: Path) -> str:
     return result_path.parent.name
 
 
+def resolved_instruction(source_video: Path) -> str:
+    """Read the concrete RoboTwin language instruction resolved for this rollout."""
+    for name in ("result.json", "state.json"):
+        path = source_video.with_name(name)
+        if not path.is_file():
+            continue
+        language = read_json(path).get("language")
+        if isinstance(language, str) and language.strip() and "{" not in language:
+            if re.search(r"\bsk-[A-Za-z0-9_-]{20,}\b", language):
+                raise ValueError(f"Unsafe instruction in {path}")
+            return language.strip()
+    raise ValueError(f"Missing resolved RoboTwin instruction next to {source_video}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -201,12 +216,13 @@ def main() -> None:
         source_key = result["episode_key"]
         spec = specs[source_key]
         task_name = result["task_name"]
+        instruction = resolved_instruction(source_video)
         task_id = f"{BENCHMARK_ID}_{task_name}"
         episode_id = f"{BENCHMARK_ID}_{source_key}"
         task = tasks.setdefault(task_id, {
             "id": task_id,
             "name": title(task_name),
-            "instruction": f"RoboTwin task: {title(task_name)}.",
+            "instruction": instruction,
             "suite": SUITE_ID,
             "suiteName": "RoboTwin 10-rollout",
             "episodes": [],
@@ -224,6 +240,7 @@ def main() -> None:
             "id": episode_id,
             "sourceEpisodeKey": source_key,
             "index": int(spec["rollout_id"]),
+            "instruction": instruction,
             "status": status_public,
             "seed": int(env["seed"]),
             "initStateId": None,
@@ -279,6 +296,7 @@ def main() -> None:
 
     for task in tasks.values():
         task["episodes"].sort(key=lambda item: item["index"])
+        task["instruction"] = task["episodes"][0]["instruction"]
         task_counts = counts(task["episodes"], 1)
         task.update({key: task_counts[key] for key in ("successes", "failures", "successRate")})
 
@@ -336,6 +354,7 @@ def main() -> None:
             for key in sorted(specs) if key not in result_keys
         ],
         "attemptSelection": selections,
+        "instructionSource": "Episode-specific RoboTwin resolved language from frames/*/result.json field language.",
     })
     report["generatedAt"] = gallery["generatedAt"]
     report["expectedEpisodes"] = sum(b["summary"]["episodes"] for b in gallery["benchmarks"])
@@ -390,7 +409,7 @@ def main() -> None:
                         "benchmark": item["id"],
                         "suite": task["suite"],
                         "task": task["id"],
-                        "instruction": task["instruction"],
+                        "instruction": episode.get("instruction", task["instruction"]),
                         "episode": episode["id"],
                         "rolloutIndex": episode["index"],
                         "status": episode["status"],
