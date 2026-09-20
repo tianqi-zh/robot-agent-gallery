@@ -168,6 +168,33 @@ def resolved_instruction(source_video: Path) -> str:
     raise ValueError(f"Missing resolved RoboTwin instruction next to {source_video}")
 
 
+def mirror_robotwin_demo(root: Path, demos: dict, task: dict) -> dict:
+    source_task_id = task["id"].replace(f"{BENCHMARK_ID}_", "robotwin_", 1)
+    source = demos.get("tasks", {}).get(source_task_id)
+    if not source or source.get("status") != "available":
+        return {
+            "taskId": task["id"],
+            "benchmark": BENCHMARK_ID,
+            "status": "unavailable",
+            "reason": "The matching RoboTwin training-demo asset is not available in the source gallery catalog.",
+            "source": {
+                "dataset": "RoboTwin 2.0 demonstrations",
+                "url": "https://robotwin-platform.github.io/",
+            },
+        }
+    record = json.loads(json.dumps(source))
+    record["taskId"] = task["id"]
+    record["benchmark"] = BENCHMARK_ID
+    record["mirrorsTaskId"] = source_task_id
+    for key, suffix in (("video", ".mp4"), ("poster", ".jpg")):
+        target = f"media/demos/{BENCHMARK_ID}/{task['id']}{suffix}"
+        target_path = root / target
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(root / source[key], target_path)
+        record[key] = target
+    return record
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
@@ -374,16 +401,7 @@ def main() -> None:
 
     demo_tasks = demos.setdefault("tasks", {})
     for task in benchmark["tasks"]:
-        demo_tasks[task["id"]] = {
-            "taskId": task["id"],
-            "benchmark": BENCHMARK_ID,
-            "status": "unavailable",
-            "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
-            "source": {
-                "dataset": "RoboTwin 2.0 demonstrations",
-                "url": "https://robotwin-platform.github.io/",
-            },
-        }
+        demo_tasks[task["id"]] = mirror_robotwin_demo(root, demos, task)
     coverage = {}
     for record in demo_tasks.values():
         item = coverage.setdefault(record["benchmark"], {"tasks": 0, "available": 0, "unavailable": 0})

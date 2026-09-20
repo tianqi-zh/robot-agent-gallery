@@ -24,8 +24,8 @@
     },
     "robotwin_nvidia10": {
       "tasks": 50,
-      "available": 0,
-      "unavailable": 50
+      "available": 50,
+      "unavailable": 0
     }
   },
   "tasks": {
@@ -14362,502 +14362,1752 @@
     "robotwin_nvidia10_adjust_bottle": {
       "taskId": "robotwin_nvidia10_adjust_bottle",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Pick the bottle with ridges near base head-up using the left arm",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 139,
+      "fps": 15,
+      "durationSeconds": 9.266667,
+      "videoBytes": 73967,
+      "videoSha256": "23c90b626e14935607622e84889f3280891162caa4d8a7230c175ec5a0f76cf1",
+      "posterSha256": "76ba050685d63c37bab1fe9c85b46c910bae74cd027b1880abe9791f15acbb89",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/adjust_bottle/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/adjust_bottle/demo_clean.zip",
+        "fileSha256": "74e8504ae0586467b0c03fe7b2423d01fc16ef32d2da1b279ea8a502cf748939",
+        "split": "train",
+        "taskName": "adjust_bottle",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "adjust_bottle/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "badfe008a11450658b3e224cec8c82ef657b3c067299944f20df9be8cf562a34"
+      },
+      "mirrorsTaskId": "robotwin_adjust_bottle"
     },
     "robotwin_nvidia10_beat_block_hammer": {
       "taskId": "robotwin_nvidia10_beat_block_hammer",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use the medium-sized metal hammer to hammer the block.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_beat_block_hammer.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_beat_block_hammer.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 125,
+      "fps": 15,
+      "durationSeconds": 8.333333,
+      "videoBytes": 61280,
+      "videoSha256": "e248e35bc8245cb4125a0f234f06c291c3909f768c9b1d03233c9738d17eccc8",
+      "posterSha256": "2adf253acead466f07ce70e54056fc0f8ffd6a5ebd81e7607aeffe50057dd595",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/beat_block_hammer/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/beat_block_hammer/demo_clean.zip",
+        "fileSha256": "12c3528b3f2318e03744bc7bab909a4a5214a7bc942ab6490af058137bebc194",
+        "split": "train",
+        "taskName": "beat_block_hammer",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "beat_block_hammer/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "191c5d554cc014cbffa0ad242c7e299bf43c66106c010e167b2f23653f03e677"
+      },
+      "mirrorsTaskId": "robotwin_beat_block_hammer"
     },
     "robotwin_nvidia10_blocks_ranking_rgb": {
       "taskId": "robotwin_nvidia10_blocks_ranking_rgb",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Pick up red block using the left arm, set it on the left, repeat the placement with the right arm for green block, and the left arm for blue block.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_blocks_ranking_rgb.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_blocks_ranking_rgb.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 478,
+      "fps": 15,
+      "durationSeconds": 31.866667,
+      "videoBytes": 197030,
+      "videoSha256": "27a7bc1dcf9d21d3d57b99a4699f747da1124dae669a107b57d8515a8b10396c",
+      "posterSha256": "143b244f8d5e7ab01b78aa94d8783b7cf9231fd4c7338c34982d93cf9a641bf5",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/blocks_ranking_rgb/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/blocks_ranking_rgb/demo_clean.zip",
+        "fileSha256": "16402a4f965718c8d042bc6f84e6792d846b90257e6a19434f2e588faeb8b8b5",
+        "split": "train",
+        "taskName": "blocks_ranking_rgb",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "blocks_ranking_rgb/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "25390ca0ff39b7076412beb03d50e58ff2339d758481c843423e1216a2be5c12"
+      },
+      "mirrorsTaskId": "robotwin_blocks_ranking_rgb"
     },
     "robotwin_nvidia10_blocks_ranking_size": {
       "taskId": "robotwin_nvidia10_blocks_ranking_size",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Bring large block, medium block, and small block to the center, sorting largest to smallest.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_blocks_ranking_size.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_blocks_ranking_size.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 474,
+      "fps": 15,
+      "durationSeconds": 31.6,
+      "videoBytes": 191790,
+      "videoSha256": "466b57663da076c6049a416d3f5920c9931165466df09a64188cbeef44731e03",
+      "posterSha256": "eb8410ed1dc4eadfe28b782557d2d49a543917904bc06566098d5765301556d8",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/blocks_ranking_size/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/blocks_ranking_size/demo_clean.zip",
+        "fileSha256": "53877a55e1f42b3a9ce625995417291bce12789726ddc9d4cc1ab4a708cf411e",
+        "split": "train",
+        "taskName": "blocks_ranking_size",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "blocks_ranking_size/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "97028212078ad25bb8481aeb1e899ff371773787fb23218e468f93f68e8a05fe"
+      },
+      "mirrorsTaskId": "robotwin_blocks_ranking_size"
     },
     "robotwin_nvidia10_click_alarmclock": {
       "taskId": "robotwin_nvidia10_click_alarmclock",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Click the black matte alarm-clock's top center button using the right arm.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_click_alarmclock.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_click_alarmclock.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 76,
+      "fps": 15,
+      "durationSeconds": 5.066667,
+      "videoBytes": 15432,
+      "videoSha256": "ecb51257acf6ce2cac4364a5f6d857d35dcc9e22f18b9bb12f73e0f1eb48eec2",
+      "posterSha256": "44c85f77fe5a94e06e32cbaaae9c7578bff2258e790c22024bdc76e17d8c911e",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/click_alarmclock/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/click_alarmclock/demo_clean.zip",
+        "fileSha256": "cc901e68c2434372ffa099e7326aa1af1d547a272e3a864f94ea44680cf3ae34",
+        "split": "train",
+        "taskName": "click_alarmclock",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "click_alarmclock/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "38f039e860623bea164e85171052e3033e7041fe1bd623e2dbcf44984c4288a9"
+      },
+      "mirrorsTaskId": "robotwin_click_alarmclock"
     },
     "robotwin_nvidia10_click_bell": {
       "taskId": "robotwin_nvidia10_click_bell",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Press down the bell shaped like half-circle dome's top center gently.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_click_bell.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_click_bell.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 80,
+      "fps": 15,
+      "durationSeconds": 5.333333,
+      "videoBytes": 30515,
+      "videoSha256": "003a57259d182feadc79a421838d20a3a836b4d04bb60f33f4cfdde5fb0940a5",
+      "posterSha256": "251d2989991aa4256b5c30339462f42da08e4717d32cf888ef6291f39d71f041",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/click_bell/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/click_bell/demo_clean.zip",
+        "fileSha256": "fe030a11cdf527599c1bfa6bf467da16ba5b5fa61ebcecf62885b5f80e2eac5b",
+        "split": "train",
+        "taskName": "click_bell",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "click_bell/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "39d848ca0493169a3f17a9709d4e2d8db21d8ef50bdd6d73f5c4f90fca5aab2f"
+      },
+      "mirrorsTaskId": "robotwin_click_bell"
     },
     "robotwin_nvidia10_dump_bin_bigbin": {
       "taskId": "robotwin_nvidia10_dump_bin_bigbin",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the desk-sized white tabletrashbin and empty its contents.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_dump_bin_bigbin.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_dump_bin_bigbin.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 170,
+      "fps": 15,
+      "durationSeconds": 11.333333,
+      "videoBytes": 52870,
+      "videoSha256": "ff84594083cf4a541bd0d6aabb53b5910b871bd7ee5e1a7214c11171c7ceb932",
+      "posterSha256": "ea9701e16c1371d8dc153a5012db1dd5d16f067634748109992a311ce1a4e917",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/dump_bin_bigbin/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/dump_bin_bigbin/demo_clean.zip",
+        "fileSha256": "a2944d6ad7e29667d93492fc39f3a6ad3784e0805b7e8d1472b97635c7949568",
+        "split": "train",
+        "taskName": "dump_bin_bigbin",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "dump_bin_bigbin/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "785632c30b430d4626f421e09caac17ddbf35bfc6ef2279c46f02c9a7dd161fb"
+      },
+      "mirrorsTaskId": "robotwin_dump_bin_bigbin"
     },
     "robotwin_nvidia10_grab_roller": {
       "taskId": "robotwin_nvidia10_grab_roller",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the light brown wooden roller off the table with both arms",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_grab_roller.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_grab_roller.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 92,
+      "fps": 15,
+      "durationSeconds": 6.133333,
+      "videoBytes": 57544,
+      "videoSha256": "91917598a04e574a77d4943aea3be9a9cc051c858d60ba2095e6a78183cece83",
+      "posterSha256": "b6dd50040383fc7f9f830acc6e5914c77e4ec3fbf8ad8f8ab40359f0e1c34448",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/grab_roller/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/grab_roller/demo_clean.zip",
+        "fileSha256": "8edd838afe04259bb4302b5bc07d56a3427451fa90b9cf0395e752591ee57bd2",
+        "split": "train",
+        "taskName": "grab_roller",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "grab_roller/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "8cb0bf5de14b93ea178e4f165f775e1572da72a010820d0a7e2a0f7716fea36e"
+      },
+      "mirrorsTaskId": "robotwin_grab_roller"
     },
     "robotwin_nvidia10_handover_block": {
       "taskId": "robotwin_nvidia10_handover_block",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the red block with the left arm, pass it to the right hand, and drop it on the blue pad.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_handover_block.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_handover_block.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 294,
+      "fps": 15,
+      "durationSeconds": 19.6,
+      "videoBytes": 94852,
+      "videoSha256": "bd8acfc3f52de9d2b5085a1d53739f1f03f23b41179937958b4ddf9ce9f253c1",
+      "posterSha256": "5ba599e21fdaae727ae7b9d4bd69778c69295a2ac436c10d5dcfaa9c35326c8d",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/handover_block/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/handover_block/demo_clean.zip",
+        "fileSha256": "9959f4daab727215a06bad6b44821bfdd38b9c3ba9d6a4eca074fe58f4d920e3",
+        "split": "train",
+        "taskName": "handover_block",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "handover_block/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "ccdbea3df10f42a187b8da42bdb77caa87ab0dbb33f32647345e1fe2a249f8bc"
+      },
+      "mirrorsTaskId": "robotwin_handover_block"
     },
     "robotwin_nvidia10_handover_mic": {
       "taskId": "robotwin_nvidia10_handover_mic",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the white microphone handle black accents and move it to the other hand.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_handover_mic.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_handover_mic.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 224,
+      "fps": 15,
+      "durationSeconds": 14.933333,
+      "videoBytes": 77571,
+      "videoSha256": "df61f22a3209f91a859ef3c4e6ab0efd6356a88f5644cfa8be68593a6536341c",
+      "posterSha256": "3d3f4e3970718f8b44cfb5f7d6064864154aa54373c10e22d2b9db363d86e225",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/handover_mic/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/handover_mic/demo_clean.zip",
+        "fileSha256": "c43714747294929689a542308235815205156b9e895c1de729288cf2e8feb787",
+        "split": "train",
+        "taskName": "handover_mic",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "handover_mic/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "e4e223d88657b2e750452291a8ac1aabe4014dd6323e6777c10f06ac54d83791"
+      },
+      "mirrorsTaskId": "robotwin_handover_mic"
     },
     "robotwin_nvidia10_hanging_mug": {
       "taskId": "robotwin_nvidia10_hanging_mug",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the mug with rounded handle, give it a turn, and hang it onto the rack with two rods sticking out.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_hanging_mug.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_hanging_mug.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 337,
+      "fps": 15,
+      "durationSeconds": 22.466667,
+      "videoBytes": 154922,
+      "videoSha256": "5b8f67019657e1dc15460071acc382eba71890a7f57c6ddd4a8e089f6306297c",
+      "posterSha256": "34192a9907944c24677c1803c886aeced758aa3bbc4aa8f87654d585eda6e080",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/hanging_mug/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/hanging_mug/demo_clean.zip",
+        "fileSha256": "bfdbe40d9e7323e8aa763684cd2861f0278aeac456b25c477239fd86566ef45a",
+        "split": "train",
+        "taskName": "hanging_mug",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "hanging_mug/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "a907a86e8dec702dc39f85348e8f1ffe8578bdb54cd82c27930215f69738614a"
+      },
+      "mirrorsTaskId": "robotwin_hanging_mug"
     },
     "robotwin_nvidia10_lift_pot": {
       "taskId": "robotwin_nvidia10_lift_pot",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Hold the gray kitchenpot with both arms",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_lift_pot.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_lift_pot.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 113,
+      "fps": 15,
+      "durationSeconds": 7.533333,
+      "videoBytes": 45521,
+      "videoSha256": "bf81ba3ae1a95728cc4d4d7df9f62224e458c2b5a330e9db993464ae8bac15c9",
+      "posterSha256": "08e17eff807dc568656cd9308313e0425d381a3945a93d90abc8a3952a9665e1",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/lift_pot/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/lift_pot/demo_clean.zip",
+        "fileSha256": "bed96a19d291b3ba5c3031e86f73c8470ccbb7e092fadbb7f03cbb3558332d95",
+        "split": "train",
+        "taskName": "lift_pot",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "lift_pot/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "021ef44c03610c1d6056e88edc05452d220ed2e40a61f8432d4541f4a9df6ef0"
+      },
+      "mirrorsTaskId": "robotwin_lift_pot"
     },
     "robotwin_nvidia10_move_can_pot": {
       "taskId": "robotwin_nvidia10_move_can_pot",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Pick the brown top sauce can and position it next to the kitchenpot with smooth metallic lid",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_can_pot.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_can_pot.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 35720,
+      "videoSha256": "f0bbfd0821384fed6201ed7085dbbe6d9cc778fb59cf6ff84a0ef9263dc76252",
+      "posterSha256": "b327fa76beabd276ae475a5d4d315c8f19b3344ea21c7b7a8b11d485ae0cbacc",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/move_can_pot/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/move_can_pot/demo_clean.zip",
+        "fileSha256": "3ef45aa9273cb961d3deae34adf435c17ddeb9061b4ecf0b8c6975fd9e0bd647",
+        "split": "train",
+        "taskName": "move_can_pot",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "move_can_pot/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "70ecbba01b308180c093dc3b8b73ff1b4c7ce78c71039ecf9532d274f70654d3"
+      },
+      "mirrorsTaskId": "robotwin_move_can_pot"
     },
     "robotwin_nvidia10_move_pillbottle_pad": {
       "taskId": "robotwin_nvidia10_move_pillbottle_pad",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use the left arm to move the white bottle with orange label to the pad",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_pillbottle_pad.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_pillbottle_pad.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 142,
+      "fps": 15,
+      "durationSeconds": 9.466667,
+      "videoBytes": 42420,
+      "videoSha256": "ffbfa915b8fe0959c27f4ac18aea26657f0ef8cc00ae92d3993086d63c61ad11",
+      "posterSha256": "8ce31f6e507a8c82dd6ca37e6a7a2740ed5689d520e7ce884c2b59d79e95a9de",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/move_pillbottle_pad/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/move_pillbottle_pad/demo_clean.zip",
+        "fileSha256": "c4af787c9ef4688ed9282e1ba9d76cfbaa15bb84942ca4da545fbd70614d9738",
+        "split": "train",
+        "taskName": "move_pillbottle_pad",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "move_pillbottle_pad/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "2d3f1825fd82c10dc5092a322a8efae261d25ca800f8f7d7d61c883e51a8b336"
+      },
+      "mirrorsTaskId": "robotwin_move_pillbottle_pad"
     },
     "robotwin_nvidia10_move_playingcard_away": {
       "taskId": "robotwin_nvidia10_move_playingcard_away",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the smooth playingcards holder from the table and move it outward.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_playingcard_away.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_playingcard_away.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 116,
+      "fps": 15,
+      "durationSeconds": 7.733333,
+      "videoBytes": 38297,
+      "videoSha256": "93ac3aba0b97027a0705410feba4cf1d25f7ec08f82a198a5573a4092c1ea261",
+      "posterSha256": "c382611be8537acc59aafcd754f837e59c7159b931125c918713168da9d57a7f",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/move_playingcard_away/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/move_playingcard_away/demo_clean.zip",
+        "fileSha256": "94f50e7301bed7fe1a0f0503f6515cd3cbca2fed280a118fe4574faf57181ad2",
+        "split": "train",
+        "taskName": "move_playingcard_away",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "move_playingcard_away/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "8300661efb470c6e694257921e8510d54600f68b28388ef3b23a502868149a42"
+      },
+      "mirrorsTaskId": "robotwin_move_playingcard_away"
     },
     "robotwin_nvidia10_move_stapler_pad": {
       "taskId": "robotwin_nvidia10_move_stapler_pad",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Set the stapler with silver staple tray on the Gray mat with the left arm.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_stapler_pad.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_move_stapler_pad.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 172,
+      "fps": 15,
+      "durationSeconds": 11.466667,
+      "videoBytes": 74117,
+      "videoSha256": "56d046673aa316b5db0649a1fa0bb12a54cb7f00e5db9f4b1d2802b2dfc01c2d",
+      "posterSha256": "f220d7ad947afb88956441a81f984a456b8863ece53e9563d05a56f425d83004",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/move_stapler_pad/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/move_stapler_pad/demo_clean.zip",
+        "fileSha256": "f04cd56cd33e81ba20a255c1b9fd936fcb76454f8f6cbe642993ca50f3276b25",
+        "split": "train",
+        "taskName": "move_stapler_pad",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "move_stapler_pad/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "73228a6c9c1cccd0543b445ece1116a0a08fc74222b3ed3f7802b41361e37b5b"
+      },
+      "mirrorsTaskId": "robotwin_move_stapler_pad"
     },
     "robotwin_nvidia10_open_laptop": {
       "taskId": "robotwin_nvidia10_open_laptop",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift and open the laptop with black textured screen.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_open_laptop.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_open_laptop.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 184,
+      "fps": 15,
+      "durationSeconds": 12.266667,
+      "videoBytes": 57508,
+      "videoSha256": "cc7ae32cbc1818a86247f69c7afe96102a9698efec28afaea7373c3c79f6eedf",
+      "posterSha256": "59507ffe5ac2817c633b28b28ecf9cbd793410eb588b453aed84441a0e735257",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/open_laptop/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/open_laptop/demo_clean.zip",
+        "fileSha256": "94cd144bc8213dc57756b8df4e43582833ddccf6e269b74018baad89ff1dbb45",
+        "split": "train",
+        "taskName": "open_laptop",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "open_laptop/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "c9647cf8be49354fa53e41cf322aa1f0b45d0dd7acc004d70e333a96c5b45319"
+      },
+      "mirrorsTaskId": "robotwin_open_laptop"
     },
     "robotwin_nvidia10_open_microwave": {
       "taskId": "robotwin_nvidia10_open_microwave",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Activate the door to open the countertop microwave.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_open_microwave.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_open_microwave.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 426,
+      "fps": 15,
+      "durationSeconds": 28.4,
+      "videoBytes": 104940,
+      "videoSha256": "079f8f16a24cbf0ba2f351e87b4ce4dbd5ddf9bb47ed774663efb0c3353c7661",
+      "posterSha256": "f7e28579114d5cd1e9a013b568cf135302cc479bd070bce1a95c128400dd0d8f",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/open_microwave/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/open_microwave/demo_clean.zip",
+        "fileSha256": "ca82b50d5f9b939a52a45c8b4d392045bc45ed7052ad26cc4caad27e394848ee",
+        "split": "train",
+        "taskName": "open_microwave",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "open_microwave/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "2d3f8561ea7ef865c44cdb9a82b297c41ff8f662320d408d951aecfda43a7019"
+      },
+      "mirrorsTaskId": "robotwin_open_microwave"
     },
     "robotwin_nvidia10_pick_diverse_bottles": {
       "taskId": "robotwin_nvidia10_pick_diverse_bottles",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Catch the smooth brown bottle with green label, then grab the smooth plastic bottle too.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_pick_diverse_bottles.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_pick_diverse_bottles.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 121,
+      "fps": 15,
+      "durationSeconds": 8.066667,
+      "videoBytes": 64013,
+      "videoSha256": "7449bd6ae72dbd281cb76c4f250d7c61f1ef774a2e3dfe65683443e7093f03b4",
+      "posterSha256": "9973767988a0bcafd17f170085bbbbe5b4c5bc33dbb4ccef0f1869efde52a711",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/pick_diverse_bottles/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/pick_diverse_bottles/demo_clean.zip",
+        "fileSha256": "5e3afcced9ed6154f23074ae8f6d6ac536393aa25d5e15fbd477a8f171d8d9ff",
+        "split": "train",
+        "taskName": "pick_diverse_bottles",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "pick_diverse_bottles/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "fb31aa0318c93cc7acaac69f5fb097c887c7c913284d3935cc4bf2ac886228d4"
+      },
+      "mirrorsTaskId": "robotwin_pick_diverse_bottles"
     },
     "robotwin_nvidia10_pick_dual_bottles": {
       "taskId": "robotwin_nvidia10_pick_dual_bottles",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the brown bottle with red label with an arm, grab the bottle with ridges near base next.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_pick_dual_bottles.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_pick_dual_bottles.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 124,
+      "fps": 15,
+      "durationSeconds": 8.266667,
+      "videoBytes": 66381,
+      "videoSha256": "7e5441bb3e8e4125437e2e81ba264f86eadbf8ff504062496f73de68ae18f813",
+      "posterSha256": "b62c15031db27d248f87b080be8048316340cdd55de7ecfe62f3c4bb2bb3cf7a",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/pick_dual_bottles/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/pick_dual_bottles/demo_clean.zip",
+        "fileSha256": "f75cdf16b01db13ebba7ed10c602f21c44951df10756080a9011d99a87d40f47",
+        "split": "train",
+        "taskName": "pick_dual_bottles",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "pick_dual_bottles/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "7b3acf728297ca5532c0166ceda5bc2dff497daaae5b079493a7e33c907165c7"
+      },
+      "mirrorsTaskId": "robotwin_pick_dual_bottles"
     },
     "robotwin_nvidia10_place_a2b_left": {
       "taskId": "robotwin_nvidia10_place_a2b_left",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the hand-sized toycar with white roof bars using the right arm and place it left of the rectangular phone.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_a2b_left.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_a2b_left.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 63448,
+      "videoSha256": "c7b10d00e69eb986cb870442b4a363efe1d139429810e39b7b979e19d21e69d4",
+      "posterSha256": "82fcc79aa8448af9ee8955c06e81ffb70b6a937e78eb51e7755faf023661f9e1",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_a2b_left/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_a2b_left/demo_clean.zip",
+        "fileSha256": "fd1ce66646a9c518a52d98c266b0ffbf73155cc40eb4c6080be55accd0338f31",
+        "split": "train",
+        "taskName": "place_a2b_left",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_a2b_left/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "6a4f891e96d51ef7a1a8d7425e9c2a260117500daf7e6a2b96da8b421f462d66"
+      },
+      "mirrorsTaskId": "robotwin_place_a2b_left"
     },
     "robotwin_nvidia10_place_a2b_right": {
       "taskId": "robotwin_nvidia10_place_a2b_right",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Bring the stapler with smooth blue finish to the right position of the compact woodenblock for organizing.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_a2b_right.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_a2b_right.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 50802,
+      "videoSha256": "11c33b09de8c8f5bb88503b255870fd1977d97d0015cb9811ecf89373465e87c",
+      "posterSha256": "294541a49320b26afcbeb1e88135597be0f1cac8ebd742afd669a59821b7031a",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_a2b_right/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_a2b_right/demo_clean.zip",
+        "fileSha256": "2d30deea5e4a977a0326b0276f46b8bfbb55a1998f8db7dddca76e042dc535d9",
+        "split": "train",
+        "taskName": "place_a2b_right",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_a2b_right/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "bb2197294895b00c6d107b4fb59f77b79b518caea61d64365ab1330e19e179d1"
+      },
+      "mirrorsTaskId": "robotwin_place_a2b_right"
     },
     "robotwin_nvidia10_place_bread_basket": {
       "taskId": "robotwin_nvidia10_place_bread_basket",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the golden brown bread with braided design and the light brown bread with ridges with two arms, put in the basket for carrying bread beige.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_bread_basket.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_bread_basket.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 224,
+      "fps": 15,
+      "durationSeconds": 14.933333,
+      "videoBytes": 123802,
+      "videoSha256": "a372e17f261b3a26db105f74a4844607443203c19c362410eacc45da7c678a4b",
+      "posterSha256": "8da15ed0bdbf22d7fa582259575e3ff448e87805f7b5a5c0c9f0c88b0c197dc2",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_bread_basket/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_bread_basket/demo_clean.zip",
+        "fileSha256": "81c9a9a3d29a79f33b85c080e44704f91d56cc34bc8de92144e34af70b7b2baf",
+        "split": "train",
+        "taskName": "place_bread_basket",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_bread_basket/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "bc619e4347f7e6bc7cbe0a9eb14b85de0a5188a634a84ae0287ff8464ff8ad07"
+      },
+      "mirrorsTaskId": "robotwin_place_bread_basket"
     },
     "robotwin_nvidia10_place_bread_skillet": {
       "taskId": "robotwin_nvidia10_place_bread_skillet",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Move the soft brown bread from table into the skillet with black cooking surface",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_bread_skillet.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_bread_skillet.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 165,
+      "fps": 15,
+      "durationSeconds": 11.0,
+      "videoBytes": 77457,
+      "videoSha256": "50d5112a4c544e9991be7a3f61369b46c561085ba79b69c8f3d8a310836b3b78",
+      "posterSha256": "dfd0a965f804df8a87323e0b13215cfe79ebf831b1969bacce9d09936aa375c4",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_bread_skillet/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_bread_skillet/demo_clean.zip",
+        "fileSha256": "81b369c40973decf728584a9d9002fafb995bc291e2853098fe7c15340a5e525",
+        "split": "train",
+        "taskName": "place_bread_skillet",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_bread_skillet/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "c7291b7b1e3ad79af2815f785c97d17d4daaa37063a90552021d2dd48a0bcc30"
+      },
+      "mirrorsTaskId": "robotwin_place_bread_skillet"
     },
     "robotwin_nvidia10_place_burger_fries": {
       "taskId": "robotwin_nvidia10_place_burger_fries",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the hand-sized orange hamburg and the Red fries box to the plastic tray for holding items and set them there.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_burger_fries.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_burger_fries.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 242,
+      "fps": 15,
+      "durationSeconds": 16.133333,
+      "videoBytes": 98972,
+      "videoSha256": "b028d39adaee72ea26e5053017dcf1e11b84b1ed42d07cc142d2e80025cf21fb",
+      "posterSha256": "f01553d3e1c71811796629d649db0c1a6d52cc7597fa5cfccd44b1102f931e09",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_burger_fries/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_burger_fries/demo_clean.zip",
+        "fileSha256": "af1c51da82f4b84a3922735cad2f08bf8456a53e23daecc9552715935249321f",
+        "split": "train",
+        "taskName": "place_burger_fries",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_burger_fries/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "9dad83a8f6739e10232b0bed9822ab48cedbad95d03305c3e8554f13a9e14957"
+      },
+      "mirrorsTaskId": "robotwin_place_burger_fries"
     },
     "robotwin_nvidia10_place_can_basket": {
       "taskId": "robotwin_nvidia10_place_can_basket",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the cylindrical white glossy can, drop it into the bright yellow basket, then use another arm for the bright yellow basket.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_can_basket.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_can_basket.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 246,
+      "fps": 15,
+      "durationSeconds": 16.4,
+      "videoBytes": 99662,
+      "videoSha256": "0142e61e87fe194d1512403eea8474aaebb29cf1869b8ad1098f19dd6a297e2f",
+      "posterSha256": "d4ecc5e1250728c6dc17e6d2577e4c6b8b6c55982700980d43d6e69771bc6cb2",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_can_basket/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_can_basket/demo_clean.zip",
+        "fileSha256": "24ebde3554b52ca6bd5da908c906ed6478036f8fa783060dfb123f9e1e2a9b92",
+        "split": "train",
+        "taskName": "place_can_basket",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_can_basket/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "0707c631aba262664a161a4b4d03d24ef6c867d90c64db10eacc6fc86678f80f"
+      },
+      "mirrorsTaskId": "robotwin_place_can_basket"
     },
     "robotwin_nvidia10_place_cans_plasticbox": {
       "taskId": "robotwin_nvidia10_place_cans_plasticbox",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use dual arms to pick the palm-sized drink can and the metal can with pull-tab top, placing both in the deep blue plasticbox with grooves.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_cans_plasticbox.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_cans_plasticbox.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 288,
+      "fps": 15,
+      "durationSeconds": 19.2,
+      "videoBytes": 137607,
+      "videoSha256": "8b12faf1037c8ad25b446c8a97b8883879f90452879e7c14d5fcd304f8c56590",
+      "posterSha256": "14ee6dc6894b8971a4338fc2613f942dca9d2643823c4b8da46f5f69d779af3e",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_cans_plasticbox/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_cans_plasticbox/demo_clean.zip",
+        "fileSha256": "242646527171b42483da3b561d82ab1082d759029357ef9c9c2bd0acf9a19ff8",
+        "split": "train",
+        "taskName": "place_cans_plasticbox",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_cans_plasticbox/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "52ccdb8d593e5069ce0aa8b5d689b41b70ed77c741e96504b293f7170a8f67c5"
+      },
+      "mirrorsTaskId": "robotwin_place_cans_plasticbox"
     },
     "robotwin_nvidia10_place_container_plate": {
       "taskId": "robotwin_nvidia10_place_container_plate",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use the smooth light gray bowl to place the container into the greenish-gray flat dinner plate",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_container_plate.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_container_plate.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 44625,
+      "videoSha256": "50fe3995ea2572a75db5452bf6538c3c87ccfd996f7793d74dce528eec6e99a6",
+      "posterSha256": "aa4657f1d843fb3497274a693a63f13d279b1ead736095375651efec8b7177bd",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_container_plate/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_container_plate/demo_clean.zip",
+        "fileSha256": "55cbccb0d4851cec0018e0fac9719fb6041b50c8656bdc67401a39b610c472f9",
+        "split": "train",
+        "taskName": "place_container_plate",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_container_plate/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "b5e64d306b24ae2828fa1cdc89626c708d1370133f2d0f82f871b372e929917a"
+      },
+      "mirrorsTaskId": "robotwin_place_container_plate"
     },
     "robotwin_nvidia10_place_dual_shoes": {
       "taskId": "robotwin_nvidia10_place_dual_shoes",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "With both arms, move two the white shoe with rubber sole into the shoe-box with Nike printed logo, tips facing left.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 223,
+      "fps": 15,
+      "durationSeconds": 14.866667,
+      "videoBytes": 118429,
+      "videoSha256": "f6c5d72ca1d2972f99e3614c78fcd44df141b945bce2e93d4bc7574cca9f7866",
+      "posterSha256": "b27231ed166092c2f89932cd91e72a6668c2e908cd52dea2c3c656953e6ad84e",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_dual_shoes/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_dual_shoes/demo_clean.zip",
+        "fileSha256": "3ed8ecb94aa6181a98c40f435f09bc9cf05e6e8fa1ec7186aec24a5ee5a26d48",
+        "split": "train",
+        "taskName": "place_dual_shoes",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_dual_shoes/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "f8db120ecb188345b70f3ea5c377c5ded0f6c1db7c008c77a5a0449bd5541ff0"
+      },
+      "mirrorsTaskId": "robotwin_place_dual_shoes"
     },
     "robotwin_nvidia10_place_empty_cup": {
       "taskId": "robotwin_nvidia10_place_empty_cup",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the rounded base blue cup up and drop it on the light gray round grainy coaster.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_empty_cup.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_empty_cup.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 179,
+      "fps": 15,
+      "durationSeconds": 11.933333,
+      "videoBytes": 41624,
+      "videoSha256": "79f3bd7c09411d0a97cca501a1989f9b1e22429a4a34732f78c2e6853197402b",
+      "posterSha256": "f63895bb12128456f641952dedcb0e6f06968f487145725328e4a37695696135",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_empty_cup/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_empty_cup/demo_clean.zip",
+        "fileSha256": "ebad5d2418fe85ebb883f79cbe98a51ec4b614e0750a7f29bb751bf67893ebcc",
+        "split": "train",
+        "taskName": "place_empty_cup",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_empty_cup/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "7454907139551ab6d290acf5ab5ccb07a67472fef56ebdd56d4dd449a5ddb27a"
+      },
+      "mirrorsTaskId": "robotwin_place_empty_cup"
     },
     "robotwin_nvidia10_place_fan": {
       "taskId": "robotwin_nvidia10_place_fan",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the fan with grid cover with the right arm, set it on the Silver mat, and align it to face the robot",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_fan.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_fan.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 53421,
+      "videoSha256": "482995eaaa649370802d03282ca9bf1a6b9f82aafeca4f7ca2d345deb235373e",
+      "posterSha256": "ab355fa5ae06db55c0d98caa532946143b23c419fd533ca8be2b0fbc97b360bd",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_fan/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_fan/demo_clean.zip",
+        "fileSha256": "48dbb136e0c54b30d0245f263150e5c7d0902a5394d4c3b759308f5d7e9ccdd0",
+        "split": "train",
+        "taskName": "place_fan",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_fan/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "1be2e36a838bfb2e45f51685cd374157a6a771a46d5625791d816f9d94a24636"
+      },
+      "mirrorsTaskId": "robotwin_place_fan"
     },
     "robotwin_nvidia10_place_mouse_pad": {
       "taskId": "robotwin_nvidia10_place_mouse_pad",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the mouse with two buttons and wheel and position it onto the Gray mat.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_mouse_pad.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_mouse_pad.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 153,
+      "fps": 15,
+      "durationSeconds": 10.2,
+      "videoBytes": 62840,
+      "videoSha256": "3b5a542389eaf98c6457496e86f13bc73c1d01430154c2ff092c66a79f9b6bc4",
+      "posterSha256": "7a8cced83f363aef37755aaf7fb8d6de5eee8be9b23d45079e51691a2b263500",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_mouse_pad/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_mouse_pad/demo_clean.zip",
+        "fileSha256": "32830874f06d31f3a56c6694ca1e93344aecc525c9c32c8c774bdb896d39f210",
+        "split": "train",
+        "taskName": "place_mouse_pad",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_mouse_pad/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "3c4235706813714960aa4b0f1f3f201eb70ee78ce4d739a3440a4bd3b2052037"
+      },
+      "mirrorsTaskId": "robotwin_place_mouse_pad"
     },
     "robotwin_nvidia10_place_object_basket": {
       "taskId": "robotwin_nvidia10_place_object_basket",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use one arm to place the box of playingcards in the basket with handle.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_basket.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_basket.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 254,
+      "fps": 15,
+      "durationSeconds": 16.933333,
+      "videoBytes": 97441,
+      "videoSha256": "f78e5807a217cb1258716b25d8e43236288003b24662dc65fe820ee865786895",
+      "posterSha256": "64a8a63aeed5f81f4137a1026398be3bbf0b27ef991f8842d1b439ad4733068e",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_object_basket/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_object_basket/demo_clean.zip",
+        "fileSha256": "6dc7c207acb00b88bf7aeddc3d508f83c8f3d173ba025dd4e20c54a088c7950f",
+        "split": "train",
+        "taskName": "place_object_basket",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_object_basket/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "106300024e75cb0c916e524df37c25c4fcf9dd775f79b6f838e79ae65c59f622"
+      },
+      "mirrorsTaskId": "robotwin_place_object_basket"
     },
     "robotwin_nvidia10_place_object_scale": {
       "taskId": "robotwin_nvidia10_place_object_scale",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Lift the mouse with two buttons and a scroll wheel and position it on the electronicscale with round weight platform",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_scale.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_scale.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 144,
+      "fps": 15,
+      "durationSeconds": 9.6,
+      "videoBytes": 37435,
+      "videoSha256": "cf0c317b331f7aebfd5ac74bde4ba7460601aa376055c771b0b6b345d0ace577",
+      "posterSha256": "1878390ba2d101727e5792fa678be9b7bd875c3b79a32c7aa415de57da642c07",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_object_scale/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_object_scale/demo_clean.zip",
+        "fileSha256": "4c556a2c0f212ae66630165d56d4098c1ffbb54f85b11d4ee577cceb036b1e68",
+        "split": "train",
+        "taskName": "place_object_scale",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_object_scale/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "2136b1de7231182a8268817c122b90cc7c0a417abbf3bfe2dc145def98522660"
+      },
+      "mirrorsTaskId": "robotwin_place_object_scale"
     },
     "robotwin_nvidia10_place_object_stand": {
       "taskId": "robotwin_nvidia10_place_object_stand",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Place the palm-fitting mouse on the angled displaystand.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_stand.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_object_stand.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 137,
+      "fps": 15,
+      "durationSeconds": 9.133333,
+      "videoBytes": 44848,
+      "videoSha256": "a33f069cbb25a551316801e2835499ca8cd50f4fc7357883b411928819368e8c",
+      "posterSha256": "310f2671c5af38e68de2961e20bbef3e358a26cf98c22f2370fb500b12586e2b",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_object_stand/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_object_stand/demo_clean.zip",
+        "fileSha256": "6da23fc5c3c5d98fbb039d312a4e30a89c56673e98c672754eceba71280c8658",
+        "split": "train",
+        "taskName": "place_object_stand",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_object_stand/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "48eeee3df7fe59c8b115a04ff7b1b3be96533279e37a20013b5981cb9f89780c"
+      },
+      "mirrorsTaskId": "robotwin_place_object_stand"
     },
     "robotwin_nvidia10_place_phone_stand": {
       "taskId": "robotwin_nvidia10_place_phone_stand",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the metallic phone with glass screen front to the small plastic phonestand.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_phone_stand.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_phone_stand.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 130,
+      "fps": 15,
+      "durationSeconds": 8.666667,
+      "videoBytes": 49592,
+      "videoSha256": "66e0c481ef27a91dd99dec09bc968ff5b819bd25e60bcfbe771f190553eaf081",
+      "posterSha256": "42be803b275569055c6b2ec875b41960315443a82230121f801c5824e2d4eaf9",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_phone_stand/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_phone_stand/demo_clean.zip",
+        "fileSha256": "ee42bbfae49da74c0500fa2765ecd6a46e347f42e64c2f78024a33b6b57a107b",
+        "split": "train",
+        "taskName": "place_phone_stand",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_phone_stand/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "75d882554664751e0bab8e788d5ccb4eb0f2b28944a20ddd0df3b48849ff1b55"
+      },
+      "mirrorsTaskId": "robotwin_place_phone_stand"
     },
     "robotwin_nvidia10_place_shoe": {
       "taskId": "robotwin_nvidia10_place_shoe",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Move the white shoe from the table to the mat",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_shoe.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_place_shoe.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 179,
+      "fps": 15,
+      "durationSeconds": 11.933333,
+      "videoBytes": 66221,
+      "videoSha256": "7af26b73e5d7c62eef6dce868ab3508f246a791657fb24164b28e3357de564aa",
+      "posterSha256": "db79c1b085de1f379f4921e0d7581afb7e4b9d1e3be7fdd4a9bae1f345437fe8",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/place_shoe/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/place_shoe/demo_clean.zip",
+        "fileSha256": "3fc58264ee756a5fa5c26066cced72339e8960e84e2878014854873fcbb08e94",
+        "split": "train",
+        "taskName": "place_shoe",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "place_shoe/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "d9985ca806adc4d72488a494efb22bf26c9832eb508eb3982db0d061f34deef2"
+      },
+      "mirrorsTaskId": "robotwin_place_shoe"
     },
     "robotwin_nvidia10_press_stapler": {
       "taskId": "robotwin_nvidia10_press_stapler",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Use one arm the right arm to press the stapler with smooth blue finish.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_press_stapler.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_press_stapler.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 112,
+      "fps": 15,
+      "durationSeconds": 7.466667,
+      "videoBytes": 21549,
+      "videoSha256": "9f49a77e121798c2619af0940ce9c940a1a5e891a4c980349d34c2e66ce9d6a7",
+      "posterSha256": "aa9f3f377674bb8d979b9014617a449e9b3bfa82655c86e6b288489c1061dee1",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/press_stapler/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/press_stapler/demo_clean.zip",
+        "fileSha256": "4dd735e5e328e8ea9d99d8bc6dbb3f30e68b06812f7ac925f7c506c4c0f3e90f",
+        "split": "train",
+        "taskName": "press_stapler",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "press_stapler/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "bdf8e977794b2c3f6b2cd96cfc7ede94e8fdcfcfa1347e3956e61e97a76ff8c5"
+      },
+      "mirrorsTaskId": "robotwin_press_stapler"
     },
     "robotwin_nvidia10_put_bottles_dustbin": {
       "taskId": "robotwin_nvidia10_put_bottles_dustbin",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the yellow liquid container with green top, the medium-sized water bottle, and the black bottle with red label one at a time and place them into the smooth black dustbin.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_put_bottles_dustbin.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_put_bottles_dustbin.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 666,
+      "fps": 15,
+      "durationSeconds": 44.4,
+      "videoBytes": 246637,
+      "videoSha256": "5749de25d10f2b35bfa4d19393e831819d07387d298519693002182baa1c0514",
+      "posterSha256": "9d3f5bf683a087ed34e66aaea5d48251586d317469ded1653dcc043eba54b43c",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/put_bottles_dustbin/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/put_bottles_dustbin/demo_clean.zip",
+        "fileSha256": "b0be2bbc3a45051b6638932a174bd561a37bd67413a8f71793236558b2b34e6c",
+        "split": "train",
+        "taskName": "put_bottles_dustbin",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "put_bottles_dustbin/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "77287f1edc1a9b324389977d9ded5b7676e51c2de762f56eaa8ce1019622ce76"
+      },
+      "mirrorsTaskId": "robotwin_put_bottles_dustbin"
     },
     "robotwin_nvidia10_put_object_cabinet": {
       "taskId": "robotwin_nvidia10_put_object_cabinet",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Slide open the cabinet with angled sides's drawer and set the rubikscube colorful and compact inside.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_put_object_cabinet.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_put_object_cabinet.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 272,
+      "fps": 15,
+      "durationSeconds": 18.133333,
+      "videoBytes": 110400,
+      "videoSha256": "2d706ff2e951e1ed0299e7eb50c9642dd57d8044000d5fdfa62b36a5dae4bb44",
+      "posterSha256": "c733ac8f14577270c46d291a0397cd23f55a7a5413759ff8d71d941109395d8b",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/put_object_cabinet/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/put_object_cabinet/demo_clean.zip",
+        "fileSha256": "ed8f683ccfd74f55694dd4244d67714d2011c57aa57c3a83ed72f0ea2ca0cd7e",
+        "split": "train",
+        "taskName": "put_object_cabinet",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "put_object_cabinet/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "691d83fffb9425907f3fe66fc38d429279858e4528872716dd0d399f523ccf97"
+      },
+      "mirrorsTaskId": "robotwin_put_object_cabinet"
     },
     "robotwin_nvidia10_rotate_qrcode": {
       "taskId": "robotwin_nvidia10_rotate_qrcode",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Pick up the rectangular plastic paymentsign and adjust its position to face the qrcode towards you.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_rotate_qrcode.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_rotate_qrcode.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 152,
+      "fps": 15,
+      "durationSeconds": 10.133333,
+      "videoBytes": 72811,
+      "videoSha256": "3913d13c8d400a4b8c28be8ff1cfe9d591eeb038c6b773fbf82a2bc2939fe758",
+      "posterSha256": "8f9232627719381dfcca75ddb9bdd78284abd39a20d7bd57b2dc6bf692809cc3",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/rotate_qrcode/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/rotate_qrcode/demo_clean.zip",
+        "fileSha256": "149a3d1be3037746706fb40634bbdd10c63a6b33e641230a3b0389a5f4f85c8d",
+        "split": "train",
+        "taskName": "rotate_qrcode",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "rotate_qrcode/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "523f41ad85bf34546e39b4e1119cad747ed897915af8e3f355435d32285bb90b"
+      },
+      "mirrorsTaskId": "robotwin_rotate_qrcode"
     },
     "robotwin_nvidia10_scan_object": {
       "taskId": "robotwin_nvidia10_scan_object",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "With the right arm, pick the barcode scanner, then grab the cube tea box with embossed designs with the left arm, and scan the cube tea box with embossed designs.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_scan_object.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_scan_object.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 163,
+      "fps": 15,
+      "durationSeconds": 10.866667,
+      "videoBytes": 71493,
+      "videoSha256": "50723ed6943ca3fa456bc5d004c6201d7bc0ee52d2611ca368a1b4b231fb83b6",
+      "posterSha256": "8ab65290017102da94888ba165edf7af516005d89151bf0967f5a6361df8f14d",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/scan_object/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/scan_object/demo_clean.zip",
+        "fileSha256": "a37821f93a1a4cf6f7cbf41e15aa88ee2c656cc8c2a34ec2f28ddb1c6ebb2167",
+        "split": "train",
+        "taskName": "scan_object",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "scan_object/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "2ef615463ec5450c152c8cf9ecec3675b177da446865221f7c51d8f2784febbd"
+      },
+      "mirrorsTaskId": "robotwin_scan_object"
     },
     "robotwin_nvidia10_shake_bottle": {
       "taskId": "robotwin_nvidia10_shake_bottle",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Pick the bottle with brown body and white top up with the left arm and shake.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_shake_bottle.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_shake_bottle.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 251,
+      "fps": 15,
+      "durationSeconds": 16.733333,
+      "videoBytes": 75130,
+      "videoSha256": "d241e10ba3e0b7cdcf1939d7ea7abf0f6aa2cd57dae159485d779e8960f7d0e3",
+      "posterSha256": "4de8f514ce72be02e5f182a25955fb0a03514f27f47b9112eca695a8e46cbb1f",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/shake_bottle/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/shake_bottle/demo_clean.zip",
+        "fileSha256": "732536fec1653c8388554596a1aff053354641bca88cf979b652fcc0af9f6486",
+        "split": "train",
+        "taskName": "shake_bottle",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "shake_bottle/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "e9022190244f7ff0e4290a8261aa8c1ca3dcdf159275af0a75eea8dc33b532b3"
+      },
+      "mirrorsTaskId": "robotwin_shake_bottle"
     },
     "robotwin_nvidia10_shake_bottle_horizontally": {
       "taskId": "robotwin_nvidia10_shake_bottle_horizontally",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Shake the rounded bottle with printed details horizontally after lifting with the left arm.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_shake_bottle_horizontally.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_shake_bottle_horizontally.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 281,
+      "fps": 15,
+      "durationSeconds": 18.733333,
+      "videoBytes": 83648,
+      "videoSha256": "bb81a0a05c942b7e4acd0f214b86e4b0ab5e83d197a50a5efff43eadb7a71300",
+      "posterSha256": "4de8f514ce72be02e5f182a25955fb0a03514f27f47b9112eca695a8e46cbb1f",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/shake_bottle_horizontally/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/shake_bottle_horizontally/demo_clean.zip",
+        "fileSha256": "65385ffa3c50c06da2d560ebf77834d0cfd965d23721b9083dad7aaa0f5ddb8a",
+        "split": "train",
+        "taskName": "shake_bottle_horizontally",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "shake_bottle_horizontally/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "c5f0afd1a9711f3fc566beb8437707771c550c3573a461f49719d0f5c4ee53db"
+      },
+      "mirrorsTaskId": "robotwin_shake_bottle_horizontally"
     },
     "robotwin_nvidia10_stack_blocks_three": {
       "taskId": "robotwin_nvidia10_stack_blocks_three",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Position red block, green block, and blue block in the center and stack blue block on green block, followed by green block on red block.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_blocks_three.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_blocks_three.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 466,
+      "fps": 15,
+      "durationSeconds": 31.066667,
+      "videoBytes": 179790,
+      "videoSha256": "4844d30ee66c18eaee7ed8f9e9728a384dc32f24e698be0dbf00b1c49d5c77e3",
+      "posterSha256": "b54d6e6ae04ed7350f8da7dd77e9fc20b8887543d123e53e5e884242f1fd9319",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/stack_blocks_three/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/stack_blocks_three/demo_clean.zip",
+        "fileSha256": "39b52a471bbaca4f8ab19ecb6550e27976829db98d85a7404b4dc36c8d06da85",
+        "split": "train",
+        "taskName": "stack_blocks_three",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "stack_blocks_three/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "285889678896751dda76d1d07248196defc6e3eefc39272572acdd4ebc976048"
+      },
+      "mirrorsTaskId": "robotwin_stack_blocks_three"
     },
     "robotwin_nvidia10_stack_blocks_two": {
       "taskId": "robotwin_nvidia10_stack_blocks_two",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Center red block using the left arm, then stack green block with the left arm on top.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_blocks_two.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_blocks_two.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 311,
+      "fps": 15,
+      "durationSeconds": 20.733333,
+      "videoBytes": 119858,
+      "videoSha256": "e867b22a4d28dc3435e303ee6fa341d7d0e9ab10a25dc8ec5c29ce8e0e5f1720",
+      "posterSha256": "8dbc5d65ac9a9d1cbe0c0c541124bbec144caf4159802d3e53f2c1d4fb40c0ab",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/stack_blocks_two/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/stack_blocks_two/demo_clean.zip",
+        "fileSha256": "86451c3cb143bb44a6f09fa656595065893cf9729938277fbcc3d1d886e11ab0",
+        "split": "train",
+        "taskName": "stack_blocks_two",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "stack_blocks_two/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "0ba1e4a6c8a2dbea164dd65a38fb3073dfde808493ce7aa0f501938622dc4c02"
+      },
+      "mirrorsTaskId": "robotwin_stack_blocks_two"
     },
     "robotwin_nvidia10_stack_bowls_three": {
       "taskId": "robotwin_nvidia10_stack_bowls_three",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Grab the first the bowl with shiny texture, position the second, then add the third.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_bowls_three.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_bowls_three.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 441,
+      "fps": 15,
+      "durationSeconds": 29.4,
+      "videoBytes": 136921,
+      "videoSha256": "e37401ece675b3f7cfa8ddef875d5ee88853c39d3697e1a177dfb5d929389bcf",
+      "posterSha256": "958b4ad95dd7ed8fe5ef356ed9e3d9cef0e2b5298712803dd755e4014c2c07eb",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/stack_bowls_three/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/stack_bowls_three/demo_clean.zip",
+        "fileSha256": "704d03a8fac22e781c9b803e6aba8524dca8f939384a22993e2323a8ea9c1b0f",
+        "split": "train",
+        "taskName": "stack_bowls_three",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "stack_bowls_three/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "7f4f0f0248acfc270238d4d89f8c9478d946e1173847559e5e679dfa01822541"
+      },
+      "mirrorsTaskId": "robotwin_stack_bowls_three"
     },
     "robotwin_nvidia10_stack_bowls_two": {
       "taskId": "robotwin_nvidia10_stack_bowls_two",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Take the ceramic bowl with earthy brown trim, place it, and stack the blue bowl on top.",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_bowls_two.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stack_bowls_two.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 311,
+      "fps": 15,
+      "durationSeconds": 20.733333,
+      "videoBytes": 92586,
+      "videoSha256": "78ec9f81d7e9933aa9c4fe251fac4004c8ca2a9a6319cb55831265d85cd40c45",
+      "posterSha256": "a6c721fa3116dce32a78c463004cb8cf065c5c3c63d3468116f86ac672dbb3c0",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/stack_bowls_two/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/stack_bowls_two/demo_clean.zip",
+        "fileSha256": "afd9de1ac182f27e17d302f3f1624b5f303d404b089d7d32787d7ad848999095",
+        "split": "train",
+        "taskName": "stack_bowls_two",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "stack_bowls_two/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "4d45c0ef4c2e33d538898b053a144df03ff2d6e1b54fdf63d2aac1660acfcd49"
+      },
+      "mirrorsTaskId": "robotwin_stack_bowls_two"
     },
     "robotwin_nvidia10_stamp_seal": {
       "taskId": "robotwin_nvidia10_stamp_seal",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "the right arm picks the seal for imprinting, stamps Red",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stamp_seal.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_stamp_seal.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 144,
+      "fps": 15,
+      "durationSeconds": 9.6,
+      "videoBytes": 37168,
+      "videoSha256": "dd938a0a263e5d9eca9d80f553957d5820eb0e3f07e0656ee26ded0cb17824da",
+      "posterSha256": "9f396fc4f6725dc5ad9bdf9943f85772df8d48dce02fdb7011c3538d17082dc3",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/stamp_seal/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/stamp_seal/demo_clean.zip",
+        "fileSha256": "2a1f1e5d5605f94f55a70bf4f47d0e153800b1b8cc8524ce4eefdaa4e3ac3ebd",
+        "split": "train",
+        "taskName": "stamp_seal",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "stamp_seal/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "cae9cd75e3cc0e04a7a066da2035f423379bd253f6240f2d829a3b4715f30afd"
+      },
+      "mirrorsTaskId": "robotwin_stamp_seal"
     },
     "robotwin_nvidia10_turn_switch": {
       "taskId": "robotwin_nvidia10_turn_switch",
       "benchmark": "robotwin_nvidia10",
-      "status": "unavailable",
-      "reason": "This derived 10-rollout evaluation reuses the RoboTwin task family; no separate training-demo asset is imported for the derived benchmark entry.",
+      "status": "available",
+      "instruction": "Directly interact with the plastic switch with angled edges",
+      "video": "media/demos/robotwin_nvidia10/robotwin_nvidia10_turn_switch.mp4",
+      "poster": "media/demos/robotwin_nvidia10/robotwin_nvidia10_turn_switch.jpg",
+      "width": 320,
+      "height": 240,
+      "frames": 92,
+      "fps": 15,
+      "durationSeconds": 6.133333,
+      "videoBytes": 27549,
+      "videoSha256": "04555583363bee6e6a8a11a8f9e807dad87e18a6bca35e2187c790ae6595f91b",
+      "posterSha256": "02d6443d004598b05b61b868d803787e3f643cbdbcae0db8c0a0a8d88dfb9a0e",
+      "cameras": [
+        "Head camera"
+      ],
       "source": {
         "dataset": "RoboTwin 2.0 demonstrations",
-        "url": "https://robotwin-platform.github.io/"
-      }
+        "url": "https://huggingface.co/datasets/TianxingChen/RoboTwin2.0/blob/981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042/dataset/turn_switch/demo_clean.zip",
+        "revision": "981c92aa34d8f94d4cff47e0d5bc2f7d4e0af042",
+        "relativePath": "dataset/turn_switch/demo_clean.zip",
+        "fileSha256": "4ea160de786c3886ab8c77ceb9251a94b9cf95a95d394d53811269882977b15b",
+        "split": "train",
+        "taskName": "turn_switch",
+        "configuration": "demo_clean",
+        "episode": "episode_0000000",
+        "cameraKey": "vision/cam_head/colors",
+        "imageOrientation": "native RGB via official decode_image_bit",
+        "archiveMember": "turn_switch/aloha_agilex/data/episode_0000000.hdf5",
+        "episodeSha256": "11b383043101bc15608cb6cb5edfe2dd1d08c7b0c0fd76d258363d074afed23c"
+      },
+      "mirrorsTaskId": "robotwin_turn_switch"
     }
   }
 }
