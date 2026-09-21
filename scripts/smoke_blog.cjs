@@ -54,7 +54,11 @@ const server = http.createServer((request, response) => {
       assert.equal(await page.locator('#load-error').isVisible(),false);
       assert.equal(await page.locator('.cross-table').count(),2);
       assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','99.75%']);
-      assert.deepEqual(await page.locator('.cross-table .unknown td').allTextContents(),['322','5','357','9']);
+      assert.equal(await page.locator('.cross-table tbody tr').count(),4);
+      assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['322','357']);
+      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['31','42']);
+      assert.deepEqual(await page.locator('.cross-table .not-applicable').allTextContents(),['\\','\\']);
+      assert.doesNotMatch(await page.locator('body').innerText(),/unknown|no explicit finish assessment/i);
       assert.deepEqual(await page.locator('.cross-table .mismatch').allTextContents(),['47','1']);
       assert.equal(await page.locator('#instruction-rows tr').count(),9);
       assert.equal(await page.locator('.case').count(),7);
@@ -68,6 +72,8 @@ const server = http.createServer((request, response) => {
       await page.locator('[data-scope="revised"]').click();
       assert.deepEqual(await page.locator('.score-value').allTextContents(),['47.78%','98.89%']);
       assert.match(await page.locator('.after .native-score').innerText(),/75\/90/);
+      assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['40','75']);
+      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['3','14']);
       await page.locator('[data-scope="all"]').click();
       assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','99.75%']);
       // Check every local link; media payloads are fetched by video decoding below.

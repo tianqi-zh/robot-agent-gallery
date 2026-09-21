@@ -43,6 +43,8 @@ Videos are compressed presentation copies retaining every recorded frame. LIBERO
 
 LIBERO, both Robotwin exports, RoboDojo and all JPEG posters are stored in the repository. The 365 RoboCasa evaluation MP4s are available locally under `media/robocasa/` in the export checkout but ignored by Git; their public copies are assets of the existing [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918). Training videos remain local site assets.
 
+The essay’s 2×2 tables accept every native success as agent success and use `\` for the structurally empty agent-failure / bench-success cell. For native failures, explicit completion claims identify disagreement; other episodes are assigned to failure under that reporting convention. Human-in-the-loop video verification covers disagreement cases. The downloadable data retain original structured finish records, which are distinct from the presentation labels. See [the accounting rules](LIBERO_ALIGNMENT.md).
+
 The essay reuses some baseline LIBERO media and adds explicitly cataloged clips under `media/blog/`. [libero-blog-media.json](data/libero-blog-media.json) records their selection, sources and fingerprints. These illustrative examples are purposefully selected diagnostic cases, not a random sample or a held-out causal estimate.
 
 A fresh clone can stage the site with RoboCasa Release playback:

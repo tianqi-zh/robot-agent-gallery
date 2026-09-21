@@ -4,31 +4,33 @@ The main comparison covers 40 tasks × 10 fixed initial states. Before: 400 orig
 
 **Instinct-alignment score (IAS) = 1 − count(agent success AND native benchmark failure) / N.**
 
-Agent success means an explicit `visually_complete` finish assessment; agent failure means explicit `unable_to_continue`. Missing structured assessments remain unknown. The metric measures the complement of an observed false-completion rate under one policy and stopping protocol, not ordinary agreement accuracy or benchmark-intrinsic alignment.
+The blog uses a two-category reporting convention. Every native benchmark success is accepted as agent success, including episodes terminated by the environment before a finish declaration. Among native failures, an explicit `visually_complete` claim counts as agent success; the remaining episodes count as agent failure. Thus benchmark success is a subset of accepted agent success in this presentation. The converse need not hold. This convention does not rewrite the archived finish records or the native benchmark outcomes.
 
 ## Before: original instructions
 
 | Agent assessment | Bench success | Bench failure |
 | --- | ---: | ---: |
-| Explicit success | 0 | 47 |
-| Explicit failure | 0 | 26 |
-| Unknown | 322 | 5 |
+| Agent success | 322 | 47 |
+| Agent failure | `\` | 31 |
 | Total | 322 | 78 |
 
-IAS = 1 − 47/400 = **88.25%**. Native success = **322/400 (80.50%)**. Explicit-assessment coverage = 73/400 (18.25%).
+IAS = 1 − 47/400 = **88.25%**. Native success = **322/400 (80.50%)**.
 
 ## After: latest instruction composite
 
 | Agent assessment | Bench success | Bench failure |
 | --- | ---: | ---: |
-| Explicit success | 0 | 1 |
-| Explicit failure | 0 | 33 |
-| Unknown | 357 | 9 |
+| Agent success | 357 | 1 |
+| Agent failure | `\` | 42 |
 | Total | 357 | 43 |
 
-IAS = 1 − 1/400 = **99.75%**. Native success = **357/400 (89.25%)**. Explicit-assessment coverage = 34/400 (8.50%). The one remaining explicit false-complete report is `libero_goal_t05_r05` from the final revision.
+IAS = 1 − 1/400 = **99.75%**. Native success = **357/400 (89.25%)**. The one remaining explicit false-complete report is `libero_goal_t05_r05` from the final revision.
 
-All native successes here lack an independent finish assessment. Native success automatically terminates episodes, often before the agent can report completion. This is outcome-dependent missingness. Unknown cannot be reclassified using the native label. A policy that always says it failed could score IAS 100% despite zero task success. Indeed, unchanged LIBERO-10 t03 and t09 each have IAS 100% and native success 0/10.
+`\` means not applicable: the agent-failure / bench-success cell cannot occur under the table’s inclusion rule. This is a reporting convention, not a universal guarantee about an unaided model’s beliefs. Five original and nine final-composite native failures ended at the 500-step limit without a finish declaration; the table assigns those to agent failure because no successful completion was declared. This assignment is not a human judgment of their terminal images. The original structured-report accounting is retained in the downloadable data.
+
+The authors used **human-in-the-loop verification of videos where agent and benchmark judgments disagreed**. This review assists interpretation and helps identify mistaken agent self-assessments, so a disagreement is not automatically blamed on benchmark design. Its coverage is the disagreement cases; it does not establish a human rating for every episode. The disagreement counts retain the agent’s original completion claims; they are not corrected human labels.
+
+IAS remains sensitive to reporting behavior. A policy that never declares completion on a native failure can obtain IAS 100% despite zero task success. Indeed, unchanged LIBERO-10 t03 and t09 each have IAS 100% and native success 0/10.
 
 ## Revision history
 
@@ -97,6 +99,6 @@ The second command requires `ffprobe` and checks all video streams. This verifie
 
 ## Interpretation limits
 
-A higher IAS here means fewer observed agent-success/native-failure reports under this policy and stopping protocol. It does not establish that the native predicate is wrong whenever the agent claims success. Some disagreements are policy errors, including the final plate fixture confusion. IAS can improve because native success improves, the agent stops claiming completion, or no assessment is produced. Report the full matrices, native success, and assessment coverage with it.
+A higher IAS here means fewer agent-success/native-failure reports under this policy and reporting convention. It does not establish that the native predicate is wrong whenever the agent claims success. Some disagreements are policy errors, including the final plate fixture confusion. Human review of disagreement videos helps diagnose such errors. IAS can improve because native success improves or a failed rollout has no successful-completion claim. Report native success and the reporting rule with it.
 
-No human study or post-training experiment was performed. The proposed harm from ambiguous instruction–demonstration pairings is a hypothesis, not a measured degradation of policy quality. A direct experiment would control demonstrations, initialization, and training compute while changing instruction clarity, then evaluate independently specified held-out transfer tasks.
+The human-in-the-loop review was qualitative verification of disagreement videos, not a controlled human performance study. No post-training experiment was performed. The proposed harm from ambiguous instruction–demonstration pairings is a hypothesis, not a measured degradation of policy quality. A direct experiment would control demonstrations, initialization, and training compute while changing instruction clarity, then evaluate independently specified held-out transfer tasks.

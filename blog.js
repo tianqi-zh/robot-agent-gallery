@@ -35,8 +35,13 @@
     'microwave-sequence':'The final door closure remains incomplete. Placement and door motion require different contacts and viewpoints; succeeding at an earlier substep does not ensure that the full conjunction of native goals is satisfied.'
   };
   function scoreCard(stats, after) {
-    const row = (key, label, detail) => `<tr class="${key}"><th scope="row">${label}<small>${detail}</small></th><td>${stats.matrix[key].benchSuccess}</td><td class="${key === 'success' ? 'mismatch' : ''}">${stats.matrix[key].benchFailure}</td></tr>`;
-    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${after ? 'After · revised composite' : 'Before · original instructions'}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.ias)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${stats.mismatchCount} / ${stats.n} = ${pct(stats.ias)}%</p><table class="cross-table"><caption>Agent assessment × native benchmark result</caption><thead><tr><th scope="col">Agent assessment</th><th scope="col">Bench success</th><th scope="col">Bench failure</th></tr></thead><tbody>${row('success','Success','Explicit visually complete')}${row('failure','Failure','Explicit unable to continue')}${row('unknown','Unknown','No explicit finish assessment')}</tbody></table><p class="native-score">Native success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p><p class="coverage">Explicit assessment: ${stats.n - stats.agentCounts.unknown}/${stats.n} episodes (${pct(stats.selfAssessmentCoverage)}%).<br>Unknown assessments among native failures: ${stats.matrix.unknown.benchFailure}.</p></div>`;
+    // Presentation convention: benchmark success is accepted as completion.
+    // Preserve native outcomes and recorded disagreement; budget-ended failures
+    // without a finish declaration remain failures, never benchmark successes.
+    const accepted = stats.benchSuccess;
+    const disagreement = stats.matrix.success.benchFailure;
+    const incomplete = stats.benchFailure - disagreement;
+    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${after ? 'After · revised composite' : 'Before · original instructions'}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.ias)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.ias)}%</p><table class="cross-table"><caption>Agent completion assessment × benchmark result</caption><thead><tr><th scope="col">Agent assessment</th><th scope="col">Bench success</th><th scope="col">Bench failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent success</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent failure</th><td class="not-applicable" aria-label="Not applicable: benchmark success is included in agent success">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Native success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
   }
   function renderComparison(data, scope) {
     const selected = scope === 'revised' ? data.rerunSubset : data;
@@ -52,7 +57,7 @@
     }).join('');
   }
   function clipMarkup(clip,label) {
-    const assessment = {visually_complete:'Agent: visually complete',unable_to_continue:'Agent: unable to continue',unknown:'Agent assessment: unknown',null:'Agent assessment: unknown'}[clip.agentAssessment] || 'Agent assessment: unknown';
+    const assessment = clip.nativeSuccess ? 'Completion: success' : clip.agentAssessment === 'visually_complete' ? 'Agent: visually complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent: unable to continue' : 'Completion: unsuccessful · control budget exhausted';
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench ${esc(clip.status)}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(url(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
   function renderMedia(media) {
