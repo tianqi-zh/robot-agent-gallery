@@ -1,6 +1,6 @@
 # Agent as Policy
 
-The [homepage](https://tianqi-zh.github.io/robot-agent-gallery/) is an English essay about using a coding agent as a robot policy. It explains native benchmark outcomes, the limits of agent completion judgments, and LIBERO instruction-alignment experiments with paired recordings and public evidence.
+The [homepage](https://tianqi-zh.github.io/robot-agent-gallery/) asks whether LIBERO’s instructions communicate the goals its evaluator expects. GPT-6 serves as a proxy for a human robot operator, acting from the instruction and live observations without access to demonstration videos or success-checker code. Human review adjudicates every agent-success / benchmark-failure case in the before-and-after comparison, separating mistaken agent judgments from plausible completions rejected by the benchmark. Paired recordings and public evidence document the instruction revisions and their outcomes.
 
 The [gallery](https://tianqi-zh.github.io/robot-agent-gallery/gallery/) presents **1,289 playable scored episodes from 497 task entries across four current collections**. Each benchmark has its own page:
 

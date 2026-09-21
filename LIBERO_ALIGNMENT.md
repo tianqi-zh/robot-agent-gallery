@@ -1,5 +1,7 @@
 # LIBERO instruction alignment audit
 
+The central question is whether an operator can infer the benchmark’s intended goal from its instruction and the visible scene, without demonstration videos or access to the success-checker code. GPT-6 acts as a proxy for that human operator. Human review of every agent-success / benchmark-failure case in the before-and-after comparison corrects proxy errors before the remaining disagreements are counted as evidence about instruction alignment. This is not a controlled measurement of human task performance.
+
 The main comparison covers 40 tasks × 10 fixed initial states. Before: 400 original episodes. After: a composite of 310 unchanged original episodes, 70 first-revision episodes, and 20 final-revision episodes. It is not a fresh 400-episode evaluation.
 
 **Instinct-alignment score (IAS) = 1 − count(agent success AND native benchmark failure) / N.**
@@ -66,15 +68,15 @@ All instruction versions are preserved verbatim in [the task records](data/liber
 
 ## Selection and pairing
 
-Nine tasks were selected after inspecting all 47 original explicit false-complete judgments. Each revised task contributes all ten seeds/initial-state IDs 0–9 from its latest specified instruction stage. No favorable per-seed outcome is selected. The spatial regression remains included. Of the 400 paired slots, 38 change failure→success, 3 change success→failure, 319 remain successful, and 40 remain unsuccessful. Reused outcomes are identical by construction, not independent new replications.
+Nine tasks were selected after inspecting all 47 original completion claims rejected by the native benchmark and retained by human review. Each revised task contributes all ten seeds/initial-state IDs 0–9 from its latest specified instruction stage. No favorable per-seed outcome is selected. The spatial regression remains included. Of the 400 paired slots, 38 change failure→success, 3 change success→failure, 319 remain successful, and 40 remain unsuccessful. Reused outcomes are identical by construction, not independent new replications.
 
 The original archive contains 404 attempts for 400 slots. Four infrastructure-error attempts (`codex_error`) were followed by one valid attempt each, at Spatial t02 r00/r02 and LIBERO-10 t03 r03/r04. Each slot has exactly one valid outcome. The 90- and 20-episode reruns have no excluded attempts, infrastructure errors, timeouts, or retries. The archive validates statuses but does not independently diagnose each service error.
 
-The revisions were developed using code, demonstrations, and observed failures, including the same initial states. This is an adaptive diagnostic intervention, not a held-out, preregistered, or causal estimate of the effect of wording. Ten episodes per task and stochastic model responses limit generalization.
+The authors developed the revisions using code, demonstrations, and observed failures, including the same initial states. The policy never received the code or demonstration videos directly; it received the resulting revised instruction and live observations. This is an adaptive diagnostic intervention, not a held-out, preregistered, or causal estimate of the effect of wording. Ten episodes per task and stochastic model responses limit generalization.
 
 ## Protocol and provenance
 
-All stages requested `gpt-6-astra`, high reasoning, fixed initial states, 512-pixel camera observations, 500 control steps, 750 tool calls, and a 3,600-second wall-clock limit. Requested model identifiers are verified in the archive; the remote service’s actual resolved model is not independently attested. There was no policy fine-tuning, demonstration input, task-specific cross-episode memory, hidden object-pose input, or native reward/success-label input to the policy. Native success still automatically stops an episode. “Zero-shot” describes this protocol, not guaranteed absence of pretraining exposure.
+All stages requested `gpt-6-astra`, high reasoning, fixed initial states, 512-pixel camera observations, 500 control steps, 750 tool calls, and a 3,600-second wall-clock limit. Requested model identifiers are verified in the archive; the remote service’s actual resolved model is not independently attested. The policy used task instructions, live RGB observations, robot proprioception, camera calibration, and generic control guidance. It had no access to demonstration videos or success-checker code. There was no policy fine-tuning, task-specific cross-episode memory, hidden object-pose input, or native reward/success-label input to the policy. Native success still automatically stops an episode. “Zero-shot” describes this protocol, not guaranteed absence of pretraining exposure.
 
 Worker counts were 10, 8, and 4. Original/first-revision workers used GPUs 4–6; final-revision workers used GPUs 0–3. Native BDDL files, initial-state files, controller/scoring source hashes, tool/control budgets, and generic prompt templates match in checked provenance. The server wrapper/report code changed to support instruction overrides. Scheduling, time of execution, and stochastic outputs are documented differences.
 
