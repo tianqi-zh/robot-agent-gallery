@@ -2,12 +2,16 @@
 """Stage only public gallery assets for GitHub Pages, without a JS build step."""
 from pathlib import Path
 import json
+import re
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATION = ROOT / "_site"
-PUBLIC_FILES = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md", "TRAINING_DEMOS.md")
-PUBLIC_DIRECTORIES = ("assets", "data", "media")
+PUBLIC_FILES = ("index.html", "blog.js", "blog.css", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md", "TRAINING_DEMOS.md", "LIBERO_ALIGNMENT.md")
+PUBLIC_DIRECTORIES = ("assets", "data", "media", "gallery")
+GALLERY_PAGES = ("gallery/index.html", *(f"gallery/{name}/index.html" for name in ("libero", "robotwin", "robocasa", "robodojo")))
+GALLERY_ALIAS = "gallery/robotwin_nvidia10/index.html"
+GALLERY_SCRIPT = re.compile(r'<script src="(?:\.\./)+app\.js" defer></script>')
 
 
 def main():
@@ -24,12 +28,15 @@ def main():
                             or episode["video"] != f"media/robocasa/{episode['id']}.mp4"):
                         raise SystemExit("Invalid release video mapping")
                     external_videos.add(episode["video"])
-    for name in PUBLIC_FILES:
+    for name in (*PUBLIC_FILES, *GALLERY_PAGES, GALLERY_ALIAS, "gallery/gallery.css"):
         if not (ROOT / name).is_file():
             raise SystemExit(f"Missing required public file: {name}")
     for name in ("data", "media"):
         if not (ROOT / name).is_dir():
             raise SystemExit(f"Missing required public directory: {name}")
+    for name in GALLERY_PAGES:
+        if len(GALLERY_SCRIPT.findall((ROOT / name).read_text())) != 1:
+            raise SystemExit(f"Cannot configure gallery runtime in {name}")
     if DESTINATION.is_symlink():
         raise SystemExit("Refusing a symlink at the build destination")
     if DESTINATION.exists():
@@ -47,12 +54,10 @@ def main():
                         if (Path(directory) / filename).relative_to(ROOT).as_posix() in external_videos]
             shutil.copytree(source, DESTINATION / name, ignore=exclude_external)
     if external_videos:
-        index = DESTINATION / "index.html"
-        html = index.read_text()
-        script = '<script src="app.js" defer></script>'
-        if html.count(script) != 1:
-            raise SystemExit("Cannot configure release playback in the staged page")
-        index.write_text(html.replace(script, '<script>window.GALLERY_REMOTE_VIDEOS = true;</script>\n  ' + script))
+        for name in GALLERY_PAGES:
+            page = DESTINATION / name
+            html = page.read_text()
+            page.write_text(GALLERY_SCRIPT.sub(lambda match: '<script>window.GALLERY_REMOTE_VIDEOS = true;</script>\n  ' + match[0], html))
     files = [path for path in DESTINATION.rglob("*") if path.is_file()]
     size = sum(path.stat().st_size for path in files)
     if size >= 1_500_000_000:

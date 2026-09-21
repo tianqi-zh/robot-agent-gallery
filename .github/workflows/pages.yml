@@ -25,6 +25,8 @@ jobs:
         uses: actions/checkout@v6
       - name: Validate the published evaluation matrix
         run: python3 scripts/validate_gallery.py --require-robocasa --require-demos --release-media
+      - name: Validate LIBERO comparison data and media
+        run: python3 scripts/validate_libero_blog.py
       - name: Stage the static website
         run: python3 scripts/build_site.py
       - name: Configure GitHub Pages

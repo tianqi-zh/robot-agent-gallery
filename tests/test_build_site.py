@@ -13,8 +13,12 @@ SPEC = importlib.util.spec_from_file_location("build_site_under_test", SCRIPTS /
 build = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(build)
 
-APP_SCRIPT = '<script src="app.js" defer></script>'
-SOURCE_HTML = f"<!doctype html><html><body><main>Test gallery</main>{APP_SCRIPT}</body></html>\n"
+SOURCE_HTML = '<!doctype html><html><body><main>Test essay</main><script src="blog.js" defer></script></body></html>\n'
+
+
+def gallery_html(relative):
+    prefix = "../" if relative == "gallery/index.html" else "../../"
+    return f'<!doctype html><html><body><main>Test gallery</main><script src="{prefix}app.js" defer></script></body></html>\n'
 
 
 @pytest.fixture
@@ -36,6 +40,10 @@ def workspace(monkeypatch):
 
         for name in build.PUBLIC_FILES:
             write(name, SOURCE_HTML.encode() if name == "index.html" else f"synthetic {name}\n".encode())
+        for name in build.GALLERY_PAGES:
+            write(name, gallery_html(name).encode())
+        write(build.GALLERY_ALIAS, b'<html><body>Alias to current Robotwin collection</body></html>')
+        write("gallery/gallery.css", b"/* nested gallery navigation */")
         write("assets/icon.svg", b"synthetic icon, not a real image")
         for benchmark in ("libero", "robotwin"):
             write(f"media/{benchmark}/legacy.mp4", f"synthetic {benchmark} video".encode())
@@ -90,14 +98,19 @@ def test_stages_only_declared_release_videos_remotely_without_changing_sources(w
         if relative in excluded:
             assert (root / relative).read_bytes() == payload
             assert not (destination / relative).exists()
-        elif relative != "index.html":
+        elif relative not in build.GALLERY_PAGES:
             assert staged[relative] == payload
 
-    html = staged["index.html"].decode()
     flag = "window.GALLERY_REMOTE_VIDEOS = true;"
-    assert html.count(flag) == 1
-    assert html.count(APP_SCRIPT) == 1
-    assert html.index(flag) < html.index(APP_SCRIPT)
+    assert flag not in staged["index.html"].decode()
+    assert flag not in staged[build.GALLERY_ALIAS].decode()
+    for relative in build.GALLERY_PAGES:
+        html = staged[relative].decode()
+        assert html.count(flag) == 1
+        script = build.GALLERY_SCRIPT.findall(html)
+        assert len(script) == 1
+        assert html.index(flag) < html.index(script[0])
+        assert (root / relative).read_text() == gallery_html(relative)
     assert (root / "index.html").read_text() == SOURCE_HTML
 
 
@@ -114,6 +127,30 @@ def test_without_robocasa_copies_local_media_and_does_not_inject_flag(workspace)
               for path in destination.rglob("*") if path.is_file()}
     assert staged == before
     assert "GALLERY_REMOTE_VIDEOS" not in (destination / "index.html").read_text()
+    assert all("GALLERY_REMOTE_VIDEOS" not in (destination / relative).read_text() for relative in build.GALLERY_PAGES)
+
+
+@pytest.mark.parametrize("missing", [*build.GALLERY_PAGES, build.GALLERY_ALIAS, "gallery/gallery.css", "blog.js", "blog.css", "LIBERO_ALIGNMENT.md"])
+def test_missing_route_or_blog_asset_preserves_existing_stage(workspace, missing):
+    root, destination, _, _, _ = workspace
+    (root / missing).unlink()
+    destination.mkdir()
+    sentinel = destination / "previous-build.txt"
+    sentinel.write_text("existing build")
+    with pytest.raises(SystemExit, match="Missing required public file"):
+        build.main()
+    assert sentinel.read_text() == "existing build"
+
+
+def test_broken_nested_runtime_is_rejected_before_replacing_stage(workspace):
+    root, destination, _, _, _ = workspace
+    (root / "gallery/robotwin/index.html").write_text('<script src="app.js" defer></script>')
+    destination.mkdir()
+    sentinel = destination / "previous-build.txt"
+    sentinel.write_text("existing build")
+    with pytest.raises(SystemExit, match="Cannot configure gallery runtime"):
+        build.main()
+    assert sentinel.read_text() == "existing build"
 
 
 def test_training_demonstrations_are_staged_locally_alongside_release_rollouts(workspace):

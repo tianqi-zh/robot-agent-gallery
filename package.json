@@ -2,9 +2,11 @@
   "name": "robot-agent-gallery",
   "version": "1.0.0",
   "private": true,
-  "description": "Static gallery of complete LIBERO, RoboTwin, RoboCasa365 and RoboDojo agent evaluation videos",
+  "description": "Robot evaluation field notes and galleries for LIBERO, Robotwin, RoboCasa365 and RoboDojo",
   "scripts": {
-    "test:browser": "node scripts/smoke_browser.cjs"
+    "test:browser": "node scripts/smoke_browser.cjs",
+    "test:blog": "node scripts/smoke_blog.cjs",
+    "test:routes": "node scripts/test_gallery_routes.cjs"
   },
   "devDependencies": {
     "playwright": "1.58.2"

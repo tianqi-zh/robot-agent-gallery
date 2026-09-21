@@ -1,9 +1,16 @@
 'use strict';
+// Resolve from the shared script, not from the current (possibly nested) page.
+const siteRoot = new URL('.', document.currentScript.src);
+const assetUrl = path => new URL(path, siteRoot).href;
+const normalizeBenchmark = id => id === 'robotwin' ? 'robotwin_nvidia10' : id;
+const benchmarkPath = id => `gallery/${id === 'robotwin_nvidia10' ? 'robotwin' : id}/`;
+const pageBenchmark = document.body.dataset.benchmark || null;
+const benchmarkUrl = id => assetUrl(benchmarkPath(normalizeBenchmark(id)));
 const $ = id => document.getElementById(id);
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const pad = value => String(value).padStart(2, '0');
 const statusName = status => ({success:'Success',failure:'Failure',timeout:'Timeout'}[status] || status);
-const state = {data:null,demos:{tasks:{}},benchmark:'libero',suite:'all',search:'',outcome:'all',sort:'default',task:null,episode:null,view:'episode',returnTask:null,returnView:'episode'};
+const state = {data:null,demos:{tasks:{}},benchmark:pageBenchmark || 'libero',suite:'all',search:'',outcome:'all',sort:'default',task:null,episode:null,view:'episode',returnTask:null,returnView:'episode'};
 const dialog = $('episode-dialog');
 const video = $('episode-video');
 let routeRendering = false;
@@ -29,10 +36,13 @@ function resolveVideoSource(episode) {
     ? episode.remoteVideo : episode.video;
 }
 function episodeCount(b) { return b.tasks.reduce((total,task) => total + task.episodes.length, 0); }
-function sampling(b) { return `${b.protocol.episodesPerTask} ${b.protocol.episodesPerTask === 1 ? 'episode' : 'episodes'} per task`; }
+function sampling(b) {
+  const incomplete = b.tasks.some(task => task.episodes.length < b.protocol.episodesPerTask);
+  return `${incomplete ? 'Up to ' : ''}${b.protocol.episodesPerTask} ${b.protocol.episodesPerTask === 1 ? 'episode' : 'episodes'} per task`;
+}
 function list(values) { return new Intl.ListFormat('en', {style:'long',type:'conjunction'}).format(values); }
 function renderOverview() {
-  const benchmarks = state.data.benchmarks;
+  const benchmarks = pageBenchmark ? [benchmark(pageBenchmark)] : state.data.benchmarks;
   const tasks = benchmarks.reduce((total,b) => total + b.tasks.length, 0);
   const episodes = benchmarks.reduce((total,b) => total + episodeCount(b), 0);
   $('total-tasks').textContent = tasks;
@@ -42,16 +52,24 @@ function renderOverview() {
   document.querySelector('meta[name="description"]').content = description;
   document.querySelector('meta[property="og:description"]').content = description;
   $('hero-description').textContent = `A coding agent controlling robots through visual feedback. Browse recorded rollouts from ${list(benchmarks.map(b => b.name))}, from the first move to the final result.`;
+  if (pageBenchmark) {
+    const title = `${benchmark(pageBenchmark).name} — Robot Evaluation Gallery`;
+    document.title = title;
+    document.querySelector('meta[property="og:title"]').content = title;
+    $('hero-title').textContent = benchmark(pageBenchmark).name;
+    $('collection-heading').textContent = `${benchmark(pageBenchmark).name} rollouts`;
+    document.querySelector('.comparison-note').textContent = 'Native benchmark outcomes. Training demonstrations are provided separately for reference.';
+  }
   const overview = $('benchmark-overview');
   overview.dataset.count = benchmarks.length;
   overview.style.setProperty('--benchmark-columns', benchmarks.length === 4 ? 2 : Math.min(3, benchmarks.length));
   overview.innerHTML = benchmarks.map((b,index) => {
     const rate = (b.summary.successRate * 100).toFixed(1);
     const groups = b.suites.length > 1 ? ` across ${b.suites.length} task groups` : '';
-    return `<button class="benchmark-summary" data-benchmark="${escapeHtml(b.id)}" aria-pressed="false"><div class="summary-heading"><span class="eyebrow">${pad(index+1)} / ${escapeHtml(b.name.toUpperCase())}</span><span class="summary-tag">${escapeHtml(sampling(b))}</span></div><div class="summary-main"><strong>${rate}<span>%</span></strong><span class="summary-detail">${b.summary.successes} / ${episodeCount(b)} successful<br><small>${b.tasks.length} tasks${groups}</small></span><span class="summary-arrow" aria-hidden="true">↗</span></div><div class="score-track"><span style="width:${rate}%"></span></div></button>`;
+    return `<a class="benchmark-summary" href="${benchmarkUrl(b.id)}" data-benchmark="${escapeHtml(b.id)}"><div class="summary-heading"><span class="eyebrow">${pad(index+1)} / ${escapeHtml(b.name.toUpperCase())}</span><span class="summary-tag">${escapeHtml(sampling(b))}</span></div><div class="summary-main"><strong>${rate}<span>%</span></strong><span class="summary-detail">${b.summary.successes} / ${episodeCount(b)} successful<br><small>${b.tasks.length} tasks${groups}</small></span><span class="summary-arrow" aria-hidden="true">↗</span></div><div class="score-track"><span style="width:${rate}%"></span></div></a>`;
   }).join('');
-  $('benchmark-tabs').dataset.count = benchmarks.length;
-  $('benchmark-tabs').innerHTML = benchmarks.map(b => `<button data-benchmark="${escapeHtml(b.id)}" aria-pressed="false">${escapeHtml(b.name)} <span>${episodeCount(b)}</span></button>`).join('');
+  $('benchmark-tabs').dataset.count = state.data.benchmarks.length;
+  $('benchmark-tabs').innerHTML = state.data.benchmarks.map(b => `<a href="${benchmarkUrl(b.id)}" data-benchmark="${escapeHtml(b.id)}">${escapeHtml(b.name)} <span>${episodeCount(b)}</span></a>`).join('');
   $('published-episodes-note').textContent = `${list(benchmarks.map(b => `${episodeCount(b)} ${b.name} videos`))}, including every selected success, failure and timeout. Infrastructure retries and source selection are documented in the evaluation protocol.`;
   $('playback-protocol').innerHTML = benchmarks.map(b => `<p><strong>${escapeHtml(b.name)}.</strong> ${escapeHtml(b.protocol.videoNote)}</p>`).join('');
   $('sampling-protocol').textContent = `${benchmarks.map(b => `${b.name}: ${sampling(b)}.`).join(' ')} Different tasks and protocols prevent direct comparison or pooling across benchmarks.`;
@@ -61,6 +79,12 @@ function renderOverview() {
   $('recorded-dates').textContent = dates.length ? `Recorded ${dates.length === 1 ? formatter.format(dates[0]) : formatter.formatRange(dates[0], dates.at(-1))}` : 'Recorded evaluation episodes';
 }
 function route(values, replace = false) {
+  const target = normalizeBenchmark(values.benchmark || state.benchmark);
+  if (pageBenchmark && target !== pageBenchmark && benchmark(target)) {
+    const params = new URLSearchParams({...values, benchmark:target});
+    location[replace ? 'replace' : 'assign'](`${benchmarkUrl(target)}${location.search}#${params}`);
+    return;
+  }
   const returnUrl = values.task ? (dialog.open ? history.state?.gallery?.returnUrl : `${location.pathname}${location.search}${location.hash}`) : null;
   if (!replace && !dialog.open) history.replaceState({gallery:{benchmark:state.benchmark}}, '', location.href);
   const params = new URLSearchParams({benchmark:values.benchmark || state.benchmark});
@@ -106,7 +130,11 @@ function applyRoute(event) {
   lastRenderedUrl = location.href;
   routeRendering = true;
   const params = new URLSearchParams(location.hash.slice(1));
-  const incoming = params.get('benchmark') || history.state?.gallery?.benchmark || (location.hash === '' ? 'libero' : state.benchmark);
+  const incoming = normalizeBenchmark(params.get('benchmark') || history.state?.gallery?.benchmark || pageBenchmark || (location.hash === '' ? 'libero' : state.benchmark));
+  if (pageBenchmark && incoming !== pageBenchmark && benchmark(incoming)) {
+    location.replace(`${benchmarkUrl(incoming)}${location.search}${location.hash}`);
+    return;
+  }
   if (incoming && benchmark(incoming)) {
     if (state.benchmark !== incoming) {
       state.suite='all'; state.search=''; state.outcome='all'; state.sort='default';
@@ -116,7 +144,11 @@ function applyRoute(event) {
   }
   renderCollection();
   const selectedTask = benchmark().tasks.find(task => task.id === params.get('task'));
-  if (selectedTask) {
+  const requestedEpisode = params.get('episode');
+  const missingRecording = Boolean(params.get('task') && !selectedTask) || Boolean(requestedEpisode && !selectedTask?.episodes.some(episode => episode.id === requestedEpisode));
+  $('route-notice').hidden = !missingRecording;
+  $('route-notice').textContent = missingRecording ? 'The requested recording is not part of this collection. Browse the current evaluation below.' : '';
+  if (selectedTask && !missingRecording) {
     const previousEpisode = state.task?.id === selectedTask.id ? state.episode : null;
     state.task = selectedTask;
     state.episode = selectedTask.episodes.find(episode => episode.id === params.get('episode')) || previousEpisode || selectedTask.episodes[0];
@@ -134,12 +166,12 @@ function applyRoute(event) {
   routeRendering = false;
 }
 function renderFeatured() {
-  const preferred = {libero:{task:'libero_spatial_t00',label:'Spatial reasoning'},robotwin:{task:'robotwin_stack_blocks_three',label:'Building with two arms'},robocasa:{label:'Around the kitchen'},robodojo:{label:'Three views of every action'}};
-  const available = state.data.benchmarks;
+  const preferred = {libero:{task:'libero_spatial_t00',label:'Spatial reasoning'},robotwin_nvidia10:{task:'robotwin_nvidia10_stack_blocks_three',label:'Building with two arms'},robocasa:{label:'Around the kitchen'},robodojo:{label:'Three views of every action'}};
+  const available = pageBenchmark ? [benchmark(pageBenchmark)] : state.data.benchmarks;
   const selections = [available[0], ...(available.length > 1 ? [available.at(-1)] : [])].map((b,index) => ({benchmark:b.id,...preferred[b.id],secondary:index > 0}));
   $('hero-visual').innerHTML = selections.map(item => {
     const b = benchmark(item.benchmark), task = b.tasks.find(t => t.id === item.task) || b.tasks[0], episode = task.episodes[0];
-    return `<button class="featured ${item.secondary ? 'featured-secondary' : ''}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(item.label || task.name)} on ${escapeHtml(b.name)}"><div class="featured-image"><img src="${episode.poster}" alt="${escapeHtml(task.name)} — recorded camera views" width="${episode.width}" height="${episode.height}" fetchpriority="${item.secondary ? 'auto' : 'high'}"><span class="featured-play" aria-hidden="true">▶</span></div><div class="featured-caption"><span>${escapeHtml(item.label || task.name)}</span><small>${escapeHtml(b.name)} · Episode 01 ↗</small></div></button>`;
+    return `<button class="featured ${item.secondary ? 'featured-secondary' : ''}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(item.label || task.name)} on ${escapeHtml(b.name)}"><div class="featured-image"><img src="${assetUrl(episode.poster)}" alt="${escapeHtml(task.name)} — recorded camera views" width="${episode.width}" height="${episode.height}" fetchpriority="${item.secondary ? 'auto' : 'high'}"><span class="featured-play" aria-hidden="true">▶</span></div><div class="featured-caption"><span>${escapeHtml(item.label || task.name)}</span><small>${escapeHtml(b.name)} · Episode 01 ↗</small></div></button>`;
   }).join('');
 }
 function filteredTasks() {
@@ -155,13 +187,18 @@ function filteredTasks() {
 function renderCollection() {
   if (!state.data) return;
   const b = benchmark();
-  document.querySelectorAll('[data-benchmark]').forEach(button => {
+  document.querySelectorAll('a[data-benchmark]').forEach(button => {
     const active = button.dataset.benchmark === b.id;
-    button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));
+    button.classList.toggle('active', active);
+    if (active) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
   });
   const suiteButtons = [{id:'all',name:'All tasks'}, ...(b.suites.length > 1 ? b.suites.map(suite => ({id:suite.id,name:prettySuite(suite.id),tasks:suite.tasks})) : [])];
   $('suite-tabs').innerHTML = suiteButtons.map(suite => `<button class="${state.suite === suite.id ? 'active' : ''}" data-suite="${escapeHtml(suite.id)}" aria-pressed="${state.suite === suite.id}">${escapeHtml(suite.name)}${suite.tasks !== undefined ? ` <span>${suite.tasks}</span>` : ''}</button>`).join('');
-  $('collection-description').textContent = `${sampling(b)}. All selected outcomes included.`;
+  const planned = b.tasks.length * b.protocol.episodesPerTask;
+  $('collection-description').textContent = episodeCount(b) < planned
+    ? `${episodeCount(b)} playable scored rollouts of ${planned} planned. ${sampling(b)}.`
+    : `${sampling(b)}. All selected outcomes included.`;
   $('collection-demo-note').textContent = trainingDemoNote(b);
   $('collection-demo-note').hidden = !trainingDemoNote(b);
   const tasks = filteredTasks();
@@ -170,7 +207,7 @@ function renderCollection() {
   $('empty-state').hidden = tasks.length > 0;
   $('task-grid').innerHTML = tasks.map(task => {
     const episode = task.episodes[0], count = task.episodes.length, demo = taskDemo(task), available = demoAvailable(demo);
-    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${episode.poster}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div><button class="task-demo ${available ? '' : 'unavailable'}" data-open-demo="${b.id}" data-task="${task.id}" aria-label="Training demo for ${escapeHtml(task.name)}${available ? '' : demo.notImported ? ', not imported' : ', unavailable'}"><span><span aria-hidden="true">${available ? '▷' : '○'}</span> Training demo</span><span class="demo-card-status">${available ? 'Watch ↗' : demo.notImported ? 'Not imported' : 'Unavailable'}</span></button></div></article>`;
+    return `<article class="task-card"><button class="media-thumb ${b.id}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" aria-label="Watch ${escapeHtml(task.name)}"><img src="${assetUrl(episode.poster)}" alt="Recorded views for ${escapeHtml(task.name)}" loading="lazy" decoding="async" width="${episode.width}" height="${episode.height}"><span class="thumb-count">${count} ${count === 1 ? 'rollout' : 'rollouts'}</span><span class="thumb-play" aria-hidden="true">▶</span></button><div class="task-body"><div class="task-meta"><span>${escapeHtml(`${b.name.toUpperCase()}${b.suites.length > 1 ? ` · ${prettySuite(task.suite)}` : ''}`)}</span><span class="task-rate ${task.failures ? 'imperfect' : ''}">${task.successes} / ${count} successful</span></div><button class="task-title" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${episode.id}" title="${escapeHtml(task.name)}">${escapeHtml(task.name)}</button><div class="sample-row">${task.episodes.map(ep => `<button class="sample-dot ${ep.status}" data-open-benchmark="${b.id}" data-task="${task.id}" data-episode="${ep.id}" aria-label="${escapeHtml(task.name)}, episode ${ep.index+1}: ${statusName(ep.status)}" title="Episode ${ep.index+1} · ${statusName(ep.status)}">${ep.index+1}</button>`).join('')}<span class="sample-caption">${count === 1 ? '1 episode' : 'Episodes'}</span></div><button class="task-demo ${available ? '' : 'unavailable'}" data-open-demo="${b.id}" data-task="${task.id}" aria-label="Training demo for ${escapeHtml(task.name)}${available ? '' : demo.notImported ? ', not imported' : ', unavailable'}"><span><span aria-hidden="true">${available ? '▷' : '○'}</span> Training demo</span><span class="demo-card-status">${available ? 'Watch ↗' : demo.notImported ? 'Not imported' : 'Unavailable'}</span></button></div></article>`;
   }).join('');
 }
 function renderPlayer() {
@@ -246,10 +283,10 @@ function setCameras(cameras) {
   $('camera-labels').innerHTML = cameras.map(name => `<span>${escapeHtml(name)}</span>`).join('');
 }
 function setVideo(recording, key, filename) {
-  const source = resolveVideoSource(recording);
+  const source = assetUrl(resolveVideoSource(recording));
   $('download-video').href = source; $('download-video').download = `${filename}.mp4`;
   if (video.dataset.media !== key) {
-    video.pause(); video.poster = recording.poster; video.src = source; video.preload = 'metadata';
+    video.pause(); video.poster = assetUrl(recording.poster); video.src = source; video.preload = 'metadata';
     video.dataset.media = key; delete video.dataset.episode;
     video.style.aspectRatio = `${recording.width}/${recording.height}`; video.load();
     video.playbackRate = Number($('playback-speed').value);
@@ -266,8 +303,10 @@ document.addEventListener('click', event => {
   if (demo) { openDemo(demo.dataset.openDemo,demo.dataset.task); return; }
   const opener = event.target.closest('[data-open-benchmark]');
   if (opener) { openEpisode(opener.dataset.openBenchmark,opener.dataset.task,opener.dataset.episode); return; }
-  const b = event.target.closest('[data-benchmark]');
-  if (b) { switchBenchmark(b.dataset.benchmark,b.classList.contains('benchmark-summary')); return; }
+  const b = event.target.closest('a[data-benchmark]');
+  if (b && pageBenchmark === b.dataset.benchmark && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+    event.preventDefault(); switchBenchmark(b.dataset.benchmark,b.classList.contains('benchmark-summary')); return;
+  }
   const suite = event.target.closest('[data-suite]');
   if (suite) { state.suite = suite.dataset.suite; renderCollection(); document.querySelector(`[data-suite="${CSS.escape(state.suite)}"]`)?.focus({preventScroll:true}); return; }
   const ep = event.target.closest('[data-select-episode]');
@@ -297,12 +336,13 @@ $('copy-link').addEventListener('click',async()=>{
 window.addEventListener('hashchange',applyRoute);
 window.addEventListener('popstate',applyRoute);
 Promise.all([
-  fetch('data/gallery.json').then(response=>{if(!response.ok)throw new Error('Manifest unavailable');return response.json();}),
-  fetch('data/task-demos.json').then(response=>{if(!response.ok)throw new Error('Training demo catalog unavailable');return response.json();})
+  fetch(assetUrl('data/gallery.json')).then(response=>{if(!response.ok)throw new Error('Manifest unavailable');return response.json();}),
+  fetch(assetUrl('data/task-demos.json')).then(response=>{if(!response.ok)throw new Error('Training demo catalog unavailable');return response.json();})
     .then(demos=>{if(!demos || !demos.tasks || typeof demos.tasks !== 'object' || Array.isArray(demos.tasks))throw new Error('Invalid training demo catalog');return demos;})
     .catch(()=>({tasks:{},unavailableReason:'The training demo catalog could not load. Reload this page to try again.'}))
 ]).then(([data,demos])=>{
-  const available = data.benchmarks.filter(b => b.tasks.length > 0 && b.tasks.every(task => task.episodes.length > 0));
+  const available = data.benchmarks.filter(b => b.id !== 'robotwin' && b.tasks.length > 0 && b.tasks.every(task => task.episodes.length > 0))
+    .map(b => b.id === 'robotwin_nvidia10' ? {...b, name:'Robotwin'} : b);
   if (!available.length) throw new Error('No published episodes available');
   state.data={...data,benchmarks:available};
   state.demos=demos && typeof demos.tasks === 'object' && demos.tasks !== null ? demos : {tasks:{}};

@@ -323,6 +323,41 @@ def validate_training_demos(root, gallery, *, required=False):
     return coverage, videos, media_paths
 
 
+def validate_blog_media(root):
+    """Allow only explicit, complete essay clip references into the media tree.
+
+    The separate blog validator checks experiment claims and clip fingerprints.
+    This inventory check also supports references to existing baseline media.
+    """
+    path = root / "data/libero-blog-media.json"
+    if not path.exists():
+        return set()
+    catalog = read_json(path)
+    public_metadata(catalog, "data/libero-blog-media.json")
+    require(isinstance(catalog, dict) and catalog.get("schemaVersion") == 1,
+            "Unsupported blog media schema")
+    require(catalog.get("complete") is True, "The blog media export is not complete")
+    clips = catalog.get("clips")
+    require(isinstance(clips, dict) and clips, "Blog media must declare its clips")
+    paths = set()
+    for identifier, clip in clips.items():
+        require(isinstance(clip, dict) and clip.get("id") == identifier,
+                "Invalid blog clip identity")
+        for key, suffix in (("video", ".mp4"), ("poster", ".jpg")):
+            relative = clip.get(key)
+            asset = local_asset(root, relative, f"blog {key}")
+            require(PurePosixPath(relative).parts[0] == "media" and asset.suffix == suffix,
+                    f"Blog {key} must reference a {suffix} file under media")
+            paths.add(relative)
+    return paths
+
+
+def validate_media_inventory(root, media_paths, external_media=()):
+    actual_media = {path.relative_to(root).as_posix() for path in (root / "media").rglob("*") if path.is_file()}
+    require(media_paths - set(external_media) <= actual_media <= media_paths,
+            "The media directory contains missing or unlisted files")
+
+
 def validate_gallery(root, *, check_interface=True, require_robocasa=False, release_assets=None,
                      require_demos=False, require_robodojo=False):
     required_files = ("index.html", "app.js", "styles.css", ".nojekyll", "METHODOLOGY.md") if check_interface else ()
@@ -331,6 +366,9 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     expected_data_files = {"gallery.json", "episodes.csv", "export-report.json"}
     if (root / "data/task-demos.json").exists():
         expected_data_files.add("task-demos.json")
+    for name in ("libero-blog-media.json", "libero-alignment.json", "libero-alignment-episodes.csv"):
+        if (root / "data" / name).exists():
+            expected_data_files.add(name)
     require({path.relative_to(root / "data").as_posix() for path in (root / "data").rglob("*") if path.is_file()}
             == expected_data_files,
             "The public data directory contains missing or unexpected files")
@@ -725,10 +763,14 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         require(pages_bytes + demo_bytes < 1_500_000_000, "Pages media including training demos exceeds 1.5 GB")
     media_paths.update(demo_paths)
     videos.extend(demo_videos)
-    actual_media = {path.relative_to(root).as_posix() for path in (root / "media").rglob("*") if path.is_file()}
-    require(actual_media == media_paths if release_assets is None else
-            media_paths - external_media <= actual_media <= media_paths,
-            "The media directory contains missing or unlisted files")
+    blog_paths = validate_blog_media(root)
+    additional_blog_paths = blog_paths - media_paths
+    blog_bytes = sum((root / relative).stat().st_size for relative in additional_blog_paths)
+    media_paths.update(blog_paths)
+    if has_robocasa:
+        require(pages_bytes + demo_bytes + blog_bytes < 1_500_000_000,
+                "Pages media including training demos and blog clips exceeds 1.5 GB")
+    validate_media_inventory(root, media_paths, external_media if release_assets is not None else ())
     with (root / "data/episodes.csv").open(newline="", encoding="utf-8") as stream:
         csv_rows = list(csv.DictReader(stream))
     require(len(csv_rows) == expected_episodes and {row["episode"] for row in csv_rows} == set(episodes), "CSV episode mapping is incomplete")
@@ -747,7 +789,8 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     return {"benchmarks": summaries, "episodes": len(episodes), "tasks": len(task_ids),
             "training_demos": demo_coverage,
             "training_demo_bytes": demo_bytes,
-            "media_files": len(media_paths), "media_bytes": video_bytes + poster_bytes + demo_bytes,
+            "blog_media_files": len(additional_blog_paths), "blog_media_bytes": blog_bytes,
+            "media_files": len(media_paths), "media_bytes": video_bytes + poster_bytes + demo_bytes + blog_bytes,
             "repository_files": tree["files"], "repository_bytes": tree["bytes"], "pages_bytes": tree["siteBytes"]}, videos
 
 

@@ -18,7 +18,10 @@ if (demoFixtureIndex >= 0) {
   args.splice(demoFixtureIndex, 2);
 }
 assert.ok(args.length <= 1, 'Usage: node scripts/smoke_browser.cjs [URL] [--fixture JSON] [--demo-fixture JSON]');
-const base = args[0] || 'http://127.0.0.1:8080/';
+const base = args[0] || 'http://127.0.0.1:8080/gallery/';
+const siteBase = new URL(base);
+siteBase.pathname = siteBase.pathname.replace(/\/gallery(?:\/.*)?$/, '/');
+siteBase.hash = ''; siteBase.search = '';
 const output = path.join(__dirname, '..', 'artifacts', 'browser', fixturePath || demoFixturePath ? 'fixture' : 'published');
 fs.mkdirSync(output, {recursive:true});
 
@@ -27,9 +30,9 @@ fs.mkdirSync(output, {recursive:true});
   try {
     const context = await browser.newContext({viewport:{width:1440,height:1000},permissions:['clipboard-read','clipboard-write']});
     const data = fixturePath ? JSON.parse(fs.readFileSync(fixturePath, 'utf8'))
-      : await (await context.request.get(new URL('data/gallery.json', base).href)).json();
+      : await (await context.request.get(new URL('data/gallery.json', siteBase).href)).json();
     const demos = demoFixturePath ? JSON.parse(fs.readFileSync(demoFixturePath, 'utf8'))
-      : await (await context.request.get(new URL('data/task-demos.json', base).href)).json();
+      : await (await context.request.get(new URL('data/task-demos.json', siteBase).href)).json();
     if (demoFixturePath) await context.route('**/data/task-demos.json', route => route.fulfill({json:demos}));
     if (fixturePath) {
       await context.route('**/data/gallery.json', route => route.fulfill({json:data}));
@@ -42,7 +45,8 @@ fs.mkdirSync(output, {recursive:true});
         document.body.append(note);
       }));
     }
-    const benchmarks = data.benchmarks.filter(b => b.tasks.length && b.tasks.every(task => task.episodes.length));
+    const benchmarks = data.benchmarks.filter(b => b.id !== 'robotwin' && b.tasks.length && b.tasks.every(task => task.episodes.length))
+      .map(b => b.id === 'robotwin_nvidia10' ? {...b, name:'Robotwin'} : b);
     const totalTasks = benchmarks.reduce((n,b) => n + b.tasks.length, 0);
     const totalEpisodes = benchmarks.reduce((n,b) => n + b.tasks.reduce((m,task) => m + task.episodes.length, 0), 0);
     const errors = [], badResponses = [], mediaRequests = [];
@@ -97,7 +101,8 @@ fs.mkdirSync(output, {recursive:true});
     const first = benchmarks.find(b => b.id === 'libero') || benchmarks[0];
     await count(first.tasks.length);
     assert.equal(mediaRequests.length, 0, 'Video data must not preload in the collection');
-    assert.equal(await page.locator('.benchmark-tabs button').count(), benchmarks.length);
+    assert.equal(await page.locator('.benchmark-tabs a').count(), benchmarks.length);
+    assert.equal(await page.locator('a[data-benchmark="robotwin"]').count(), 0, 'Historical RoboTwin collection must not be offered');
     assert.equal(await page.locator('.benchmark-summary').count(), benchmarks.length);
     assert.equal(await page.locator('#total-tasks').textContent(), String(totalTasks));
     assert.equal(await page.locator('#total-episodes').textContent(), String(totalEpisodes));
@@ -243,7 +248,7 @@ fs.mkdirSync(output, {recursive:true});
       await page.locator('#copy-link').click();
       await page.waitForFunction(() => document.querySelector('#copy-status').textContent.length > 0);
       assert.match(await page.locator('#copy-status').textContent(), /copied|http/);
-      const source = await page.evaluate(episode => resolveVideoSource(episode), episode);
+      const source = await page.evaluate(episode => assetUrl(resolveVideoSource(episode)), episode);
       assert.equal(await page.locator('#download-video').getAttribute('href'), source);
       assert.equal(await page.locator('#episode-video').getAttribute('src'), source);
       const shared = page.url();
@@ -287,7 +292,7 @@ fs.mkdirSync(output, {recursive:true});
         await page.locator('#view-demo').focus();
         await page.keyboard.press('ArrowLeft');
         await ready(page, lastEpisode);
-        assert.equal(await page.locator('#task-instruction').textContent(), demoTask.instruction);
+        assert.equal(await page.locator('#task-instruction').textContent(), lastEpisode.instruction || demoTask.instruction);
         assert.equal(await page.evaluate(() => document.activeElement.id), 'view-episode');
         assert.equal(await page.locator('#episode-video').evaluate(video => video.paused), true);
         await page.keyboard.press('End');
@@ -382,7 +387,7 @@ fs.mkdirSync(output, {recursive:true});
     } finally { await missingContext.close(); }
     assert.deepEqual(errors, []);
     assert.deepEqual(badResponses, []);
-    const report = {passed:true,dataSource:fixturePath ? 'isolated UI fixture; not evaluation results' : new URL('data/gallery.json', base).href,demoSource:demoFixturePath ? 'isolated UI fixture; not training demonstrations' : new URL('data/task-demos.json', base).href,
+    const report = {passed:true,dataSource:fixturePath ? 'isolated UI fixture; not evaluation results' : new URL('data/gallery.json', siteBase).href,demoSource:demoFixturePath ? 'isolated UI fixture; not training demonstrations' : new URL('data/task-demos.json', siteBase).href,
       benchmarks:benchmarks.map(b => b.id),tasks:totalTasks,episodes:totalEpisodes,
       desktopAndMobile:true,filters:true,suites:true,allEpisodeSelection:true,playback:true,deepLinks:true,
       backCloseReopen:true,zeroEagerVideos:true,trainingDemos:true,demoKeyboardTabs:true,demoDeepLinks:true,missingDemo:true,missingCatalogFallback:true,

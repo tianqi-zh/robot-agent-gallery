@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-21T05:04:10.557340+00:00",
+  "complete": true,
+  "selectionPolicy": "Purposefully chosen explanatory cases, not a random sample or an estimate from the displayed clips. Paired examples use the lowest rollout index showing the stated transition, without rerunning a policy failure. Every task rate includes all ten frozen initial states for its named stage. Revisions were developed after source/demo inspection; these are diagnostic reruns, not held-out causal estimates.",
+  "videoNote": "Original full episode frames at 20 fps, including the initial frame and ten warmup steps. Agent view is left and wrist view is right. Inference waiting time is omitted. Success is the native environment predicate; automatic success termination does not imply an independent agent completion judgment.",
+  "encoding": {
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "crf": 28,
+    "maxRate": "600k",
+    "bufferSize": "1200k",
+    "preset": "medium",
+    "fastStart": true,
+    "resize": false,
+    "preserveFramesAndFps": true
+  },
+  "stages": {
+    "baseline": {
+      "id": "baseline",
+      "label": "Original instructions",
+      "run": "astra_libero_v5_calibrated_parallel10_r4",
+      "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+      "episodes": 400,
+      "successes": 322,
+      "model": "gpt-6-astra",
+      "reasoningEffort": "high",
+      "workers": 10,
+      "gpuIds": [
+        4,
+        5,
+        6
+      ],
+      "controlSteps": 500,
+      "initStateIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "liberoCommit": "8f1084e3132a39270c3a13ebe37270a43ece2a01"
+    },
+    "r1": {
+      "id": "r1",
+      "label": "First instruction revision",
+      "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+      "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+      "episodes": 90,
+      "successes": 63,
+      "model": "gpt-6-astra",
+      "reasoningEffort": "high",
+      "workers": 8,
+      "gpuIds": [
+        4,
+        5,
+        6
+      ],
+      "controlSteps": 500,
+      "initStateIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "liberoCommit": "8f1084e3132a39270c3a13ebe37270a43ece2a01"
+    },
+    "r2": {
+      "id": "r2",
+      "label": "Minimal instruction revision",
+      "run": "astra_libero_v5_instruction_minimal_parallel4_r2",
+      "manifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+      "episodes": 20,
+      "successes": 12,
+      "model": "gpt-6-astra",
+      "reasoningEffort": "high",
+      "workers": 4,
+      "gpuIds": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "controlSteps": 500,
+      "initStateIds": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "liberoCommit": "8f1084e3132a39270c3a13ebe37270a43ece2a01"
+    }
+  },
+  "pairs": [
+    {
+      "id": "book-compartment",
+      "title": "Which compartment is “back”?",
+      "suite": "libero_10",
+      "taskId": 5,
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "before": "baseline:libero_10_t05_r00",
+      "after": "r2:libero_10_t05_r00",
+      "beforeTask": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "afterTask": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "pairedMatrix": {
+        "S→S": 0,
+        "S→F": 0,
+        "F→S": 10,
+        "F→F": 0
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "The latest revision identifies the back compartment between the two large side compartments. The earlier “narrow back compartment” revision remained at 0/10.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_10/STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy.bddl"
+        }
+      ]
+    },
+    {
+      "id": "alphabet-soup",
+      "title": "Identify the intended can",
+      "suite": "libero_object",
+      "taskId": 0,
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "before": "baseline:libero_object_t00_r00",
+      "after": "r1:libero_object_t00_r00",
+      "beforeTask": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "afterTask": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "pairedMatrix": {
+        "S→S": 2,
+        "S→F": 0,
+        "F→S": 8,
+        "F→F": 0
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "Color words distinguish the blue-and-yellow alphabet soup can from the other cans.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_object/pick_up_the_alphabet_soup_and_place_it_in_the_basket.bddl"
+        }
+      ]
+    },
+    {
+      "id": "middle-drawer",
+      "title": "How far is “open”?",
+      "suite": "libero_goal",
+      "taskId": 0,
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "before": "baseline:libero_goal_t00_r02",
+      "after": "r1:libero_goal_t00_r02",
+      "beforeTask": {
+        "successes": 8,
+        "episodes": 10,
+        "successRate": 0.8
+      },
+      "afterTask": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "pairedMatrix": {
+        "S→S": 8,
+        "S→F": 0,
+        "F→S": 2,
+        "F→F": 0
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "Adding “fully” makes the intended amount of drawer opening more explicit.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_goal/open_the_middle_drawer_of_the_cabinet.bddl"
+        }
+      ]
+    },
+    {
+      "id": "wine-rack",
+      "title": "Specify the rack and bottle orientation",
+      "suite": "libero_goal",
+      "taskId": 9,
+      "rolloutIndex": 3,
+      "seed": 3,
+      "initStateId": 3,
+      "before": "baseline:libero_goal_t09_r03",
+      "after": "r1:libero_goal_t09_r03",
+      "beforeTask": {
+        "successes": 7,
+        "episodes": 10,
+        "successRate": 0.7
+      },
+      "afterTask": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "pairedMatrix": {
+        "S→S": 7,
+        "S→F": 0,
+        "F→S": 3,
+        "F→F": 0
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "The revision names the upper rack and places the bottle base against its lower retaining rail.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_goal/put_the_wine_bottle_on_the_rack.bddl"
+        }
+      ]
+    },
+    {
+      "id": "mug-and-pudding",
+      "title": "Make both placements more specific",
+      "suite": "libero_10",
+      "taskId": 6,
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "before": "baseline:libero_10_t06_r00",
+      "after": "r1:libero_10_t06_r00",
+      "beforeTask": {
+        "successes": 1,
+        "episodes": 10,
+        "successRate": 0.1
+      },
+      "afterTask": {
+        "successes": 9,
+        "episodes": 10,
+        "successRate": 0.9
+      },
+      "pairedMatrix": {
+        "S→S": 1,
+        "S→F": 0,
+        "F→S": 8,
+        "F→F": 1
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "The mug goes in the center of the plate; the pudding goes immediately to its right.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_10/LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate.bddl"
+        }
+      ]
+    },
+    {
+      "id": "plate-near-stove",
+      "title": "A closer plate placement",
+      "suite": "libero_goal",
+      "taskId": 5,
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "before": "baseline:libero_goal_t05_r02",
+      "after": "r2:libero_goal_t05_r02",
+      "beforeTask": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "afterTask": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "pairedMatrix": {
+        "S→S": 0,
+        "S→F": 0,
+        "F→S": 2,
+        "F→F": 8
+      },
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "The latest instruction adds “close to its front edge.” Only 2/10 passed. The intervening 35 cm revision used the wrong stove reference point and remained at 0/10.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_goal/push_the_plate_to_the_front_of_the_stove.bddl"
+        }
+      ]
+    },
+    {
+      "id": "spatial-regression",
+      "title": "Clearer wording can still regress",
+      "suite": "libero_spatial",
+      "taskId": 4,
+      "rolloutIndex": 5,
+      "seed": 5,
+      "initStateId": 5,
+      "before": "baseline:libero_spatial_t04_r05",
+      "after": "r1:libero_spatial_t04_r05",
+      "beforeTask": {
+        "successes": 5,
+        "episodes": 10,
+        "successRate": 0.5
+      },
+      "afterTask": {
+        "successes": 4,
+        "episodes": 10,
+        "successRate": 0.4
+      },
+      "pairedMatrix": {
+        "S→S": 2,
+        "S→F": 3,
+        "F→S": 2,
+        "F→F": 3
+      },
+      "selectionRule": "Lowest rollout index with success → failure in these two frozen runs.",
+      "note": "Adding “in the center” did not consistently improve this task: 5/10 became 4/10, with both improvements and regressions across paired initial states.",
+      "sourceLinks": [
+        {
+          "label": "Native predicate implementation",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/envs/predicates/base_predicates.py"
+        },
+        {
+          "label": "Task BDDL",
+          "url": "https://github.com/Lifelong-Robot-Learning/LIBERO/blob/8f1084e3132a39270c3a13ebe37270a43ece2a01/libero/libero/bddl_files/libero_spatial/pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate.bddl"
+        }
+      ]
+    }
+  ],
+  "failureCases": [
+    {
+      "id": "plate-wrong-object",
+      "title": "Mistaking the cabinet for the stove",
+      "clip": "r2:libero_goal_t05_r05",
+      "category": "object-identification",
+      "note": "The plate is pushed beside the wooden cabinet on the left; the actual single-burner stove is on the right. The agent declared visual completion at 259 steps, but the native predicate failed.",
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "selectionRule": "Named diagnostic episode chosen after review; not a random sample."
+    },
+    {
+      "id": "plate-control-budget",
+      "title": "The plate remains short of the goal",
+      "clip": "r2:libero_goal_t05_r07",
+      "category": "execution-budget",
+      "note": "The agent used all 500 control steps and acknowledged the remaining gap. Offline replay places the plate center 1.82 cm beyond the goal’s front boundary.",
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "selectionRule": "Named diagnostic episode chosen after review; not a random sample."
+    },
+    {
+      "id": "bottom-drawer-sequence",
+      "title": "Place the bowl, then close the drawer",
+      "clip": "baseline:libero_10_t03_r00",
+      "category": "multi-step-manipulation",
+      "note": "A baseline failure on a two-part task. This task scored 0/10 and was not included in either instruction-revision batch.",
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "selectionRule": "Named diagnostic episode chosen after review; not a random sample."
+    },
+    {
+      "id": "microwave-sequence",
+      "title": "Place the mug, then close the microwave",
+      "clip": "baseline:libero_10_t09_r00",
+      "category": "multi-step-manipulation",
+      "note": "A baseline failure on placement followed by door closure. This task scored 0/10 and was not included in either instruction-revision batch.",
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "selectionRule": "Named diagnostic episode chosen after review; not a random sample."
+    }
+  ],
+  "clips": {
+    "baseline:libero_10_t05_r00": {
+      "id": "baseline:libero_10_t05_r00",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_10_t05_r00",
+      "episodeKey": "libero_10_t05_r00",
+      "suite": "libero_10",
+      "taskId": 5,
+      "taskName": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "pick up the book and place it in the back compartment of the caddy",
+      "originalInstruction": "pick up the book and place it in the back compartment of the caddy",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 497,
+      "maxSteps": 500,
+      "video": "media/libero/libero_10_t05_r00.mp4",
+      "poster": "media/libero/libero_10_t05_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 508,
+      "fps": 20,
+      "durationSeconds": 25.4,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "1d887f87e9f3de400eeb784b0f0b5e6573f50777c9a66b32a2bc32240389f3bf",
+        "videoSha256": "83db9de2851b27c490cb3e06e6e64d4a7af83724d0dd3295135a7e097e2730f9",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "07ca32c940d70c065e870452ef9c63e6dfa1d8506e6a86cf9b3763f652ba2d9f",
+        "initFileSha256": "6cd3937ba18d64e72223222af36888d26ea201840415adbc4dae590454d0a5a8"
+      },
+      "media": {
+        "videoSha256": "b57f08ed664e9fb38d222664f93f25363ff98a1e1abba50321f92a2520a094b4",
+        "videoBytes": 569132,
+        "posterSha256": "b78aeb72dc58ff596d0655bae9038d6c38058cb774cbcaaf5a9af8626fcf7e78",
+        "posterBytes": 28514,
+        "posterFrame": 254,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r2:libero_10_t05_r00": {
+      "id": "r2:libero_10_t05_r00",
+      "stage": "r2",
+      "stageLabel": "Minimal instruction revision",
+      "episodeId": "libero_10_t05_r00",
+      "episodeKey": "libero_10_t05_r00",
+      "suite": "libero_10",
+      "taskId": 5,
+      "taskName": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "pick up the book and place it in the back compartment of the caddy, between the two large side compartments",
+      "originalInstruction": "pick up the book and place it in the back compartment of the caddy",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 389,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r2/libero_10_t05_r00.mp4",
+      "poster": "media/blog/libero/r2/libero_10_t05_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 400,
+      "fps": 20,
+      "durationSeconds": 20.0,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_minimal_parallel4_r2",
+        "manifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+        "resultSha256": "99c6e78452d5eddf7f2a9f16e3acadc1a654a7132b1dd304eb35a1bb95b24c11",
+        "videoSha256": "7883e0c077fbbac2a7b2c8c89afdc807b23ec7c85eb8f5bee058cc74be73ab8f",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "07ca32c940d70c065e870452ef9c63e6dfa1d8506e6a86cf9b3763f652ba2d9f",
+        "initFileSha256": "6cd3937ba18d64e72223222af36888d26ea201840415adbc4dae590454d0a5a8"
+      },
+      "media": {
+        "videoSha256": "128167dc016b0c9b0562747e94dd8ce0467734e9937eccdabf4b29c57aac0fe5",
+        "videoBytes": 528533,
+        "posterSha256": "5df7f44556ff08ec50204f3e2c49ee9add18c13394bd86106455934c9bc49d29",
+        "posterBytes": 27613,
+        "posterFrame": 200,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_object_t00_r00": {
+      "id": "baseline:libero_object_t00_r00",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_object_t00_r00",
+      "episodeKey": "libero_object_t00_r00",
+      "suite": "libero_object",
+      "taskId": 0,
+      "taskName": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "pick up the alphabet soup and place it in the basket",
+      "originalInstruction": "pick up the alphabet soup and place it in the basket",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 477,
+      "maxSteps": 500,
+      "video": "media/libero/libero_object_t00_r00.mp4",
+      "poster": "media/libero/libero_object_t00_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 488,
+      "fps": 20,
+      "durationSeconds": 24.4,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "4efce7f57e295696b92226eca57221b609092878a3a938c014a5f54df606e366",
+        "videoSha256": "4ade9d7fdf1ffe2c0c9ebc873c1db1283b3b23e2b5e0d96ad8d75cf4c91899d6",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "df088984da13131f8332ee0f13a7896c6a97afd02ee5007a42e8fc5e0893571e",
+        "initFileSha256": "b9023e5546b239cacb2aaa3c76df3b73c3de6f97500fea5e27a0db9827002a19"
+      },
+      "media": {
+        "videoSha256": "f7b3aa7cfd1b0fac221e2edcef7103da8dd2fe7084103d488cc87fe0d872e9a2",
+        "videoBytes": 760280,
+        "posterSha256": "8597feb8f96d9016bbb56ee36d70230b68cf8360be6f8b1544ae6d2679450742",
+        "posterBytes": 42247,
+        "posterFrame": 244,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_object_t00_r00": {
+      "id": "r1:libero_object_t00_r00",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_object_t00_r00",
+      "episodeKey": "libero_object_t00_r00",
+      "suite": "libero_object",
+      "taskId": 0,
+      "taskName": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "pick up the blue-and-yellow alphabet soup can and place it in the basket",
+      "originalInstruction": "pick up the alphabet soup and place it in the basket",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 358,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_object_t00_r00.mp4",
+      "poster": "media/blog/libero/r1/libero_object_t00_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 369,
+      "fps": 20,
+      "durationSeconds": 18.45,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "90e1bd109dce473b5ddfcce9aa08e98fe27ed4556e8f6b0bc3e7d190a2ff1e7b",
+        "videoSha256": "f6d1e287c57e44bb172250a462131554bd497a4f2cb46294515ffd65a13e1502",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "df088984da13131f8332ee0f13a7896c6a97afd02ee5007a42e8fc5e0893571e",
+        "initFileSha256": "b9023e5546b239cacb2aaa3c76df3b73c3de6f97500fea5e27a0db9827002a19"
+      },
+      "media": {
+        "videoSha256": "986412950cd54d0e66ea8cf674cce8144760f760823613e606a9d99348072b7a",
+        "videoBytes": 567613,
+        "posterSha256": "743681ea63c9dc671c2501c4f6fe39ce370c07fe2643e3b99e8f7a83b8826a41",
+        "posterBytes": 38644,
+        "posterFrame": 184,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_goal_t00_r02": {
+      "id": "baseline:libero_goal_t00_r02",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_goal_t00_r02",
+      "episodeKey": "libero_goal_t00_r02",
+      "suite": "libero_goal",
+      "taskId": 0,
+      "taskName": "open_the_middle_drawer_of_the_cabinet",
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "instruction": "open the middle drawer of the cabinet",
+      "originalInstruction": "open the middle drawer of the cabinet",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 332,
+      "maxSteps": 500,
+      "video": "media/libero/libero_goal_t00_r02.mp4",
+      "poster": "media/libero/libero_goal_t00_r02.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 343,
+      "fps": 20,
+      "durationSeconds": 17.15,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 8,
+        "episodes": 10,
+        "successRate": 0.8
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "365cd7e26b840fc7f156202990f7148fa2391255b34186214f41eabe7d413528",
+        "videoSha256": "fd62f454d9db682d02b2c2936e0fcd8539d37f2ca288f772f2220978ae04dbe9",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "832ab48ec476807c767e8985666e295700f92d1f8daeae1c34eee1e75293769b",
+        "initFileSha256": "977efe1216bee72bb4e9fa9ec4be1bcfe37fb00ece815eac117feba019b34b9f"
+      },
+      "media": {
+        "videoSha256": "7821cccbbc2aff549c94f860274c6f9c9cc7c1132e209106b3d453e2edd5999d",
+        "videoBytes": 508295,
+        "posterSha256": "5729f72571065da795f7fa8e9efaca53dd37827c15aa3c6943bfabe7dc7c2f49",
+        "posterBytes": 24536,
+        "posterFrame": 171,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_goal_t00_r02": {
+      "id": "r1:libero_goal_t00_r02",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_goal_t00_r02",
+      "episodeKey": "libero_goal_t00_r02",
+      "suite": "libero_goal",
+      "taskId": 0,
+      "taskName": "open_the_middle_drawer_of_the_cabinet",
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "instruction": "fully open the middle drawer of the cabinet",
+      "originalInstruction": "open the middle drawer of the cabinet",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 235,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_goal_t00_r02.mp4",
+      "poster": "media/blog/libero/r1/libero_goal_t00_r02.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 246,
+      "fps": 20,
+      "durationSeconds": 12.3,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "c0979e4ae1bc7660fce3f1b39867804c6c803557112ddbc926d43634dbdb4322",
+        "videoSha256": "bffeab944d3c75d5e27f16b4cfd38adc37be7b3785cfd888a3ca0d6cb357d06b",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "832ab48ec476807c767e8985666e295700f92d1f8daeae1c34eee1e75293769b",
+        "initFileSha256": "977efe1216bee72bb4e9fa9ec4be1bcfe37fb00ece815eac117feba019b34b9f"
+      },
+      "media": {
+        "videoSha256": "702570d398627a69efbc17e969c887ff497c7d5f627cd879b3ccd8e8a16378e0",
+        "videoBytes": 390299,
+        "posterSha256": "070307d88e39778392d6ce30ddd3aa5f131acb804f36c21fa501131e6acf5515",
+        "posterBytes": 26165,
+        "posterFrame": 123,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_goal_t09_r03": {
+      "id": "baseline:libero_goal_t09_r03",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_goal_t09_r03",
+      "episodeKey": "libero_goal_t09_r03",
+      "suite": "libero_goal",
+      "taskId": 9,
+      "taskName": "put_the_wine_bottle_on_the_rack",
+      "rolloutIndex": 3,
+      "seed": 3,
+      "initStateId": 3,
+      "instruction": "put the wine bottle on the rack",
+      "originalInstruction": "put the wine bottle on the rack",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 392,
+      "maxSteps": 500,
+      "video": "media/libero/libero_goal_t09_r03.mp4",
+      "poster": "media/libero/libero_goal_t09_r03.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 403,
+      "fps": 20,
+      "durationSeconds": 20.15,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 7,
+        "episodes": 10,
+        "successRate": 0.7
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "a5115303b7efe60dd9f8a745d6a2103602d20a460789a1813788f202bc6b8286",
+        "videoSha256": "1ea76a4a0b6f19ecc9693d5cd63785978f928703f4612e1a81af6f5a996a4e36",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "3d3ee18139056aa3780572cde17b1c50dc20ae0d299403f65e514e8471ba0e8e",
+        "initFileSha256": "fa09aa4ade871c1c6be3dd8c93eb3437ea15190fd7dc73b8c986c8d2d3cfb062"
+      },
+      "media": {
+        "videoSha256": "caf5f61a04c5c4ad52fdfa46c148319c07a49638ff4893248f1f7f0067131bfb",
+        "videoBytes": 647994,
+        "posterSha256": "b39ed2a2b4f9e7bd8b67093bcdf800c0621b4ee79e3f5d5a60cc2d0964e2f01b",
+        "posterBytes": 29894,
+        "posterFrame": 201,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_goal_t09_r03": {
+      "id": "r1:libero_goal_t09_r03",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_goal_t09_r03",
+      "episodeKey": "libero_goal_t09_r03",
+      "suite": "libero_goal",
+      "taskId": 9,
+      "taskName": "put_the_wine_bottle_on_the_rack",
+      "rolloutIndex": 3,
+      "seed": 3,
+      "initStateId": 3,
+      "instruction": "put the wine bottle on the upper rack, with its base against the lower rail",
+      "originalInstruction": "put the wine bottle on the rack",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 311,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_goal_t09_r03.mp4",
+      "poster": "media/blog/libero/r1/libero_goal_t09_r03.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 322,
+      "fps": 20,
+      "durationSeconds": 16.1,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 10,
+        "episodes": 10,
+        "successRate": 1.0
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "18b45f706ee059617b2744d9badb2daa10b657b24b2122e6b617dbf9b7c197d1",
+        "videoSha256": "afce220de5ebf995aed726dcb09541593e2714361dd80c2c445448b686d85129",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "3d3ee18139056aa3780572cde17b1c50dc20ae0d299403f65e514e8471ba0e8e",
+        "initFileSha256": "fa09aa4ade871c1c6be3dd8c93eb3437ea15190fd7dc73b8c986c8d2d3cfb062"
+      },
+      "media": {
+        "videoSha256": "f1922fc086f358999703d49cd8647b99ca0c7f5ebc39fd330bbe962c456f06c0",
+        "videoBytes": 460171,
+        "posterSha256": "fe1b669fa7947870c1d5a02eb4c2d170862e7f958eb4bbc868a77c5c4197f89d",
+        "posterBytes": 33968,
+        "posterFrame": 161,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_10_t06_r00": {
+      "id": "baseline:libero_10_t06_r00",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_10_t06_r00",
+      "episodeKey": "libero_10_t06_r00",
+      "suite": "libero_10",
+      "taskId": 6,
+      "taskName": "LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+      "originalInstruction": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 498,
+      "maxSteps": 500,
+      "video": "media/libero/libero_10_t06_r00.mp4",
+      "poster": "media/libero/libero_10_t06_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 509,
+      "fps": 20,
+      "durationSeconds": 25.45,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 1,
+        "episodes": 10,
+        "successRate": 0.1
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "0df0cd5a3fc13e0ca5209981c7c1851700f5394874fec6801e91a27fafbd83fe",
+        "videoSha256": "78578faec09c3c25d65963e57a15aeb5fec233afff6084b80cb62acae2435a53",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "dbc9464b424cdc9b771b92d0b8a8c185b1b539f6a4133b323dc858bcf8f6a9c2",
+        "initFileSha256": "6e811394c4ff9a43ae23515d8512e9b657c04344b94dd5baed121b595490514f"
+      },
+      "media": {
+        "videoSha256": "4e413e22536de71c53965fcda94f2da8f69fd89654a06819580c2e697d60a891",
+        "videoBytes": 766144,
+        "posterSha256": "9cf3507fd89559f263e0c76e0f067c67a9f8946a0ae1afabea3eb7490db72491",
+        "posterBytes": 30345,
+        "posterFrame": 254,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_10_t06_r00": {
+      "id": "r1:libero_10_t06_r00",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_10_t06_r00",
+      "episodeKey": "libero_10_t06_r00",
+      "suite": "libero_10",
+      "taskId": 6,
+      "taskName": "LIVING_ROOM_SCENE6_put_the_white_mug_on_the_plate_and_put_the_chocolate_pudding_to_the_right_of_the_plate",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "put the white mug in the center of the plate and put the chocolate pudding immediately to the right of the plate",
+      "originalInstruction": "put the white mug on the plate and put the chocolate pudding to the right of the plate",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 408,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_10_t06_r00.mp4",
+      "poster": "media/blog/libero/r1/libero_10_t06_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 419,
+      "fps": 20,
+      "durationSeconds": 20.95,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 9,
+        "episodes": 10,
+        "successRate": 0.9
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "8b7a4818f834d19c5531f64457da926fdd304261fddcc55c03cd6de3ba5a7e35",
+        "videoSha256": "52948e0fb2d95e6725736195f2faf05b10d530777fc7370004b7f5c1c3843239",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "dbc9464b424cdc9b771b92d0b8a8c185b1b539f6a4133b323dc858bcf8f6a9c2",
+        "initFileSha256": "6e811394c4ff9a43ae23515d8512e9b657c04344b94dd5baed121b595490514f"
+      },
+      "media": {
+        "videoSha256": "6bdd5b30f5aa4695287a2e4aca123e9de65a6c5adfb49dc6cf234239153dcc78",
+        "videoBytes": 625002,
+        "posterSha256": "1dea8f0632007253afe4260523014237c9c865efc3413d2cc7864931b0536995",
+        "posterBytes": 31498,
+        "posterFrame": 209,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_goal_t05_r02": {
+      "id": "baseline:libero_goal_t05_r02",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_goal_t05_r02",
+      "episodeKey": "libero_goal_t05_r02",
+      "suite": "libero_goal",
+      "taskId": 5,
+      "taskName": "push_the_plate_to_the_front_of_the_stove",
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "instruction": "push the plate to the front of the stove",
+      "originalInstruction": "push the plate to the front of the stove",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 427,
+      "maxSteps": 500,
+      "video": "media/libero/libero_goal_t05_r02.mp4",
+      "poster": "media/libero/libero_goal_t05_r02.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 438,
+      "fps": 20,
+      "durationSeconds": 21.9,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "dde622e44a6d539513df53f2a5a9e8074d3031ec7cb1af5f5147f64a8df7becc",
+        "videoSha256": "88697a49b74788de6b4debdff9bf8956d512cda94940b756f1661d6614e9ad82",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+        "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
+      },
+      "media": {
+        "videoSha256": "23e74e745a669b2ca8692986f88302cbc38d775a48e50e95405503c4ced14b41",
+        "videoBytes": 699421,
+        "posterSha256": "a4e3d13eb7030b3d35f3437aa4eb2c7faad21dc48772cb1587e3977e7cfe9222",
+        "posterBytes": 31742,
+        "posterFrame": 219,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r2:libero_goal_t05_r02": {
+      "id": "r2:libero_goal_t05_r02",
+      "stage": "r2",
+      "stageLabel": "Minimal instruction revision",
+      "episodeId": "libero_goal_t05_r02",
+      "episodeKey": "libero_goal_t05_r02",
+      "suite": "libero_goal",
+      "taskId": 5,
+      "taskName": "push_the_plate_to_the_front_of_the_stove",
+      "rolloutIndex": 2,
+      "seed": 2,
+      "initStateId": 2,
+      "instruction": "push the plate to the front of the stove, close to its front edge",
+      "originalInstruction": "push the plate to the front of the stove",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 388,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r2/libero_goal_t05_r02.mp4",
+      "poster": "media/blog/libero/r2/libero_goal_t05_r02.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 399,
+      "fps": 20,
+      "durationSeconds": 19.95,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_minimal_parallel4_r2",
+        "manifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+        "resultSha256": "f64342ba2501acef7dcd3df82202e7301a084b10ce2bf624190de38f02d631ad",
+        "videoSha256": "17cb62c810009ce52870822a25ae5016d64e33da8e7e80a3f1346e308e6dcfec",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+        "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
+      },
+      "media": {
+        "videoSha256": "f398bebdb12429e158cb2dcf49739b75c22463f1dacbba2e9a6ca0495bec3961",
+        "videoBytes": 635822,
+        "posterSha256": "108d20f9925fbaa1501eda6653843dfd7debe6e320bfd33c654c8c0148b57fbd",
+        "posterBytes": 36253,
+        "posterFrame": 199,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_spatial_t04_r05": {
+      "id": "baseline:libero_spatial_t04_r05",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_spatial_t04_r05",
+      "episodeKey": "libero_spatial_t04_r05",
+      "suite": "libero_spatial",
+      "taskId": 4,
+      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+      "rolloutIndex": 5,
+      "seed": 5,
+      "initStateId": 5,
+      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 471,
+      "maxSteps": 500,
+      "video": "media/libero/libero_spatial_t04_r05.mp4",
+      "poster": "media/libero/libero_spatial_t04_r05.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 482,
+      "fps": 20,
+      "durationSeconds": 24.1,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 5,
+        "episodes": 10,
+        "successRate": 0.5
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "d83789a2d1b19e3b5c218bd99e5262baf65e264a9ffbf68c32ed1b92e30091c0",
+        "videoSha256": "c482ff9c18eca694a217bc794ddfdbe62856ced77e61ba66bd159a707597413d",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
+        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
+      },
+      "media": {
+        "videoSha256": "860c19e36bd1e1ce077c75a391c8d413374ad4ef5899a72276bf73d84cfb5db0",
+        "videoBytes": 843367,
+        "posterSha256": "e8a49245fd94e177027ed51df14f74279a1becb18c129d84848878022aeb97ba",
+        "posterBytes": 38615,
+        "posterFrame": 241,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_spatial_t04_r05": {
+      "id": "r1:libero_spatial_t04_r05",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_spatial_t04_r05",
+      "episodeKey": "libero_spatial_t04_r05",
+      "suite": "libero_spatial",
+      "taskId": 4,
+      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+      "rolloutIndex": 5,
+      "seed": 5,
+      "initStateId": 5,
+      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it in the center of the plate",
+      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "unknown",
+      "stopReason": "step_budget",
+      "steps": 500,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_spatial_t04_r05.mp4",
+      "poster": "media/blog/libero/r1/libero_spatial_t04_r05.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 511,
+      "fps": 20,
+      "durationSeconds": 25.55,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 4,
+        "episodes": 10,
+        "successRate": 0.4
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "33298d66b6d5a958218fd67e859a8fe4f83b3aade078b59ece072e555e9fda59",
+        "videoSha256": "845dfd38a0afa2a1045a8797b58935496556e42b16e75f85f038a23b0de6d82a",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
+        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
+      },
+      "media": {
+        "videoSha256": "49fb1a34e438c31fefbdd039e1c3b14ecccb8c2d2d6974682102f16ddc14b6d7",
+        "videoBytes": 1081202,
+        "posterSha256": "c0ae00c4bf66e18dd6f6bfc09addd041dab1c085e434c8f9bd27e8b6b7b37434",
+        "posterBytes": 37296,
+        "posterFrame": 255,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r2:libero_goal_t05_r05": {
+      "id": "r2:libero_goal_t05_r05",
+      "stage": "r2",
+      "stageLabel": "Minimal instruction revision",
+      "episodeId": "libero_goal_t05_r05",
+      "episodeKey": "libero_goal_t05_r05",
+      "suite": "libero_goal",
+      "taskId": 5,
+      "taskName": "push_the_plate_to_the_front_of_the_stove",
+      "rolloutIndex": 5,
+      "seed": 5,
+      "initStateId": 5,
+      "instruction": "push the plate to the front of the stove, close to its front edge",
+      "originalInstruction": "push the plate to the front of the stove",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 259,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r2/libero_goal_t05_r05.mp4",
+      "poster": "media/blog/libero/r2/libero_goal_t05_r05.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 270,
+      "fps": 20,
+      "durationSeconds": 13.5,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_minimal_parallel4_r2",
+        "manifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+        "resultSha256": "5145cfe433e0d2df1a30ba26889bb2a086b6eea533a9c83a56f64ea36f4da12e",
+        "videoSha256": "293f47d024611bf1dc454899cb852ee665b93a3077be6a190eb00bc367925d95",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+        "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
+      },
+      "media": {
+        "videoSha256": "913ed406f2104e6e2be1df694c826e66131520c6bfbb7f0928035a2ba99d7fe5",
+        "videoBytes": 376643,
+        "posterSha256": "b0f7a75f98a5491c47c5eaf559e0d1d34e5b13ddb630ba4a714edf2d16cef2a7",
+        "posterBytes": 27131,
+        "posterFrame": 135,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r2:libero_goal_t05_r07": {
+      "id": "r2:libero_goal_t05_r07",
+      "stage": "r2",
+      "stageLabel": "Minimal instruction revision",
+      "episodeId": "libero_goal_t05_r07",
+      "episodeKey": "libero_goal_t05_r07",
+      "suite": "libero_goal",
+      "taskId": 5,
+      "taskName": "push_the_plate_to_the_front_of_the_stove",
+      "rolloutIndex": 7,
+      "seed": 7,
+      "initStateId": 7,
+      "instruction": "push the plate to the front of the stove, close to its front edge",
+      "originalInstruction": "push the plate to the front of the stove",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "unable_to_continue",
+      "stopReason": "step_budget",
+      "steps": 500,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r2/libero_goal_t05_r07.mp4",
+      "poster": "media/blog/libero/r2/libero_goal_t05_r07.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 511,
+      "fps": 20,
+      "durationSeconds": 25.55,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 2,
+        "episodes": 10,
+        "successRate": 0.2
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_minimal_parallel4_r2",
+        "manifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+        "resultSha256": "5299200a8ba745ae406b6e871f0ab785e05d857adf013734489e606b71c7d8f5",
+        "videoSha256": "08c4b952bbe5c14593697a44281b1cc95bcca1e3540337fdd6ec6819fc5a1902",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+        "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
+      },
+      "media": {
+        "videoSha256": "5f0e3b95c3bd2995d5c50575aa6184c455475c621b04961a2f917e38d89d76b1",
+        "videoBytes": 750619,
+        "posterSha256": "3c4085e18f9c2351b1d720a0afe2ecbbabe881c71c5fa8707e22ef18146180e8",
+        "posterBytes": 35111,
+        "posterFrame": 255,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_10_t03_r00": {
+      "id": "baseline:libero_10_t03_r00",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_10_t03_r00",
+      "episodeKey": "libero_10_t03_r00",
+      "suite": "libero_10",
+      "taskId": 3,
+      "taskName": "KITCHEN_SCENE4_put_the_black_bowl_in_the_bottom_drawer_of_the_cabinet_and_close_it",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "put the black bowl in the bottom drawer of the cabinet and close it",
+      "originalInstruction": "put the black bowl in the bottom drawer of the cabinet and close it",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "unknown",
+      "stopReason": "step_budget",
+      "steps": 500,
+      "maxSteps": 500,
+      "video": "media/libero/libero_10_t03_r00.mp4",
+      "poster": "media/libero/libero_10_t03_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 511,
+      "fps": 20,
+      "durationSeconds": 25.55,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "523edad0565006313d00a894b5068b7a130f9923643620b47857eee8cb8618b9",
+        "videoSha256": "c0e5897314daad6a90aba2f449ff6215d0f82d75eb09b8f4347fb4548f26256c",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "5255fe54d7f25fad4dee8fa30a30033d8cb908f1708d953c91ab609264fb4fb8",
+        "initFileSha256": "e98ded151f64a036c74c872336dd09b968c379f3c9db7bc333aba37e7c235b86"
+      },
+      "media": {
+        "videoSha256": "06e5df19715b563ebd9f42189b5a7b0f826197238d912d18c3aa3d1178eee78b",
+        "videoBytes": 1201544,
+        "posterSha256": "e5e5c3aac8bdfe16093c943ddee5c578a175958ac5cbc29438579c71ceda13dc",
+        "posterBytes": 47617,
+        "posterFrame": 255,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "baseline:libero_10_t09_r00": {
+      "id": "baseline:libero_10_t09_r00",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_10_t09_r00",
+      "episodeKey": "libero_10_t09_r00",
+      "suite": "libero_10",
+      "taskId": 9,
+      "taskName": "KITCHEN_SCENE6_put_the_yellow_and_white_mug_in_the_microwave_and_close_it",
+      "rolloutIndex": 0,
+      "seed": 0,
+      "initStateId": 0,
+      "instruction": "put the yellow and white mug in the microwave and close it",
+      "originalInstruction": "put the yellow and white mug in the microwave and close it",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "unknown",
+      "stopReason": "step_budget",
+      "steps": 500,
+      "maxSteps": 500,
+      "video": "media/libero/libero_10_t09_r00.mp4",
+      "poster": "media/libero/libero_10_t09_r00.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 511,
+      "fps": 20,
+      "durationSeconds": 25.55,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 0,
+        "episodes": 10,
+        "successRate": 0.0
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "cdff3837c5d5edc686fc8c30fb48de870d48a5891c6a8b443db5ffc39d1d6107",
+        "videoSha256": "334e1d5b17dab5879430e919149a9ca8d122667c4fa7a3151828d899133e21ee",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "456d145f92be049f445fc77673dc583d9d17ea7afe92f6ffcb2fd1fa5565d420",
+        "initFileSha256": "6b75c8d4d1e1c40b5d99c78ceea380d99ccffb0a484a4cb2d3153488a0afbbe2"
+      },
+      "media": {
+        "videoSha256": "8f17600b84b538911c7ed9f6a9b46ec1e337b7c6798c5b552b927595d6a807d1",
+        "videoBytes": 784365,
+        "posterSha256": "3f6a018a12ed51f82a313e976dc360ffbdcbb36f20fead4d283a2d1e50bb2935",
+        "posterBytes": 32204,
+        "posterFrame": 255,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    }
+  },
+  "validation": {
+    "complete": true,
+    "privatePathsIncluded": false,
+    "rawModelMessagesIncluded": false,
+    "verifiedClips": 18,
+    "newClips": 9,
+    "reusedClips": 9,
+    "newMediaBytes": 5709583
+  }
+}

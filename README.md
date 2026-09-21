@@ -1,102 +1,104 @@
-# Robot Agent Gallery
+# Agent as Policy
 
-Browse all **1,339 scored playable episodes from 547 task entries** across five coding-agent robot evaluation collections, including failures and timeouts. Each policy requests `gpt-6-astra` with `high` reasoning and controls the robot from RGB images and robot proprioception. Calibration inputs depend on the benchmark; RoboDojo receives no camera calibration.
+The [homepage](https://tianqi-zh.github.io/robot-agent-gallery/) is an English essay about using a coding agent as a robot policy. It explains native benchmark outcomes, the limits of agent completion judgments, and LIBERO instruction-alignment experiments with paired recordings and public evidence.
 
-**Website:** [tianqi-zh.github.io/robot-agent-gallery](https://tianqi-zh.github.io/robot-agent-gallery/). This revision includes the RoboDojo evaluation and adds a RoboTwin 10-rollout NVIDIA API collection with 482 playable scored episodes. A push to `main` triggers GitHub Pages; deployment success and the live catalog must be verified separately.
+The [gallery](https://tianqi-zh.github.io/robot-agent-gallery/gallery/) presents **1,289 playable scored episodes from 497 task entries across four current collections**. Each benchmark has its own page:
 
-| Evaluation | Experiment date | Tasks | Episodes | Successes | Failures, including timeouts | Success rate |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| LIBERO v5 r4 | 2026-09-17 | 40 | 400 | 322 | 78 | 80.5% |
-| RoboTwin first pass | 2026-09-17 | 50 | 50 | 36 | 14 | 72.0% |
-| RoboCasa365 | 2026-09-18 | 365 | 365 | 165 | 200 | 45.2% |
-| RoboDojo first pass, local | 2026-09-19 | 42 | 42 | 6 | 36 | 14.29% |
-| RoboTwin 10-rollout NVIDIA API | 2026-09-19 | 50 | 482 | 320 | 162 | 66.39% |
+| Collection | Route | Experiment date | Tasks | Episodes | Successes | Failures, including timeouts | Success rate |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| LIBERO v5 r4 | [/gallery/libero/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/libero/) | 2026-09-17 | 40 | 400 | 322 | 78 | 80.5% |
+| Robotwin | [/gallery/robotwin/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robotwin/) | 2026-09-19 | 50 | 482 | 320 | 162 | 66.39% |
+| RoboCasa365 | [/gallery/robocasa/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robocasa/) | 2026-09-18 | 365 | 365 | 165 | 200 | 45.2% |
+| RoboDojo | [/gallery/robodojo/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robodojo/) | 2026-09-19 | 42 | 42 | 6 | 36 | 14.29% |
 
-LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes all 65 atomic tasks (28 successes) and 300 composite tasks (137 successes). RoboTwin's failures include one timeout; RoboCasa's include two. RoboDojo has zero timeouts and zero infrastructure errors. The original RoboTwin, RoboCasa and RoboDojo collections each have one valid sampled episode per task; the RoboTwin 10-rollout collection publishes the scored success/failure episodes that produced complete MP4s. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
+**Robotwin is the newer 10-rollout collection only**, internally identified as `robotwin_nvidia10`. It publishes 482 playable scored episodes from 500 planned rollouts; 18 planned rollouts did not yield a playable scored episode. The older 50-episode first-pass collection has no gallery entry, selector, search results or task cards. `/gallery/robotwin_nvidia10/` redirects to `/gallery/robotwin/`.
 
-Success is the benchmark's native score. It is separate from the policy's written assessment or an independent visual judgment; the [methodology](METHODOLOGY.md) explains the known StackCans criterion limitation and how invalid initial scenes are excluded.
+The historical source archive remains intact: [gallery.json](data/gallery.json), [episodes.csv](data/episodes.csv), the export report and media retain **1,339 episodes and 547 task entries**, including the older 50 Robotwin episodes. **Download source CSV** deliberately downloads that complete archive, so its row count differs from the current gallery. The essay's diagnostic rerun clips are separate from both gallery evaluation totals.
 
-RoboDojo adds all 42 standard tasks from `robodojo42_astra_firstpass_20260919`, with eight verified simultaneous policies and no retries. Its task instruction is exactly the native instruction supplied to VLA policies, with no extra task-specific hint. The shared prompt supplies generic robot/tool procedure only. The policies executed 29,557 native actions; all 29,599 recorded frames are retained. See [RoboDojo import and audit evidence](ROBODOJO_IMPORT.md).
+LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes 65 atomic tasks (28 successes) and 300 composite tasks (137 successes), with two timeouts. RoboDojo has zero timeouts and zero infrastructure errors. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
 
-Videos are compressed presentation copies retaining every recorded frame. LIBERO plays at 20 FPS, including initialization and warmup. RoboTwin plays at 10 FPS, with an initial frame and one frame after each native action. RoboCasa plays at 20 FPS across three camera views. RoboDojo plays at 25 FPS in a 1920 × 480 head/left-wrist/right-wrist panel. RoboCasa and RoboDojo include an initial frame and every native action. Thinking and transport delays are omitted; playback duration is not evaluation wall time.
+Success is the benchmark's native score. It is separate from the policy's written assessment or an independent visual judgment. The [methodology](METHODOLOGY.md) explains the protocols, the known StackCans criterion limitation and exclusion of invalid initial scenes. Each policy requests `gpt-6-astra` with `high` reasoning and controls the robot from RGB images and robot proprioception. Calibration inputs depend on the benchmark; RoboDojo receives no camera calibration.
 
 ## Local preview and browsing
 
-With the full local media export present, serve this checkout:
+With the full local media export present:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Open [localhost:8080](http://localhost:8080/) or the [local RoboDojo view](http://localhost:8080/#benchmark=robodojo). The website is static and requires no model access or API key.
+Open the [essay](http://localhost:8080/), [gallery overview](http://localhost:8080/gallery/) or a benchmark page such as [Robotwin](http://localhost:8080/gallery/robotwin/). The static site requires no model access or API key. The same routes and media links work under a GitHub Pages project prefix.
 
-1. Choose a benchmark and suite or task group, search task names or instructions, and filter by **With failures** or **All successful**. RoboCasa has **Atomic** and **Composite** groups; RoboDojo has five native task groups.
-2. Open a task or episode. LIBERO retains all ten episodes per task; RoboTwin, RoboCasa and RoboDojo each show one. The player displays the native outcome, instruction, seed, action count and recorded camera views.
-3. Use **Copy episode link** or **Download MP4**. Share links use the current server address. Public RoboDojo links require a completed deployment containing this revision.
+1. Select a benchmark, then choose a suite or task group, search names or instructions, and filter by **With failures** or **All successful**. Filters select tasks and retain all episodes within matching tasks.
+2. Open a task or episode. LIBERO has ten episodes per task; Robotwin has up to ten; RoboCasa and RoboDojo have one. The player shows native outcome, instruction, seed, action count and camera views.
+3. Switch between agent episodes and training demonstrations, use **Copy episode link** or **Copy demo link**, or download the selected MP4.
 
-Outcome filters select tasks and retain all episodes within each matching task. The [episode CSV](data/episodes.csv) contains the complete 1,339-episode playable set. Its `video` column is the local path; `remoteVideo` retains RoboCasa's public MP4 URL. RoboDojo uses relative paths to repository media.
+Legacy `#benchmark=…&task=…&episode=…` and `view=demo` links remain supported. Root links open the corresponding gallery page. Historical Robotwin episode identifiers display a missing-recording notice instead of being relabeled as newer episodes.
 
-There are 440 training reference videos: 40 LIBERO, 50 RoboTwin, 316 RoboCasa and 34 RoboDojo. The other 49 RoboCasa tasks and eight RoboDojo Open tasks display an explicit unavailable state because the released training data has no matching demonstration. RoboDojo references use complete official episode-zero head-camera previews; only those previews and source metadata are downloaded. All 497 tasks have a training-catalog record. See [training sources and export details](TRAINING_DEMOS.md). Demo videos have their own share links and do not contribute to evaluation counts.
+The current four collections offer 440 training reference videos: 40 LIBERO, 50 Robotwin, 316 RoboCasa and 34 RoboDojo. The other 49 RoboCasa tasks and eight RoboDojo Open tasks display an explicit unavailable state. The archived training catalog has records for all 547 task entries, including the older Robotwin collection. See [training sources and export details](TRAINING_DEMOS.md). Demonstrations never contribute to evaluation counts.
 
-## Media storage
+## Media and playback
 
-LIBERO and RoboTwin MP4s and all JPEG posters are stored in the repository. The 365 RoboCasa presentation MP4s are kept locally under `media/robocasa/` in the export checkout but ignored by Git; their public copies are assets of the existing [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918).
+Videos are compressed presentation copies retaining every recorded frame. LIBERO plays at 20 FPS, including initialization and warmup. Robotwin plays at 10 FPS, with an initial frame and one frame after each native action. RoboCasa plays at 20 FPS across three views. RoboDojo plays at 25 FPS in a 1920 × 480 head/left-wrist/right-wrist panel. Thinking and transport delays are omitted; playback duration is not evaluation wall time.
 
-The 42 new RoboDojo MP4s and posters are ordinary local files under `media/robodojo/`, eligible for Git tracking. The completed import contains 166,020,322 bytes of RoboDojo MP4 video, retaining all 29,599 frames. They have no `remoteVideo` URL and no new Release. Original evaluation recordings remain in the source run; presentation compression preserves frame count, order, FPS, dimensions and camera layout.
+LIBERO, both Robotwin exports, RoboDojo and all JPEG posters are stored in the repository. The 365 RoboCasa evaluation MP4s are available locally under `media/robocasa/` in the export checkout but ignored by Git; their public copies are assets of the existing [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918). Training videos remain local site assets.
 
-A fresh clone can preview all four benchmarks while using RoboCasa's existing Release videos:
+The essay reuses some baseline LIBERO media and adds explicitly cataloged clips under `media/blog/`. [libero-blog-media.json](data/libero-blog-media.json) records their selection, sources and fingerprints. These illustrative examples are purposefully selected diagnostic cases, not a random sample or a held-out causal estimate.
+
+A fresh clone can stage the site with RoboCasa Release playback:
 
 ```bash
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos --release-media
+python3 scripts/validate_libero_blog.py
 python3 scripts/build_site.py
 python3 -m http.server 8080 --directory _site
 ```
 
-The staged preview uses network access for RoboCasa videos. Serving the repository root uses local MP4 paths, so a fresh clone needs the RoboCasa files downloaded into `media/robocasa/` or reproduced from the audited source. The RoboDojo addition and its verification are described separately in [ROBODOJO_IMPORT.md](ROBODOJO_IMPORT.md).
+The build copies the essay, nested gallery pages and declared public assets, and enables Release playback on every gallery page. The staged preview needs network access for RoboCasa videos. Serving the checkout directly uses local MP4 paths, so a fresh clone needs those RoboCasa files downloaded or reproduced from the audited source.
 
-## Validate the local four-benchmark import
+## Validation
 
-The completed local import passed 178 automated tests, complete catalog/media-hash validation, site staging and the four-benchmark desktop/mobile browser smoke check, with no browser errors or failed responses. See [the import record](ROBODOJO_IMPORT.md) for coverage and media totals.
-
-With all 857 evaluation MP4s and the existing training videos present locally:
+With the complete local evaluation and training media present:
 
 ```bash
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos --videos
+python3 scripts/validate_libero_blog.py
+python3 scripts/validate_libero_blog.py --probe
+python3 -m pytest -q
 ```
 
-The first command checks the task matrix, native results, CSV, metadata, media hashes, training-catalog coverage and size limits. The second also uses `ffprobe` to verify video frames and encoding metadata. The training catalog accounts for all 497 tasks, including explicit unavailable records, and preserves the original 455 task records.
+The gallery validator checks the entire historical archive: task matrices, native results, CSV, public metadata, media hashes, demo coverage and size limits. `--videos` also probes evaluation and training videos with `ffprobe`. Blog clips join the media inventory only through explicit video/poster references in a complete `libero-blog-media.json`; missing, unsafe or unlisted assets remain errors. The separate essay validator checks its evidence and clip fingerprints, and `--probe` decodes all selected essay videos to check frame counts.
 
-Existing RoboCasa Release checks remain available with `python3 scripts/release_media.py --check` and the validator's `--release-media` option. They verify public asset names, SHA256 digests, sizes, upload state and URLs. Local RoboCasa files are still checked when present; `--release-media --videos` also probes remote videos and requires network access.
+Existing RoboCasa Release checks remain available with `python3 scripts/release_media.py --check` and the gallery validator's `--release-media` option. They verify public asset names, SHA256 digests, sizes, upload state and URLs. Local RoboCasa files are checked when present; `--release-media --videos` also probes remote videos.
 
-With a local server running, the browser check exercises task groups, filters, episode switching, playback, share links, history navigation and mobile layouts:
+Browser checks cover browsing, filtering, playback, demos, share links, history and mobile layouts:
 
 ```bash
 npm ci
 npx playwright install chromium
-npm run test:browser
+# With the local preview server already running:
+npm run test:browser -- http://127.0.0.1:8080/gallery/
+# Self-contained route check, including a simulated GitHub project prefix:
+npm run test:routes
+# Self-contained essay check: statistics, all 18 clips, mobile layout and legacy links:
+npm run test:blog
+# Check the staged release (including remote RoboCasa playback):
+node scripts/test_gallery_routes.cjs _site
+node scripts/smoke_blog.cjs _site
 ```
 
-Pass a different website URL after `--` to check it. Screenshots are saved under the ignored `artifacts/browser/` directory. Node dependencies are only needed for this check.
+Browser screenshots are saved under ignored `artifacts/browser/`. Node dependencies are only needed for browser checks. The public export excludes raw model reasoning, credentials, private logs and source-machine paths; public checks do not replace the private source audit.
 
-The export contains task descriptions, results and provenance fingerprints. It excludes raw model reasoning, credentials, private logs and source-machine paths. Gallery checks do not replace the private source audit; see [METHODOLOGY.md](METHODOLOGY.md).
+## Files, rebuilding and publication
 
-## Publication status
+- `index.html`, `blog.js`, `blog.css`: the English essay.
+- `gallery/`, `app.js`, `styles.css`: gallery overview, benchmark routes and shared player.
+- `data/gallery.json`, `data/episodes.csv`, `data/export-report.json`: complete historical evaluation archive and provenance.
+- `data/task-demos.json`, `media/demos/`: training references and explicit unavailable records.
+- `data/libero-alignment.json`, `data/libero-alignment-episodes.csv`, `data/libero-blog-media.json`, `media/blog/`: essay evidence and selected recordings.
+- `scripts/validate_gallery.py`, `scripts/validate_libero_blog.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, existing Release handling and site staging.
 
-The [Pages workflow](.github/workflows/pages.yml) runs after a push to `main` or manual dispatch, validates the catalog and stages the website. A successful Git push does not establish a successful deployment: check the workflow result and the live site afterward. RoboDojo media is included in the repository build; the existing RoboCasa Release remains unchanged.
+Rebuilding evaluation exports requires Python 3.10+, FFmpeg/ffprobe and the private original runs. Earlier procedures and evidence are retained in [ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md), [ROBODOJO_IMPORT.md](ROBODOJO_IMPORT.md) and [TRAINING_DEMOS.md](TRAINING_DEMOS.md). Those records describe their historical import counts. Exporters read existing recordings; they do not call a model or start new episodes.
 
-[ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md) preserves the earlier three-benchmark Release publication and recovery procedure. It describes the earlier 815-episode baseline; the RoboDojo evaluation and training imports extend that catalog.
-
-## Files and rebuilding
-
-- `index.html`, `app.js`, `styles.css`: static interface.
-- `data/gallery.json` and `data/episodes.csv`: the local task and episode catalog.
-- `data/task-demos.json`, `media/demos/`: training mappings, videos and posters for all four benchmarks.
-- `data/export-report.json`: source selections, exclusion provenance and media fingerprints.
-- `media/libero/`, `media/robotwin/`, `media/robocasa/`, `media/robodojo/`: presentation media.
-- `scripts/export_gallery.py`, `scripts/robocasa_export.py`: the earlier three-benchmark source export.
-- `scripts/robodojo_export.py`: audited additive RoboDojo import, preserving the existing 815 episode records and media.
-- `scripts/export_training_demos.py`, `scripts/export_robocasa_demos.py`, `scripts/export_robodojo_demos.py`, `scripts/assemble_training_demos.py`: training-video export and catalog assembly.
-- `scripts/validate_gallery.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, existing Release handling and site staging.
-
-Rebuilding requires Python 3.10+, FFmpeg/ffprobe and the private original evaluation runs. Reproduce the three-benchmark baseline using [ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md), including its registered recovery runs and full collection audit, then add RoboDojo using [ROBODOJO_IMPORT.md](ROBODOJO_IMPORT.md). Exporters read existing recordings; they do not call a model or start new episodes. The public gallery alone does not include the private evidence needed to repeat the source audits.
+A push to `main` triggers the [Pages workflow](.github/workflows/pages.yml). A successful push does not establish a successful deployment: check the workflow result and the live routes afterward. The existing RoboCasa Release remains unchanged.
