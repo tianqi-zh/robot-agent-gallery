@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "reviewScope": "agent-benchmark disagreement videos",
+  "reviewCoverageStatus": "complete",
+  "coveragePanels": [
+    "before",
+    "after"
+  ],
+  "unchangedDisagreementsConfirmed": true,
+  "reviewNote": "The user confirmed that only the final-round plate case below should be relabeled and that all other disagreement labels in the before/after comparison should remain unchanged. Coverage confirmation applies to these before/after disagreement videos, not the intermediate round-one disagreements or every episode. Native successes and native failures without completion claims use the reporting convention and are not claimed to have individual human ratings.",
+  "corrections": [
+    {
+      "stage": "round2",
+      "episodeKey": "libero_goal_t05_r05",
+      "originalAgentOutcome": "visually_complete",
+      "originalAgentLabel": "success",
+      "reviewedAgentLabel": "failure",
+      "nativeSuccess": false,
+      "sourceRunName": "astra_libero_v5_instruction_minimal_parallel4_r2",
+      "sourceManifestSha256": "08e43c9fb96ffebf033f0e93fd5371a8ef36b41566eadfa89db80b4958381847",
+      "sourceResultSha256": "5145cfe433e0d2df1a30ba26889bb2a086b6eea533a9c83a56f64ea36f4da12e",
+      "sourceFinishSha256": "d2617f687601bdc1ff721fb512d88921eb8252deb7947027072df5034023db60",
+      "reason": "The agent confused the left drawer cabinet with the stove on the right and placed the plate in front of the wrong fixture.",
+      "decisionBasis": "User-confirmed human review"
+    }
+  ],
+  "sourceFiles": {
+    "alignment": {
+      "path": "data/libero-alignment.json",
+      "sha256": "f0a54866bad8a0034b1e0a1b044b69d507af39ac5ef88efa20c9dc7ce6913424"
+    },
+    "episodes": {
+      "path": "data/libero-alignment-episodes.csv",
+      "sha256": "792982368289f36b3842fc05133f340b39f3798133e32658ba701898ce4a0b5b"
+    }
+  },
+  "reportingRule": {
+    "iasFormula": "1 - count(reviewed agent success AND native benchmark failure) / N",
+    "nativeSuccess": "Accept every native benchmark success as agent success under the presentation convention; this is not an explicit agent declaration or a human rating.",
+    "nativeFailure": "Start from the explicit visually_complete claim, if present, then apply only a confirmed, source-matched human correction. Other native failures count as agent failure under the reporting convention.",
+    "unassessedNativeFailure": "A native failure without a finish declaration is assigned to agent failure because no completion was declared; this is not a human assessment of the terminal image.",
+    "notApplicableCell": "agent failure / benchmark success",
+    "notApplicableSymbol": "\\",
+    "nativeOutcomesChanged": false,
+    "archivedAgentReportsChanged": false,
+    "pendingReview": "Unconfirmed disagreements retain their archived completion claim provisionally. Pending coverage must not be presented as a completed human rating."
+  },
+  "reviewCoverageSummary": {
+    "rawDisagreementEpisodes": 48,
+    "confirmedCorrections": 1,
+    "confirmedUnchangedDisagreements": 47,
+    "awaitingConfirmation": 0
+  },
+  "before": {
+    "n": 400,
+    "benchSuccess": 322,
+    "benchFailure": 78,
+    "benchSuccessRate": 0.805,
+    "mismatchCount": 47,
+    "ias": 0.8825000000000001,
+    "matrix": {
+      "success": {
+        "benchSuccess": 322,
+        "benchFailure": 47
+      },
+      "failure": {
+        "benchSuccess": 0,
+        "benchFailure": 31
+      }
+    },
+    "agentCounts": {
+      "success": 369,
+      "failure": 31
+    },
+    "sourceStageCounts": {
+      "baseline": 400
+    },
+    "rawMismatchCount": 47,
+    "appliedCorrectionCount": 0,
+    "confirmedDisagreementReviewCount": 47,
+    "unconfirmedDisagreementCount": 0,
+    "inferredNativeSuccessCount": 322,
+    "unassessedNativeFailureCount": 5
+  },
+  "round1": {
+    "n": 400,
+    "benchSuccess": 345,
+    "benchFailure": 55,
+    "benchSuccessRate": 0.8625,
+    "mismatchCount": 19,
+    "ias": 0.9525,
+    "matrix": {
+      "success": {
+        "benchSuccess": 345,
+        "benchFailure": 19
+      },
+      "failure": {
+        "benchSuccess": 0,
+        "benchFailure": 36
+      }
+    },
+    "agentCounts": {
+      "success": 364,
+      "failure": 36
+    },
+    "sourceStageCounts": {
+      "baseline": 310,
+      "round1": 90
+    },
+    "rawMismatchCount": 19,
+    "appliedCorrectionCount": 0,
+    "confirmedDisagreementReviewCount": 0,
+    "unconfirmedDisagreementCount": 19,
+    "inferredNativeSuccessCount": 345,
+    "unassessedNativeFailureCount": 8
+  },
+  "after": {
+    "n": 400,
+    "benchSuccess": 357,
+    "benchFailure": 43,
+    "benchSuccessRate": 0.8925,
+    "mismatchCount": 0,
+    "ias": 1.0,
+    "matrix": {
+      "success": {
+        "benchSuccess": 357,
+        "benchFailure": 0
+      },
+      "failure": {
+        "benchSuccess": 0,
+        "benchFailure": 43
+      }
+    },
+    "agentCounts": {
+      "success": 357,
+      "failure": 43
+    },
+    "sourceStageCounts": {
+      "baseline": 310,
+      "round1": 70,
+      "round2": 20
+    },
+    "rawMismatchCount": 1,
+    "appliedCorrectionCount": 1,
+    "confirmedDisagreementReviewCount": 1,
+    "unconfirmedDisagreementCount": 0,
+    "inferredNativeSuccessCount": 357,
+    "unassessedNativeFailureCount": 9
+  },
+  "rerunSubset": {
+    "n": 90,
+    "before": {
+      "n": 90,
+      "benchSuccess": 40,
+      "benchFailure": 50,
+      "benchSuccessRate": 0.4444444444444444,
+      "mismatchCount": 47,
+      "ias": 0.47777777777777775,
+      "matrix": {
+        "success": {
+          "benchSuccess": 40,
+          "benchFailure": 47
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 3
+        }
+      },
+      "agentCounts": {
+        "success": 87,
+        "failure": 3
+      },
+      "sourceStageCounts": {
+        "baseline": 90
+      },
+      "rawMismatchCount": 47,
+      "appliedCorrectionCount": 0,
+      "confirmedDisagreementReviewCount": 47,
+      "unconfirmedDisagreementCount": 0,
+      "inferredNativeSuccessCount": 40,
+      "unassessedNativeFailureCount": 0
+    },
+    "round1": {
+      "n": 90,
+      "benchSuccess": 63,
+      "benchFailure": 27,
+      "benchSuccessRate": 0.7,
+      "mismatchCount": 19,
+      "ias": 0.7888888888888889,
+      "matrix": {
+        "success": {
+          "benchSuccess": 63,
+          "benchFailure": 19
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 8
+        }
+      },
+      "agentCounts": {
+        "success": 82,
+        "failure": 8
+      },
+      "sourceStageCounts": {
+        "round1": 90
+      },
+      "rawMismatchCount": 19,
+      "appliedCorrectionCount": 0,
+      "confirmedDisagreementReviewCount": 0,
+      "unconfirmedDisagreementCount": 19,
+      "inferredNativeSuccessCount": 63,
+      "unassessedNativeFailureCount": 3
+    },
+    "after": {
+      "n": 90,
+      "benchSuccess": 75,
+      "benchFailure": 15,
+      "benchSuccessRate": 0.8333333333333334,
+      "mismatchCount": 0,
+      "ias": 1.0,
+      "matrix": {
+        "success": {
+          "benchSuccess": 75,
+          "benchFailure": 0
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 15
+        }
+      },
+      "agentCounts": {
+        "success": 75,
+        "failure": 15
+      },
+      "sourceStageCounts": {
+        "round1": 70,
+        "round2": 20
+      },
+      "rawMismatchCount": 1,
+      "appliedCorrectionCount": 1,
+      "confirmedDisagreementReviewCount": 1,
+      "unconfirmedDisagreementCount": 0,
+      "inferredNativeSuccessCount": 75,
+      "unassessedNativeFailureCount": 4
+    }
+  },
+  "finalRoundSubset": {
+    "n": 20,
+    "before": {
+      "n": 20,
+      "benchSuccess": 0,
+      "benchFailure": 20,
+      "benchSuccessRate": 0.0,
+      "mismatchCount": 19,
+      "ias": 0.050000000000000044,
+      "matrix": {
+        "success": {
+          "benchSuccess": 0,
+          "benchFailure": 19
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 1
+        }
+      },
+      "agentCounts": {
+        "success": 19,
+        "failure": 1
+      },
+      "sourceStageCounts": {
+        "baseline": 20
+      },
+      "rawMismatchCount": 19,
+      "appliedCorrectionCount": 0,
+      "confirmedDisagreementReviewCount": 19,
+      "unconfirmedDisagreementCount": 0,
+      "inferredNativeSuccessCount": 0,
+      "unassessedNativeFailureCount": 0
+    },
+    "round1": {
+      "n": 20,
+      "benchSuccess": 0,
+      "benchFailure": 20,
+      "benchSuccessRate": 0.0,
+      "mismatchCount": 19,
+      "ias": 0.050000000000000044,
+      "matrix": {
+        "success": {
+          "benchSuccess": 0,
+          "benchFailure": 19
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 1
+        }
+      },
+      "agentCounts": {
+        "success": 19,
+        "failure": 1
+      },
+      "sourceStageCounts": {
+        "round1": 20
+      },
+      "rawMismatchCount": 19,
+      "appliedCorrectionCount": 0,
+      "confirmedDisagreementReviewCount": 0,
+      "unconfirmedDisagreementCount": 19,
+      "inferredNativeSuccessCount": 0,
+      "unassessedNativeFailureCount": 0
+    },
+    "after": {
+      "n": 20,
+      "benchSuccess": 12,
+      "benchFailure": 8,
+      "benchSuccessRate": 0.6,
+      "mismatchCount": 0,
+      "ias": 1.0,
+      "matrix": {
+        "success": {
+          "benchSuccess": 12,
+          "benchFailure": 0
+        },
+        "failure": {
+          "benchSuccess": 0,
+          "benchFailure": 8
+        }
+      },
+      "agentCounts": {
+        "success": 12,
+        "failure": 8
+      },
+      "sourceStageCounts": {
+        "round2": 20
+      },
+      "rawMismatchCount": 1,
+      "appliedCorrectionCount": 1,
+      "confirmedDisagreementReviewCount": 1,
+      "unconfirmedDisagreementCount": 0,
+      "inferredNativeSuccessCount": 12,
+      "unassessedNativeFailureCount": 1
+    }
+  }
+}

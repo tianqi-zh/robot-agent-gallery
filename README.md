@@ -43,7 +43,7 @@ Videos are compressed presentation copies retaining every recorded frame. LIBERO
 
 LIBERO, both Robotwin exports, RoboDojo and all JPEG posters are stored in the repository. The 365 RoboCasa evaluation MP4s are available locally under `media/robocasa/` in the export checkout but ignored by Git; their public copies are assets of the existing [same-repository Release](https://github.com/tianqi-zh/robot-agent-gallery/releases/tag/robocasa365-20260918). Training videos remain local site assets.
 
-The essay’s 2×2 tables accept every native success as agent success and use `\` for the structurally empty agent-failure / bench-success cell. For native failures, explicit completion claims identify disagreement; other episodes are assigned to failure under that reporting convention. Human-in-the-loop video verification covers disagreement cases. The downloadable data retain original structured finish records, which are distinct from the presentation labels. See [the accounting rules](LIBERO_ALIGNMENT.md).
+The essay’s 2×2 tables accept every native success as agent success and use `\` for the structurally empty agent-failure / bench-success cell. For native failures, human review adjudicates explicit completion claims; rejected claims and other episodes are assigned to failure under that reporting convention. Human-in-the-loop video verification covers disagreement cases. The published tables use the corrected labels, recorded separately in [libero-human-review.json](data/libero-human-review.json). The downloadable data retain original structured finish records, which are distinct from the presentation labels. See [the accounting rules](LIBERO_ALIGNMENT.md).
 
 The essay reuses some baseline LIBERO media and adds explicitly cataloged clips under `media/blog/`. [libero-blog-media.json](data/libero-blog-media.json) records their selection, sources and fingerprints. These illustrative examples are purposefully selected diagnostic cases, not a random sample or a held-out causal estimate.
 
@@ -52,6 +52,7 @@ A fresh clone can stage the site with RoboCasa Release playback:
 ```bash
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos --release-media
 python3 scripts/validate_libero_blog.py
+python3 scripts/review_libero_alignment.py --check --require-complete
 python3 scripts/build_site.py
 python3 -m http.server 8080 --directory _site
 ```
@@ -66,6 +67,7 @@ With the complete local evaluation and training media present:
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos
 python3 scripts/validate_gallery.py --require-robocasa --require-robodojo --require-demos --videos
 python3 scripts/validate_libero_blog.py
+python3 scripts/review_libero_alignment.py --check --require-complete
 python3 scripts/validate_libero_blog.py --probe
 python3 -m pytest -q
 ```
@@ -98,8 +100,8 @@ Browser screenshots are saved under ignored `artifacts/browser/`. Node dependenc
 - `gallery/`, `app.js`, `styles.css`: gallery overview, benchmark routes and shared player.
 - `data/gallery.json`, `data/episodes.csv`, `data/export-report.json`: complete historical evaluation archive and provenance.
 - `data/task-demos.json`, `media/demos/`: training references and explicit unavailable records.
-- `data/libero-alignment.json`, `data/libero-alignment-episodes.csv`, `data/libero-blog-media.json`, `media/blog/`: essay evidence and selected recordings.
-- `scripts/validate_gallery.py`, `scripts/validate_libero_blog.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, existing Release handling and site staging.
+- `data/libero-alignment.json`, `data/libero-alignment-episodes.csv`, `data/libero-blog-media.json`, `data/libero-human-review.json`, `media/blog/`: essay evidence and selected recordings.
+- `scripts/validate_gallery.py`, `scripts/validate_libero_blog.py`, `scripts/review_libero_alignment.py`, `scripts/release_media.py`, `scripts/build_site.py`: verification, existing Release handling and site staging.
 
 Rebuilding evaluation exports requires Python 3.10+, FFmpeg/ffprobe and the private original runs. Earlier procedures and evidence are retained in [ROBOCASA_IMPORT.md](ROBOCASA_IMPORT.md), [ROBODOJO_IMPORT.md](ROBODOJO_IMPORT.md) and [TRAINING_DEMOS.md](TRAINING_DEMOS.md). Those records describe their historical import counts. Exporters read existing recordings; they do not call a model or start new episodes.
 

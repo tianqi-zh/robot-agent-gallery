@@ -34,14 +34,13 @@
     'bottom-drawer-sequence':'The final closure remains incomplete. Placing an object inside a drawer is only part of the goal; the policy must then move to an effective pushing contact and verify the articulated state within the remaining budget.',
     'microwave-sequence':'The final door closure remains incomplete. Placement and door motion require different contacts and viewpoints; succeeding at an earlier substep does not ensure that the full conjunction of native goals is satisfied.'
   };
+  let reviewCorrections = new Map();
   function scoreCard(stats, after) {
-    // Presentation convention: benchmark success is accepted as completion.
-    // Preserve native outcomes and recorded disagreement; budget-ended failures
-    // without a finish declaration remain failures, never benchmark successes.
-    const accepted = stats.benchSuccess;
+    // Recomputed from the source records and documented human adjudications.
+    const accepted = stats.matrix.success.benchSuccess;
     const disagreement = stats.matrix.success.benchFailure;
-    const incomplete = stats.benchFailure - disagreement;
-    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${after ? 'After · revised composite' : 'Before · original instructions'}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.ias)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.ias)}%</p><table class="cross-table"><caption>Agent completion assessment × benchmark result</caption><thead><tr><th scope="col">Agent assessment</th><th scope="col">Bench success</th><th scope="col">Bench failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent success</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent failure</th><td class="not-applicable" aria-label="Not applicable: benchmark success is included in agent success">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Native success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
+    const incomplete = stats.matrix.failure.benchFailure;
+    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${after ? 'After · revised composite' : 'Before · original instructions'}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.ias)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.ias)}%</p><table class="cross-table"><caption>Agent assessment after human review × benchmark result</caption><thead><tr><th scope="col">Agent assessment</th><th scope="col">Bench success</th><th scope="col">Bench failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent success</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent failure</th><td class="not-applicable" aria-label="Not applicable: benchmark success is included in agent success">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Native success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
   }
   function renderComparison(data, scope) {
     const selected = scope === 'revised' ? data.rerunSubset : data;
@@ -57,7 +56,9 @@
     }).join('');
   }
   function clipMarkup(clip,label) {
-    const assessment = clip.nativeSuccess ? 'Completion: success' : clip.agentAssessment === 'visually_complete' ? 'Agent: visually complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent: unable to continue' : 'Completion: unsuccessful · control budget exhausted';
+    const stage = {baseline:'baseline',r1:'round1',r2:'round2'}[clip.stage];
+    const correction = reviewCorrections.get(`${stage}:${clip.episodeKey}`);
+    const assessment = correction ? `Human review: ${correction.reviewedAgentLabel} · original agent claim: visually complete` : clip.nativeSuccess ? 'Completion: success' : clip.agentAssessment === 'visually_complete' ? 'Agent: visually complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent: unable to continue' : 'Completion: unsuccessful · control budget exhausted';
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench ${esc(clip.status)}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(url(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
   function renderMedia(media) {
@@ -100,16 +101,19 @@
       if (!meta.querySelector('.media-error')) meta.insertAdjacentHTML('beforeend','<br><span class="media-error" role="alert">Playback unavailable. Try the MP4 download link.</span>');
     }));
   }
-  Promise.all(['data/libero-alignment.json','data/libero-blog-media.json'].map(async path => {
+  Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json'].map(async path => {
     const response = await fetch(url(path));
     if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
     return response.json();
-  })).then(([data,media]) => {
+  })).then(([data,media,review]) => {
     if (!media.complete) throw new Error('Media export is incomplete');
-    renderComparison(data,'all');
+    if (review.reviewCoverageStatus !== 'complete' || !review.unchangedDisagreementsConfirmed) throw new Error('Human review coverage is not confirmed');
+    reviewCorrections = new Map(review.corrections.map(item => [`${item.stage}:${item.episodeKey}`,item]));
+    renderComparison(review,'all');
+    document.querySelector('#review-accounting').textContent = `The original table contains ${review.before.matrix.success.benchSuccess} agent-success / bench-success episodes, ${review.before.matrix.success.benchFailure} agent-success / bench-failure episodes, and ${review.before.matrix.failure.benchFailure} failures under both labels. After instruction refinement and human adjudication, those counts are ${review.after.matrix.success.benchSuccess}, ${review.after.matrix.success.benchFailure}, and ${review.after.matrix.failure.benchFailure}. Native outcomes are unchanged by human review.`;
     renderInstructions(data);
     renderMedia(media);
-    document.querySelectorAll('[data-scope]').forEach(button => button.addEventListener('click', () => renderComparison(data,button.dataset.scope)));
+    document.querySelectorAll('[data-scope]').forEach(button => button.addEventListener('click', () => renderComparison(review,button.dataset.scope)));
     document.documentElement.dataset.blogReady = 'true';
   }).catch(error => {
     document.querySelector('#load-error').hidden = false;

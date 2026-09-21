@@ -53,13 +53,13 @@ const server = http.createServer((request, response) => {
       await page.waitForFunction(() => document.documentElement.dataset.blogReady === 'true');
       assert.equal(await page.locator('#load-error').isVisible(),false);
       assert.equal(await page.locator('.cross-table').count(),2);
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','99.75%']);
+      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','100.00%']);
       assert.equal(await page.locator('.cross-table tbody tr').count(),4);
       assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['322','357']);
-      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['31','42']);
+      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['31','43']);
       assert.deepEqual(await page.locator('.cross-table .not-applicable').allTextContents(),['\\','\\']);
       assert.doesNotMatch(await page.locator('body').innerText(),/unknown|no explicit finish assessment/i);
-      assert.deepEqual(await page.locator('.cross-table .mismatch').allTextContents(),['47','1']);
+      assert.deepEqual(await page.locator('.cross-table .mismatch').allTextContents(),['47','0']);
       assert.equal(await page.locator('#instruction-rows tr').count(),9);
       assert.equal(await page.locator('.case').count(),7);
       assert.equal(await page.locator('.failure-case').count(),4);
@@ -67,15 +67,17 @@ const server = http.createServer((request, response) => {
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
       assert.match(await page.locator('#failure-plate-control-budget .clip-meta').innerText(),/Agent: unable to continue/);
+      assert.match(await page.locator('#failure-plate-wrong-object .clip-meta').innerText(),/Human review: failure/);
+      assert.match(await page.locator('#review-accounting').textContent(),/357, 0, and 43/);
       assert.match(await page.locator('#case-plate-near-stove .case-detail').innerText(),/8 × 8 cm/);
       assert.match(await page.locator('#case-spatial-regression .case-detail').innerText(),/success → failure/);
       await page.locator('[data-scope="revised"]').click();
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['47.78%','98.89%']);
+      assert.deepEqual(await page.locator('.score-value').allTextContents(),['47.78%','100.00%']);
       assert.match(await page.locator('.after .native-score').innerText(),/75\/90/);
       assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['40','75']);
-      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['3','14']);
+      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['3','15']);
       await page.locator('[data-scope="all"]').click();
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','99.75%']);
+      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','100.00%']);
       // Check every local link; media payloads are fetched by video decoding below.
       const links = await page.locator('a[href]').evaluateAll(as => [...new Set(as.map(a => a.href))]);
       for(const link of links) {

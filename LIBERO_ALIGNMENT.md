@@ -4,7 +4,7 @@ The main comparison covers 40 tasks × 10 fixed initial states. Before: 400 orig
 
 **Instinct-alignment score (IAS) = 1 − count(agent success AND native benchmark failure) / N.**
 
-The blog uses a two-category reporting convention. Every native benchmark success is accepted as agent success, including episodes terminated by the environment before a finish declaration. Among native failures, an explicit `visually_complete` claim counts as agent success; the remaining episodes count as agent failure. Thus benchmark success is a subset of accepted agent success in this presentation. The converse need not hold. This convention does not rewrite the archived finish records or the native benchmark outcomes.
+The blog uses a two-category reporting convention. Every native benchmark success is accepted as agent success, including episodes terminated by the environment before a finish declaration. Among native failures, human review adjudicates explicit `visually_complete` claims: retained claims count as agent success, while rejected claims and the remaining episodes count as agent failure. Thus benchmark success is a subset of accepted agent success in this presentation. The converse need not hold. This convention does not rewrite the archived finish records or the native benchmark outcomes.
 
 ## Before: original instructions
 
@@ -20,28 +20,30 @@ IAS = 1 − 47/400 = **88.25%**. Native success = **322/400 (80.50%)**.
 
 | Agent assessment | Bench success | Bench failure |
 | --- | ---: | ---: |
-| Agent success | 357 | 1 |
-| Agent failure | `\` | 42 |
+| Agent success | 357 | 0 |
+| Agent failure | `\` | 43 |
 | Total | 357 | 43 |
 
-IAS = 1 − 1/400 = **99.75%**. Native success = **357/400 (89.25%)**. The one remaining explicit false-complete report is `libero_goal_t05_r05` from the final revision.
+IAS = 1 − 0/400 = **100.00%** after human adjudication. Native success = **357/400 (89.25%)**. The original explicit false-complete report in `libero_goal_t05_r05` was rejected by human review: the policy mistook the wooden cabinet for the stove. This episode moves to agent failure / bench failure; the native benchmark result remains failure. Before that correction, the raw-report IAS was 99.75%.
 
 `\` means not applicable: the agent-failure / bench-success cell cannot occur under the table’s inclusion rule. This is a reporting convention, not a universal guarantee about an unaided model’s beliefs. Five original and nine final-composite native failures ended at the 500-step limit without a finish declaration; the table assigns those to agent failure because no successful completion was declared. This assignment is not a human judgment of their terminal images. The original structured-report accounting is retained in the downloadable data.
 
-The authors used **human-in-the-loop verification of videos where agent and benchmark judgments disagreed**. This review assists interpretation and helps identify mistaken agent self-assessments, so a disagreement is not automatically blamed on benchmark design. Its coverage is the disagreement cases; it does not establish a human rating for every episode. The disagreement counts retain the agent’s original completion claims; they are not corrected human labels.
+The authors used **human-in-the-loop verification of videos where agent and benchmark judgments disagreed**. This review assists interpretation and helps identify mistaken agent self-assessments, so a disagreement is not automatically blamed on benchmark design. Its coverage is the disagreement cases; it does not establish a human rating for every episode. The published tables and IAS use the human-adjudicated labels. The user confirmed that only final-round `libero_goal_t05_r05` changes from agent success to agent failure; all other disagreement labels remain as originally reported. The [correction log and recomputed statistics](data/libero-human-review.json) preserve that decision separately from the raw records.
 
 IAS remains sensitive to reporting behavior. A policy that never declares completion on a native failure can obtain IAS 100% despite zero task success. Indeed, unchanged LIBERO-10 t03 and t09 each have IAS 100% and native success 0/10.
 
 ## Revision history
 
-| Panel | Native success | Explicit false completions | IAS |
+The original and final panels below use the confirmed human adjudications. First-revision rows retain their recorded agent labels; the only correction applies to the final round.
+
+| Panel | Native success | Agent-success / bench-failure | IAS |
 | --- | ---: | ---: | ---: |
 | Original full 400 | 322/400 | 47 | 88.25% |
 | First-revision 400 composite | 345/400 | 19 | 95.25% |
-| Final 400 composite | 357/400 | 1 | 99.75% |
+| Final 400 composite, human-reviewed | 357/400 | 0 | 100.00% |
 | Original nine-task subset | 40/90 | 47 | 47.78% |
 | First revision of nine tasks | 63/90 | 19 | 78.89% |
-| Final nine-task composite | 75/90 | 1 | 98.89% |
+| Final nine-task composite, human-reviewed | 75/90 | 0 | 100.00% |
 
 | Revised task | Original | Revision 1 | Final |
 | --- | ---: | ---: | ---: |
@@ -88,17 +90,18 @@ Native source: [LIBERO commit 8f1084e](https://github.com/Lifelong-Robot-Learnin
 
 [Video metadata](data/libero-blog-media.json) records seven paired cases and four failure examples, with stage, native outcome, explicit assessment, instruction, seed, task rate, and source/output hashes. Each paired example is the lowest rollout index showing the stated transition in the frozen runs. The failure examples are named diagnostic selections after review. They illustrate mechanisms and are not a random sample. Eighteen full recordings preserve original frames, dimensions, and 20 fps playback; scene camera is left and wrist camera right. Inference waiting time is omitted. Nine original videos are reused; nine revision videos are web-compressed. Native success can stop the recording before release.
 
-Public data contain no private reasoning traces, credentials, or host paths. The [400-row CSV](data/libero-alignment-episodes.csv) preserves every slot and all stage assignments; the [aggregate JSON](data/libero-alignment.json) includes matrices, task-level instructions, source hashes, methods, and limitations. Recompute and validate these public exports from this repository:
+Public data contain no private reasoning traces, credentials, or host paths. The [400-row CSV](data/libero-alignment-episodes.csv) preserves every slot and all stage assignments; the [raw aggregate JSON](data/libero-alignment.json) includes original self-report matrices, task-level instructions, source hashes, methods, and limitations. The separate [human-review JSON](data/libero-human-review.json) binds each correction to its source result and contains the recomputed two-category tables and IAS. An uncorrected report and an adjudicated assessment remain distinguishable. Recompute and validate these public exports from this repository:
 
 ```sh
 python3 scripts/validate_libero_blog.py
 python3 scripts/validate_libero_blog.py --probe
+python3 scripts/review_libero_alignment.py --check --require-complete
 ```
 
-The second command requires `ffprobe` and checks all video streams. This verifies published accounting and assets; regenerating from the raw runs additionally requires the source archives. Export scripts do not contain those archives. The original gallery remains [400 baseline episodes](gallery/libero/); the essay’s reruns are separate assets.
+The second command requires `ffprobe` and checks all video streams. The third recomputes the reviewed tables, checks the correction against the frozen source record, and requires confirmed review coverage. This verifies published accounting and assets; regenerating from the raw runs additionally requires the source archives. Export scripts do not contain those archives. The original gallery remains [400 baseline episodes](gallery/libero/); the essay’s reruns are separate assets.
 
 ## Interpretation limits
 
-A higher IAS here means fewer agent-success/native-failure reports under this policy and reporting convention. It does not establish that the native predicate is wrong whenever the agent claims success. Some disagreements are policy errors, including the final plate fixture confusion. Human review of disagreement videos helps diagnose such errors. IAS can improve because native success improves or a failed rollout has no successful-completion claim. Report native success and the reporting rule with it.
+A higher IAS here means fewer human-adjudicated agent-success/native-failure disagreements under this policy and reporting convention. Human review corrects known policy self-assessment errors, including the final plate fixture confusion, before the score is computed. The resulting 100% IAS does not mean perfect policy performance: 43 native failures remain, and the review did not independently rate every video. IAS can improve because native success improves or a failed rollout has no successful-completion claim. Report native success and the reporting rule with it.
 
 The human-in-the-loop review was qualitative verification of disagreement videos, not a controlled human performance study. No post-training experiment was performed. The proposed harm from ambiguous instruction–demonstration pairings is a hypothesis, not a measured degradation of policy quality. A direct experiment would control demonstrations, initialization, and training compute while changing instruction clarity, then evaluate independently specified held-out transfer tasks.

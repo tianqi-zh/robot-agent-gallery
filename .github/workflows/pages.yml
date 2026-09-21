@@ -27,6 +27,8 @@ jobs:
         run: python3 scripts/validate_gallery.py --require-robocasa --require-demos --release-media
       - name: Validate LIBERO comparison data and media
         run: python3 scripts/validate_libero_blog.py
+      - name: Validate human-reviewed LIBERO labels
+        run: python3 scripts/review_libero_alignment.py --check --require-complete
       - name: Stage the static website
         run: python3 scripts/build_site.py
       - name: Configure GitHub Pages

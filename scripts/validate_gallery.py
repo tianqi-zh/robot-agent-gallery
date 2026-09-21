@@ -366,7 +366,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     expected_data_files = {"gallery.json", "episodes.csv", "export-report.json"}
     if (root / "data/task-demos.json").exists():
         expected_data_files.add("task-demos.json")
-    for name in ("libero-blog-media.json", "libero-alignment.json", "libero-alignment-episodes.csv"):
+    for name in ("libero-blog-media.json", "libero-alignment.json", "libero-alignment-episodes.csv", "libero-human-review.json"):
         if (root / "data" / name).exists():
             expected_data_files.add(name)
     require({path.relative_to(root / "data").as_posix() for path in (root / "data").rglob("*") if path.is_file()}
