@@ -72,6 +72,8 @@ Nine tasks were selected after inspecting all 47 original completion claims reje
 
 The original archive contains 404 attempts for 400 slots. Four infrastructure-error attempts (`codex_error`) were followed by one valid attempt each, at Spatial t02 r00/r02 and LIBERO-10 t03 r03/r04. Each slot has exactly one valid outcome. The 90- and 20-episode reruns have no excluded attempts, infrastructure errors, timeouts, or retries. The archive validates statuses but does not independently diagnose each service error.
 
+For the final improved instructions displayed in the blog, the instruction-refining agent was restricted to small edits of the original sentence in simple, natural language. Exact coordinates, centimeter-level target positions, and detailed control instructions were excluded. This limits the GPT → language → GPT channel: the instruction clarifies the goal while the robot-control agent must still interpret the scene and determine how to act.
+
 The authors developed the revisions using code, demonstrations, and observed failures, including the same initial states. The policy never received the code or demonstration videos directly; it received the resulting revised instruction and live observations. This is an adaptive diagnostic intervention, not a held-out, preregistered, or causal estimate of the effect of wording. Ten episodes per task and stochastic model responses limit generalization.
 
 ## Protocol and provenance
