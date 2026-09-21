@@ -1,36 +1,36 @@
 # LIBERO instruction alignment audit
 
-The central question is whether an operator can infer the benchmark’s intended goal from its instruction and the visible scene, without demonstration videos or access to the success-checker code. GPT-6 acts as a proxy for that human operator. Human review of every agent-success / benchmark-failure case in the before-and-after comparison corrects proxy errors before the remaining disagreements are counted as evidence about instruction alignment. This is not a controlled measurement of human task performance.
+The central question is whether an operator can infer the benchmark’s intended goal from its instruction and the visible scene, without demonstration videos or access to the success-checker code. GPT-6 acts as a proxy for that human operator. This is not a controlled measurement of human task performance.
 
 The main comparison covers 40 tasks × 10 fixed initial states. Before: 400 original episodes. After: a composite of 310 unchanged original episodes, 70 first-revision episodes, and 20 final-revision episodes. It is not a fresh 400-episode evaluation.
 
-**Instinct-alignment score (IAS) = 1 − count(agent success AND native benchmark failure) / N.**
+**Instinct-alignment score (IAS) = 1 − count(agent considers complete AND benchmark judges failure) / N.**
 
-The blog uses a two-category reporting convention. Every native benchmark success is accepted as agent success, including episodes terminated by the environment before a finish declaration. Among native failures, human review adjudicates explicit `visually_complete` claims: retained claims count as agent success, while rejected claims and the remaining episodes count as agent failure. Thus benchmark success is a subset of accepted agent success in this presentation. The converse need not hold. This convention does not rewrite the archived finish records or the native benchmark outcomes.
+The blog separates the agent’s completion judgment from the benchmark’s verdict. Every outcome the benchmark judges successful is counted as complete on the agent side, including episodes terminated before a finish declaration. For outcomes the benchmark judges failures, retained explicit `visually_complete` claims count as “agent considers complete”; rejected claims and episodes without a completion claim count as “agent does not consider complete.” The review described below supplies the only correction. This accounting convention does not rewrite archived finish records or native outcomes.
 
 ## Before: original instructions
 
-| Agent assessment | Bench success | Bench failure |
+| Agent completion judgment | Bench judges success | Bench judges failure |
 | --- | ---: | ---: |
-| Agent success | 322 | 47 |
-| Agent failure | `\` | 31 |
+| Agent considers complete | 322 | 47 |
+| Agent does not consider complete | `\` | 31 |
 | Total | 322 | 78 |
 
 IAS = 1 − 47/400 = **88.25%**. Native success = **322/400 (80.50%)**.
 
 ## After: latest instruction composite
 
-| Agent assessment | Bench success | Bench failure |
+| Agent completion judgment | Bench judges success | Bench judges failure |
 | --- | ---: | ---: |
-| Agent success | 357 | 0 |
-| Agent failure | `\` | 43 |
+| Agent considers complete | 357 | 0 |
+| Agent does not consider complete | `\` | 43 |
 | Total | 357 | 43 |
 
-IAS = 1 − 0/400 = **100.00%** after human adjudication. Native success = **357/400 (89.25%)**. The original explicit false-complete report in `libero_goal_t05_r05` was rejected by human review: the policy mistook the wooden cabinet for the stove. This episode moves to agent failure / bench failure; the native benchmark result remains failure. Before that correction, the raw-report IAS was 99.75%.
+IAS = 1 − 0/400 = **100.00%** after human adjudication. Native success = **357/400 (89.25%)**. The original completion claim in `libero_goal_t05_r05` was rejected by human review: the policy mistook the wooden cabinet for the stove. This episode is counted as incomplete on the agent side and judged a failure by the benchmark; the native benchmark result remains failure. Before that correction, the raw-report IAS was 99.75%.
 
-`\` means not applicable: the agent-failure / bench-success cell cannot occur under the table’s inclusion rule. This is a reporting convention, not a universal guarantee about an unaided model’s beliefs. Five original and nine final-composite native failures ended at the 500-step limit without a finish declaration; the table assigns those to agent failure because no successful completion was declared. This assignment is not a human judgment of their terminal images. The original structured-report accounting is retained in the downloadable data.
+`\` means not applicable: the combination “agent does not consider complete / benchmark judges success” cannot occur under the table’s inclusion rule. This is a reporting convention, not a universal guarantee about an unaided model’s beliefs. Five original and nine final-composite native failures ended at the 500-step limit without a finish declaration; the table counts these as “agent does not consider complete” because no completion was declared. This assignment is not a human judgment of their terminal images. The original structured-report accounting is retained in the downloadable data.
 
-The authors used **human-in-the-loop verification of videos where agent and benchmark judgments disagreed**. This review assists interpretation and helps identify mistaken agent self-assessments, so a disagreement is not automatically blamed on benchmark design. Its coverage is the disagreement cases; it does not establish a human rating for every episode. The published tables and IAS use the human-adjudicated labels. The user confirmed that only final-round `libero_goal_t05_r05` changes from agent success to agent failure; all other disagreement labels remain as originally reported. The [correction log and recomputed statistics](data/libero-human-review.json) preserve that decision separately from the raw records.
+The authors used **human-in-the-loop verification of videos where agent and benchmark judgments disagreed**. This review assists interpretation and helps identify mistaken agent self-assessments, so a disagreement is not automatically blamed on benchmark design. Its coverage is the disagreement cases; it does not establish a human rating for every episode. The published tables and IAS use the human-adjudicated labels. The user confirmed that only final-round `libero_goal_t05_r05` has its completion claim corrected to incomplete; all other disagreement labels remain as originally reported. The [correction log and recomputed statistics](data/libero-human-review.json) preserve that decision separately from the raw records.
 
 IAS remains sensitive to reporting behavior. A policy that never declares completion on a native failure can obtain IAS 100% despite zero task success. Indeed, unchanged LIBERO-10 t03 and t09 each have IAS 100% and native success 0/10.
 
@@ -38,7 +38,7 @@ IAS remains sensitive to reporting behavior. A policy that never declares comple
 
 The original and final panels below use the confirmed human adjudications. First-revision rows retain their recorded agent labels; the only correction applies to the final round.
 
-| Panel | Native success | Agent-success / bench-failure | IAS |
+| Panel | Native success | Agent considers complete, benchmark judges failure | IAS |
 | --- | ---: | ---: | ---: |
 | Original full 400 | 322/400 | 47 | 88.25% |
 | First-revision 400 composite | 345/400 | 19 | 95.25% |
@@ -104,6 +104,8 @@ The second command requires `ffprobe` and checks all video streams. The third re
 
 ## Interpretation limits
 
-A higher IAS here means fewer human-adjudicated agent-success/native-failure disagreements under this policy and reporting convention. Human review corrects known policy self-assessment errors, including the final plate fixture confusion, before the score is computed. The resulting 100% IAS does not mean perfect policy performance: 43 native failures remain, and the review did not independently rate every video. IAS can improve because native success improves or a failed rollout has no successful-completion claim. Report native success and the reporting rule with it.
+Instruction refinement can improve agreement about completion while manipulation success stays low or decreases. Spatial t04’s native success fell from 5/10 to 4/10, but explicit completion claims rejected by the benchmark fell from 3 to 0. Four of its six final failures explicitly reported inability to continue; two reached the step limit without claiming completion. The matched r01 episode failed the native check under both instructions, changing from a completion claim to an explicit inability report. Goal t05 improved only from 0/10 to 2/10 native successes while raw rejected completion claims fell from 9 to 1; its last claim is the separately corrected r05. These counts describe closer agreement with the evaluator, not evidence that all original interpretations were unreasonable or all final failures were explicitly recognized.
+
+A higher IAS here means fewer episodes in which the agent considers the task complete but the benchmark judges it a failure, after the documented correction and under the stated reporting convention. Human review corrects known policy self-assessment errors, including the final plate fixture confusion, before the score is computed. The resulting 100% IAS does not mean perfect policy performance: 43 native failures remain, and the review did not independently rate every video. IAS can improve because native success improves or a failed rollout has no successful-completion claim. Report native success and the reporting rule with it.
 
 The human-in-the-loop review was qualitative verification of disagreement videos, not a controlled human performance study. No post-training experiment was performed. The proposed harm from ambiguous instruction–demonstration pairings is a hypothesis, not a measured degradation of policy quality. A direct experiment would control demonstrations, initialization, and training compute while changing instruction clarity, then evaluate independently specified held-out transfer tasks.

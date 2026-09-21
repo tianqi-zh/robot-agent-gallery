@@ -1,4 +1,4 @@
-// Self-contained browser regression for direct and legacy nested gallery URLs.
+// Self-contained browser regression for the essay and its legacy gallery links.
 const {chromium} = require('playwright');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -39,6 +39,19 @@ const server = http.createServer((request, response) => {
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true,args:['--no-sandbox']});
   const errors = [], badResponses = [];
+  const alignment = JSON.parse(fs.readFileSync(path.join(root,'data/libero-alignment.json'),'utf8'));
+  const changedTasks = alignment.tasks.filter(task => task.changed);
+  const expectedHighlights = {
+    libero_goal_t00:['fully'],
+    libero_goal_t05:['close','to','its','front','edge'],
+    libero_goal_t09:['upper','with','its','base','against','the','lower','rail'],
+    libero_object_t00:['blue','and','yellow','can'],
+    libero_object_t04:['white','capped','bottle'],
+    libero_10_t05:['between','the','two','large','side','compartments'],
+    libero_10_t06:['in','center','of','the','immediately'],
+    libero_10_t07:['fully','inside'],
+    libero_spatial_t04:['in','center','of','the']
+  };
   const output = path.join(__dirname,'../artifacts/browser/blog');
   fs.mkdirSync(output,{recursive:true});
   let decoded = 0;
@@ -52,7 +65,15 @@ const server = http.createServer((request, response) => {
       await page.goto(base);
       await page.waitForFunction(() => document.documentElement.dataset.blogReady === 'true');
       assert.equal(await page.locator('#load-error').isVisible(),false);
+      assert.match(await page.title(),/When bench cannot judge actor/);
+      assert.equal((await page.locator('h1').innerText()).replace(/\s+/g,' ').trim(),'When bench cannot judge actor');
+      assert.equal(await page.locator('[data-scope]').count(),0);
+      assert.deepEqual(await page.locator('.score-top > span').allTextContents(),['n = 400','n = 400']);
       assert.equal(await page.locator('.cross-table').count(),2);
+      assert.deepEqual(await page.locator('.cross-table caption').allTextContents(),Array(2).fill('Agent’s completion judgment × benchmark’s verdict'));
+      assert.deepEqual(await page.locator('.cross-table thead th').allTextContents(),Array(2).fill(['Agent’s completion judgment','Bench judges success','Bench judges failure']).flat());
+      assert.deepEqual(await page.locator('.cross-table tbody th').allTextContents(),Array(2).fill(['Agent considers complete','Agent does not consider complete']).flat());
+      assert.doesNotMatch(await page.locator('#comparison').innerText(),/\b(?:agent|bench) (?:success|failure)\b/i);
       assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','100.00%']);
       assert.equal(await page.locator('.cross-table tbody tr').count(),4);
       assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['322','357']);
@@ -61,23 +82,34 @@ const server = http.createServer((request, response) => {
       assert.doesNotMatch(await page.locator('body').innerText(),/unknown|no explicit finish assessment/i);
       assert.deepEqual(await page.locator('.cross-table .mismatch').allTextContents(),['47','0']);
       assert.equal(await page.locator('#instruction-rows tr').count(),9);
+      assert.equal(await page.locator('#instruction-rows .revision-label').count(),0);
+      for (const task of changedTasks) {
+        const row = page.locator(`#instruction-rows [data-task="${task.id}"]`);
+        assert.equal(await row.locator('.instruction-original').textContent(),task.instructionBefore);
+        assert.equal(await row.locator('.instruction-original *').count(),0,'Original instruction must be unformatted');
+        assert.equal(await row.locator('.instruction-improved').textContent(),task.instructionAfter,'Highlighting must preserve exact instruction text');
+        assert.deepEqual(await row.locator('.instruction-improved strong').allTextContents(),expectedHighlights[task.id],task.id);
+        assert.equal(await row.locator('.instruction-improved :not(strong)').count(),0);
+      }
       assert.equal(await page.locator('.case').count(),7);
       assert.equal(await page.locator('.failure-case').count(),4);
       assert.equal(await page.locator('video').count(),18);
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
-      assert.match(await page.locator('#failure-plate-control-budget .clip-meta').innerText(),/Agent: unable to continue/);
-      assert.match(await page.locator('#failure-plate-wrong-object .clip-meta').innerText(),/Human review: failure/);
+      assert.match(await page.locator('#failure-plate-control-budget .clip-meta').innerText(),/Agent reports unable to continue/);
+      assert.match(await page.locator('#failure-plate-wrong-object .clip-meta').innerText(),/Agent claimed completion · corrected to incomplete/);
+      assert.match(await page.locator('#failure-bottom-drawer-sequence .clip-meta').innerText(),/No completion claim · control budget exhausted/);
+      assert.match(await page.locator('#case-book-compartment .clip-meta').first().innerText(),/Agent considers the task complete/);
+      assert.match(await page.locator('#case-book-compartment .clip-meta').last().innerText(),/Bench judges success/);
+      assert.equal(await page.locator('#review-note').count(),1);
+      assert.doesNotMatch(await page.locator('.clip-meta').allTextContents().then(items=>items.join(' ')),/Human review:|Completion: success|Agent: visually complete/);
+      assert.ok((await page.locator('.clip-header .status').allTextContents()).every(text=>['Bench judges success','Bench judges failure'].includes(text)));
       assert.match(await page.locator('#review-accounting').textContent(),/357, 0, and 43/);
+      assert.match(await page.locator('#review-accounting').textContent(),/agent considers the task complete and the bench judges failure/);
+      assert.doesNotMatch(await page.locator('#review-accounting').textContent(),/human review|adjudication/i);
       assert.match(await page.locator('#case-plate-near-stove .case-detail').innerText(),/8 × 8 cm/);
       assert.match(await page.locator('#case-spatial-regression .case-detail').innerText(),/success → failure/);
-      await page.locator('[data-scope="revised"]').click();
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['47.78%','100.00%']);
-      assert.match(await page.locator('.after .native-score').innerText(),/75\/90/);
-      assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['40','75']);
-      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['3','15']);
-      await page.locator('[data-scope="all"]').click();
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','100.00%']);
+      assert.match(await page.locator('.after .native-score').innerText(),/Bench judges success: 357\/400/);
       // Check every local link; media payloads are fetched by video decoding below.
       const links = await page.locator('a[href]').evaluateAll(as => [...new Set(as.map(a => a.href))]);
       for(const link of links) {
@@ -107,6 +139,7 @@ const server = http.createServer((request, response) => {
         await page.evaluate(() => scrollTo(0,0));
         await page.screenshot({path:path.join(output,'desktop-hero.png')});
         await page.locator('#results').screenshot({path:path.join(output,'desktop-results.png')});
+        await page.locator('#instructions .table-scroll').screenshot({path:path.join(output,'desktop-instructions.png')});
         await page.locator('.case').first().screenshot({path:path.join(output,'desktop-case.png')});
         await page.setViewportSize({width:390,height:844});
         await page.evaluate(() => scrollTo(0,0));
@@ -125,8 +158,20 @@ const server = http.createServer((request, response) => {
       await page.waitForURL(`**${mount}gallery/robotwin/**`);
       await page.waitForFunction(() => document.querySelectorAll('.task-card').length === 50);
     }
+    // Escaping remains intact when diff markup encounters punctuation and HTML-like words.
+    const escapedData = structuredClone(alignment);
+    const escapedTask = escapedData.tasks.find(task=>task.changed);
+    escapedTask.instructionBefore = 'place "book" & <caddy> beside the tray';
+    escapedTask.instructionAfter = 'place "book" & <caddy> safely beside the tray <img src="x" onerror="throw 1">';
+    await page.route('**/data/libero-alignment.json',route=>route.fulfill({json:escapedData}));
+    await page.goto(origin + '/');
+    await page.waitForFunction(()=>document.documentElement.dataset.blogReady==='true');
+    const escapedRow = page.locator(`#instruction-rows [data-task="${escapedTask.id}"]`);
+    assert.equal(await escapedRow.locator('.instruction-original').textContent(),escapedTask.instructionBefore);
+    assert.equal(await escapedRow.locator('.instruction-improved').textContent(),escapedTask.instructionAfter);
+    assert.equal(await escapedRow.locator('img,caddy,script').count(),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(badResponses,[]);
-    console.log(`Blog smoke passed: two mount paths, two denominators, 9 instructions, 7 pairs, 4 failure cases, ${decoded} video decodes, responsive layouts and legacy links.`);
+    console.log(`Blog smoke passed: two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted instructions, escaped markup, 7 pairs, 4 failure cases, ${decoded} video decodes, responsive layouts and legacy links.`);
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error);process.exitCode=1;});
