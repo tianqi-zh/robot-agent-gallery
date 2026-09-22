@@ -12,7 +12,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://tianqi-zh.github.io/robot-agent-gallery/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="blog.css?v=e3046bf909bd">
+  <link rel="stylesheet" href="blog.css?v=1824b7d923f9">
   <script src="gallery-hosting.js?v=07c6812a48b6" defer></script>
   <script src="blog.js?v=8817e8bb7f8e" defer></script>
 </head>
@@ -28,6 +28,14 @@
       <h1>Small instruction edits.<br><em>Better-aligned benchmarks.</em></h1>
       <p class="deck">A robot can follow a reasonable reading of an instruction and still fail the benchmark. We use GPT as a proxy for a human operator to find these gaps in LIBERO and RoboTwin, then repair the instruction layer while preserving the success checkers and recorded demonstrations.</p>
       <div class="hero-meta"><span>Small instruction edits. Big gains in benchmark alignment.</span><span>GPT-6-Astra · high reasoning</span><a href="#results">See the results ↓</a></div>
+      <section id="takeaways" class="key-takeaways" aria-labelledby="takeaways-heading">
+        <h2 id="takeaways-heading" class="eyebrow">KEY TAKEAWAYS</h2>
+        <ol>
+          <li><h3>Robot benchmarks still have instruction–verification gaps.</h3><p>Our LIBERO and RoboTwin audits reveal cases where the instruction leaves out conditions required by the success checker, so reasonable task completion can still be scored as failure.</p></li>
+          <li><h3>Strong zero-shot performance still has limits.</h3><p>In our evaluations, GPT-6-Astra performs well on many robot tasks, but success remains low on some contact-rich tasks that demand precise manipulation. Its zero-shot robot control is not yet consistently reliable.</p></li>
+          <li><h3>An imperfect policy can still help debug benchmarks.</h3><p>GPT-6-Astra is not a ground-truth policy, yet its behavior and completion judgments help expose mismatches and guide instruction repairs that improve instruction–verification alignment, while preserving the checker and recorded demonstrations.</p></li>
+        </ol>
+      </section>
       <div class="study-flow" aria-label="Audit the instruction, compare the judgments, repair the language, and reuse the demonstrations">
         <div class="study-step"><span>01 / THE OPERATOR TEST</span><h3>Read the instruction.<br>Observe the scene.</h3><p>GPT controls the robot without demonstration videos or direct access to the success checker.</p></div>
         <div class="study-step"><span>02 / THE DIAGNOSIS</span><h3>Looks complete.<br>Scores as failure.</h3><p>Review disagreements to separate missing goal information from mistakes by the agent.</p></div>
