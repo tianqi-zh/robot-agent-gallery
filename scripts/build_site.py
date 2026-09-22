@@ -14,7 +14,7 @@ PUBLIC_FILES = (
     "METHODOLOGY.md", "LIBERO_ALIGNMENT.md", "assets/favicon.svg",
     "data/libero-alignment.json", "data/libero-alignment-episodes.csv",
     "data/libero-blog-media.json", "data/libero-human-review.json",
-    "data/robotwin-alignment-summary.json",
+    "data/robotwin-alignment-summary.json", "data/robotwin-instruction-examples.json",
 )
 GALLERY_PAGES = (
     "gallery/index.html",

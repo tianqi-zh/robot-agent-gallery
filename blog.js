@@ -35,6 +35,16 @@
     'bottom-drawer-sequence':'The final closure remains incomplete. Placing an object inside a drawer is only part of the goal; the policy must then move to an effective pushing contact and verify the articulated state within the remaining budget.',
     'microwave-sequence':'The final door closure remains incomplete. Placement and door motion require different contacts and viewpoints; succeeding at an earlier substep does not ensure that the full conjunction of native goals is satisfied.'
   };
+  const robotwinCaseDetails = {
+    adjust_bottle: ['Specify height and side', 'The appendix makes the required bottle height and side of the table explicit. This rerun passes the unchanged native checker.'],
+    place_mouse_pad: ['Center, align, then release', 'The revised instruction specifies centering, orientation, and open grippers. This rerun passes the unchanged native checker.'],
+    rotate_qrcode: ['Make orientation and release explicit', 'The appendix gives an orientation target, a height condition, and a release condition. This is richer guidance than a short natural-language edit; this rerun passes the unchanged native checker.'],
+    scan_object: ['Remaining disagreement · scanner alignment', 'The added criteria specify a close relative pose between the scanner and object while both grippers remain closed. The agent still claims completion and the benchmark rejects the result. The failed predicate has not been isolated from this recording.'],
+    move_can_pot: ['Remaining disagreement · position and orientation', 'The added criteria combine side, relative position, orientation, table height, and release. The agent still claims completion and the benchmark rejects the result; that disagreement alone does not identify which condition was missed.'],
+    pick_dual_bottles: ['Remaining disagreement · two simultaneous goals', 'Both bottles must meet their assigned position and height criteria. The agent still claims completion and the benchmark rejects the result. This is a residual disagreement, not an independently established control failure.'],
+    place_dual_shoes: ['Remaining disagreement · two placements', 'Each shoe has a target position, orientation, and support height, with both grippers open. The revised episode introduces a completion claim that the benchmark rejects; the earlier episode had no completion claim.'],
+    dump_bin_bigbin: ['Remaining disagreement · checking every item', 'The added criteria include the small bin’s height and the final height band of every item. The agent still claims completion and the benchmark rejects the result. Further inspection is needed to separate missed criteria from remaining ambiguity or control errors.']
+  };
   let reviewCorrections = new Map();
   function highlightInstructionChanges(original, improved) {
     // Match words case-insensitively; retain the improved sentence's exact
@@ -103,7 +113,8 @@
     }).join('');
     document.querySelector('#failure-cases').innerHTML = media.failureCases.map(item => {
       const clip = media.clips[item.clip];
-      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))} / ${item.task.successes}/${item.task.episodes} TASK SUCCESSES</p><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p></div>${clipMarkup(clip,'Failure example')}<div class="failure-description"><p>${esc(failureDetails[item.id] || '')}</p></div></section>`;
+      const label = clip.stage === 'baseline' ? 'Unchanged instruction · baseline recording' : `Revised instruction · revision ${clip.stage.slice(1)}`;
+      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))} / ${item.task.successes}/${item.task.episodes} TASK SUCCESSES</p><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p></div>${clipMarkup(clip,label)}<div class="failure-description"><p>${esc(failureDetails[item.id] || '')}</p></div></section>`;
     }).join('');
     document.querySelectorAll('.play-pair').forEach(button => {
       const section = button.closest('.case');
@@ -136,30 +147,40 @@
     }));
   }
   function outcomeText(record) {
-    const agent = record.agentSuccess ? 'agent success' : 'agent false';
-    const bench = record.benchSuccess ? 'bench success' : 'bench false';
+    const agent = record.agentSuccess ? 'agent considers complete' : 'agent does not consider complete';
+    const bench = record.benchSuccess ? 'bench judges success' : 'bench judges failure';
     return `${agent} / ${bench}`;
   }
-  function renderRobotwin(data) {
+  function robotwinInstructionMarkup(instruction) {
+    const baseline = instruction.sameBaseInstruction ? '' : `<details><summary>Baseline instruction</summary><p class="instruction-baseline">${esc(instruction.baselineInstruction)}</p></details>`;
+    return `<div class="instruction-comparison"><p class="instruction-label">Base instruction</p><p class="instruction-base">${esc(instruction.revisedBaseInstruction)}</p><details><summary>Added goal criteria</summary><p class="instruction-goal-criteria">${esc(instruction.addedGoalSpec)}</p></details><details><summary>Full revised instruction</summary><p class="instruction-full">${esc(instruction.revisedInstruction)}</p></details>${baseline}<p class="instruction-provenance">${esc(instruction.comparisonNote)} Baseline seed ${instruction.baselineSeed}; revised seed ${instruction.revisedSeed}. Base instruction and added criteria above come from the same revised-run record.</p></div>`;
+  }
+  function robotwinCaseMarkup(item, instruction, index) {
+    const [title, detail] = robotwinCaseDetails[item.taskName];
+    return `<section class="robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Revised-run outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>Goal-spec rerun · ${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(downloadUrl(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${esc(detail)}</p>${robotwinInstructionMarkup(instruction)}</div></section>`;
+  }
+  function renderRobotwin(data, instructions) {
     document.querySelector('#robotwin-comparison').innerHTML =
       robotwinScoreCard(data.before, 'Before · original RoboTwin instructions', false) +
       robotwinScoreCard(data.after, 'After · public goal spec rerun', true);
     const common = data.common;
     document.querySelector('#robotwin-summary-grid').innerHTML = [
       ['Common terminal episodes', common.n],
-      ['AS/BF fixed', common.fixedAgentSuccessBenchFalse],
-      ['AS/BF remaining', common.remainingAgentSuccessBenchFalse],
-      ['New AS/BF', common.newAgentSuccessBenchFalse],
+      ['Original disagreements removed', common.fixedAgentSuccessBenchFalse],
+      ['Original disagreements retained', common.remainingAgentSuccessBenchFalse],
+      ['New disagreements', common.newAgentSuccessBenchFalse],
       ['Playable rerun videos', data.coverage.afterPlayableEpisodes],
       ['Missing terminal results', data.coverage.afterMissingTerminalResults]
     ].map(([label,value]) => `<div class="mini-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
-    document.querySelector('#robotwin-cases').innerHTML = data.cases.map((item,index) => {
-      const fixed = item.before.agentSuccess && !item.before.benchSuccess && item.after.benchSuccess;
-      const title = fixed ? 'Mismatch fixed by public goal criteria' :
-        item.after.agentSuccess && !item.after.benchSuccess ? 'Still visually complete, still rejected' :
-        'Execution remains difficult';
-      return `<section class="robotwin-case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(downloadUrl(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${fixed ? 'The earlier run was a classic agent-success/bench-false disagreement. The goal-spec rerun gives the agent the benchmark-relevant observable criterion and the native checker now agrees.' : 'The public goal criteria make the target clearer, but this episode still exposes execution, perception, or precision limits. Alignment improves at the benchmark level, not every task becomes easy.'}</p></div></section>`;
-    }).join('');
+    const instructionByEpisode = new Map(instructions.cases.map(item => [item.episodeKey,item]));
+    const rendered = data.cases.map((item,index) => {
+      const instruction = instructionByEpisode.get(item.episodeKey);
+      if (!instruction) throw new Error(`Missing RoboTwin instruction: ${item.episodeKey}`);
+      if (instruction.baselineBenchSuccess !== item.before.benchSuccess || instruction.revisedBenchSuccess !== item.after.benchSuccess) throw new Error(`RoboTwin instruction outcome mismatch: ${item.episodeKey}`);
+      return {success:item.after.benchSuccess,html:robotwinCaseMarkup(item,instruction,index)};
+    });
+    document.querySelector('#robotwin-cases').innerHTML = rendered.filter(item => item.success).map(item => item.html).join('');
+    document.querySelector('#robotwin-failure-cases').innerHTML = rendered.filter(item => !item.success).map(item => item.html).join('');
   }
   window.galleryHosting.then(async config => {
     hosting = config;
@@ -168,7 +189,7 @@
     document.querySelectorAll('[data-gallery-path]').forEach(link => {
       link.href = new URL(link.dataset.galleryPath, hosting.galleryUrl).href;
     });
-    const [data,media,review,robotwin] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
+    const [data,media,review,robotwin,robotwinInstructions] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json','data/robotwin-instruction-examples.json'].map(async path => {
       const response = await fetch(url(path));
       if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
       return response.json();
@@ -180,7 +201,7 @@
     document.querySelector('#review-accounting').textContent = `The 400 original episodes comprise ${review.before.matrix.success.benchSuccess} where the agent considers the task complete and the bench judges success; ${review.before.matrix.success.benchFailure} where the agent considers the task complete and the bench judges failure; and ${review.before.matrix.failure.benchFailure} where the agent does not consider the task complete and the bench judges failure. In the revised composite of 400 episodes, those same categories contain ${review.after.matrix.success.benchSuccess}, ${review.after.matrix.success.benchFailure}, and ${review.after.matrix.failure.benchFailure} episodes, respectively.`;
     renderInstructions(data);
     renderMedia(media);
-    renderRobotwin(robotwin);
+    renderRobotwin(robotwin,robotwinInstructions);
     document.documentElement.dataset.blogReady = 'true';
   }).catch(error => {
     document.querySelector('#load-error').hidden = false;

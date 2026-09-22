@@ -1,6 +1,6 @@
 # Agent as Policy
 
-The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) examines whether robot benchmark instructions communicate the goals their evaluators expect. This GitHub repository contains the essay, its 26 selected example videos and posters, analysis data, and validation tools.
+**Small instruction edits. Better-aligned benchmarks.** The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) uses GPT as a proxy for a human robot operator to diagnose instruction–evaluator mismatches in LIBERO and RoboTwin. It explains the motivation, evaluation method, instruction repairs and results, remaining difficulties, and implications for reusing existing demonstrations. This GitHub repository contains the essay, its 26 selected example videos and posters, analysis data, and validation tools.
 
 **[Open the video gallery on Hugging Face](https://huggingface.co/spaces/Alan0928/robot-agent-gallery)** · [Video Dataset](https://huggingface.co/datasets/Alan0928/robot-agent-gallery) · [Gallery source](https://huggingface.co/spaces/Alan0928/robot-agent-gallery/tree/main)
 
@@ -59,5 +59,6 @@ GitHub Pages is configured to publish the repository root from `robotwin-blog-co
 - [Evaluation methodology](METHODOLOGY.md)
 - [LIBERO alignment data](data/libero-alignment.json), [episode records](data/libero-alignment-episodes.csv), [reviewed labels](data/libero-human-review.json), and [clip provenance](data/libero-blog-media.json)
 - [RoboTwin alignment summary](data/robotwin-alignment-summary.json)
+- [Verbatim RoboTwin instruction comparisons and source provenance](data/robotwin-instruction-examples.json)
 
 Only article-selected videos and posters remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.
