@@ -15,12 +15,9 @@
   }
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const pct = value => (100 * value).toFixed(2);
-  const url = path => new URL(path, path.startsWith('media/') ? hosting.mediaBaseUrl : siteRoot).href;
-  const downloadUrl = path => {
-    const target = new URL(url(path));
-    target.searchParams.set('download', 'true');
-    return target.href;
-  };
+  // The essay's selected recordings ship with this site; the full gallery stays on HF.
+  const url = path => new URL(path, siteRoot).href;
+  const downloadUrl = url;
   const suiteNames = {libero_10:'LIBERO-10',libero_goal:'Goal',libero_object:'Object',libero_spatial:'Spatial'};
   const taskLabel = (suite,id) => `${suiteNames[suite]} t${String(id).padStart(2,'0')}`;
   const descriptions = {

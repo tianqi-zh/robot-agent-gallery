@@ -1,6 +1,6 @@
 # Agent as Policy
 
-The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) examines whether robot benchmark instructions communicate the goals their evaluators expect. This GitHub repository contains the essay, analysis data, and validation tools.
+The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) examines whether robot benchmark instructions communicate the goals their evaluators expect. This GitHub repository contains the essay, its 26 selected example videos and posters, analysis data, and validation tools.
 
 **[Open the video gallery on Hugging Face](https://huggingface.co/spaces/Alan0928/robot-agent-gallery)** · [Video Dataset](https://huggingface.co/datasets/Alan0928/robot-agent-gallery) · [Gallery source](https://huggingface.co/spaces/Alan0928/robot-agent-gallery/tree/main)
 
@@ -21,9 +21,9 @@ The HF archive also preserves the 50 older Robotwin episodes, 490 training refer
 python3 -m http.server 8080
 ```
 
-Open http://localhost:8080/. Video playback needs network access to Hugging Face; no model API or credentials are needed. The essay's 26 video players load the same recordings from HF. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
+Open http://localhost:8080/. The essay's 26 video players load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
 
-[gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The media URL is pinned to a verified HF Dataset commit so future gallery updates do not silently change the essay's recordings. To adopt a new media revision, update this configuration and rerun validation.
+[gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The archive media URL is pinned to a verified HF Dataset commit and is retained for validation and recovering missing files. Article playback uses local media; adopting a new example requires updating the evidence catalog and local assets together.
 
 ## Validate and publish
 
@@ -34,7 +34,7 @@ python3 scripts/build_site.py
 python3 -m http.server 8080 --directory _site
 ```
 
-The media validator downloads the 18 LIBERO evidence clips and their posters into an ignored cache, then verifies their recorded sizes and SHA256 hashes. For offline validation against a local Dataset checkout:
+The media validator verifies the 18 local LIBERO evidence clips and their posters against recorded sizes and SHA256 hashes. It can recover missing files from the pinned HF archive into an ignored cache. To validate directly against another local Dataset checkout:
 
 ```bash
 python3 scripts/validate_libero_blog.py --media-root /path/to/robot-agent-gallery-media
@@ -49,9 +49,9 @@ npx playwright install chromium
 npm run test:blog
 ```
 
-The browser check covers all 26 players, evidence tables, mobile layouts, HF links, and legacy redirects. The Pages build stages only the essay, public evidence, visual assets, and forwarding pages. It contains no gallery application or video files.
+The browser check decodes all 26 local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, its 52 explicitly selected video/poster files (about 24.4 MB), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
 
-A push to `main` triggers the [Pages workflow](.github/workflows/pages.yml). Work on another branch does not publish the site. The standalone Space and media Dataset are updated separately in their HF repositories.
+GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
 ## Evidence and methods
 
@@ -60,4 +60,4 @@ A push to `main` triggers the [Pages workflow](.github/workflows/pages.yml). Wor
 - [LIBERO alignment data](data/libero-alignment.json), [episode records](data/libero-alignment-episodes.csv), [reviewed labels](data/libero-human-review.json), and [clip provenance](data/libero-blog-media.json)
 - [RoboTwin alignment summary](data/robotwin-alignment-summary.json)
 
-The migration removes media from this branch's current file tree. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.
+Only article-selected videos and posters remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.

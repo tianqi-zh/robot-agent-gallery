@@ -7,17 +7,14 @@ const path = require('node:path');
 
 const root = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const prefix = '/project-preview/robot-agent-gallery/';
-const mediaRoot = process.env.MEDIA_ROOT ? path.resolve(process.env.MEDIA_ROOT) : null;
 const hosting = JSON.parse(fs.readFileSync(path.join(root, 'gallery-hosting.json'), 'utf8'));
 const robotwin = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-alignment-summary.json'), 'utf8'));
 const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.mp4':'video/mp4', '.csv':'text/csv'};
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
-  const fixture = mediaRoot && url.pathname.startsWith('/__hf_media__/');
-  const mount = fixture ? '/__hf_media__/' : url.pathname.startsWith(prefix) ? prefix : '/';
-  const directory = fixture ? mediaRoot : root;
-  let file = path.resolve(directory, decodeURIComponent(url.pathname.slice(mount.length)));
-  if (!file.startsWith(directory + path.sep) && file !== directory) { response.writeHead(403).end(); return; }
+  const mount = url.pathname.startsWith(prefix) ? prefix : '/';
+  let file = path.resolve(root, decodeURIComponent(url.pathname.slice(mount.length)));
+  if (!file.startsWith(root + path.sep) && file !== root) { response.writeHead(403).end(); return; }
   try {
     if (fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
     const stat = fs.statSync(file);
@@ -43,7 +40,7 @@ const server = http.createServer((request, response) => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true,args:['--no-sandbox']});
-  const errors = [], badResponses = [], localMediaRequests = [];
+  const errors = [], badResponses = [], localMediaRequests = [], externalMediaRequests = [];
   const alignment = JSON.parse(fs.readFileSync(path.join(root,'data/libero-alignment.json'),'utf8'));
   const changedTasks = alignment.tasks.filter(task => task.changed);
   const expectedHighlights = {
@@ -69,19 +66,19 @@ const server = http.createServer((request, response) => {
     });
     // Exercise forwarding without depending on the live Space's gallery runtime.
     await page.route(`${hosting.galleryUrl}**`, route => route.fulfill({contentType:'text/html',body:'<!doctype html><title>Hugging Face gallery destination</title><main>Gallery destination</main>'}));
-    if (mediaRoot) {
-      await page.route(`${hosting.mediaBaseUrl}**`, async route => {
-        const relative = route.request().url().slice(hosting.mediaBaseUrl.length);
-        const response = await route.fetch({url:`${origin}/__hf_media__/${relative}`});
-        await route.fulfill({response});
-      });
-    }
+    // Article playback must work even when the external media service is unavailable.
+    await page.route(`${hosting.mediaBaseUrl}**`, route => {
+      externalMediaRequests.push(route.request().url());
+      return route.abort();
+    });
     page.on('response',response => { if(response.status()>=400) badResponses.push([response.status(),response.url()]); });
     for (const mount of ['/',prefix]) {
       const base = `${origin}${mount}`;
       console.log(`Checking blog at ${mount}`);
       await page.goto(base);
       await page.waitForFunction(() => document.documentElement.dataset.blogReady === 'true');
+      assert.ok((await page.locator('script[src]').evaluateAll(scripts=>scripts.map(script=>script.src)))
+        .every(src=>new URL(src).searchParams.has('v')),'Entry scripts must have a cache version');
       assert.equal(await page.locator('#load-error').isVisible(),false);
       assert.match(await page.title(),/When bench cannot judge actor/);
       assert.equal((await page.locator('h1').innerText()).replace(/\s+/g,' ').trim(),'When bench cannot judge actor');
@@ -118,10 +115,10 @@ const server = http.createServer((request, response) => {
       assert.deepEqual(await page.locator('#robotwin-comparison .score-value').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`${(100*stats.instinctAlignment).toFixed(2)}%`));
       const mediaUrls = await page.locator('video').evaluateAll(videos=>videos.flatMap(video=>[video.src,video.poster]));
       assert.equal(mediaUrls.length,52);
-      assert.ok(mediaUrls.every(url=>url.startsWith(hosting.mediaBaseUrl+'media/')),'All videos and posters must be hosted on HF');
+      assert.ok(mediaUrls.every(url=>url.startsWith(base+'media/')),'All article videos and posters must load from this site');
       const downloads = await page.locator('.clip-meta a[download]').evaluateAll(links=>links.map(link=>link.href));
       assert.equal(downloads.length,26);
-      assert.ok(downloads.every(link=>link.startsWith(hosting.mediaBaseUrl+'media/') && new URL(link).searchParams.get('download') === 'true'),'HF download links must request attachment responses');
+      assert.ok(downloads.every(link=>link.startsWith(base+'media/') && !new URL(link).search),'Article downloads must use local video files');
       assert.ok((await page.locator('[data-gallery-path]').evaluateAll(links=>links.map(link=>link.href))).every(url=>url.startsWith(hosting.galleryUrl) && new URL(url).pathname.endsWith('/index.html')));
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
@@ -206,7 +203,8 @@ const server = http.createServer((request, response) => {
     await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
     assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
     await noScript.close();
-    assert.deepEqual(localMediaRequests,[],'The blog must never request media from GitHub Pages');
+    assert.ok(localMediaRequests.length >= 52,'Article media must load from the local site under both mounts');
+    assert.deepEqual(externalMediaRequests,[],'Article playback must not depend on HF media');
     // Escaping remains intact when diff markup encounters punctuation and HTML-like words.
     const escapedData = structuredClone(alignment);
     const escapedTask = escapedData.tasks.find(task=>task.changed);
@@ -221,6 +219,6 @@ const server = http.createServer((request, response) => {
     assert.equal(await escapedRow.locator('img,caddy,script').count(),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(badResponses,[]);
-    console.log(`Blog smoke passed: two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted instructions, escaped markup, 7 LIBERO pairs, 4 LIBERO failure cases, 8 RoboTwin cases, ${decoded} external video decodes, responsive layouts and HF forwarding.`);
+    console.log(`Blog smoke passed: two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted instructions, escaped markup, 7 LIBERO pairs, 4 LIBERO failure cases, 8 RoboTwin cases, ${decoded} local video decodes with HF media blocked, responsive layouts and HF forwarding.`);
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error);process.exitCode=1;});

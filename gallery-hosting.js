@@ -1,7 +1,9 @@
 (() => {
   'use strict';
-  const siteRoot = new URL('./', document.currentScript.src);
-  window.galleryHosting = fetch(new URL('gallery-hosting.json', siteRoot)).then(async response => {
+  const scriptUrl = new URL(document.currentScript.src);
+  const configUrl = new URL('gallery-hosting.json', scriptUrl);
+  configUrl.search = scriptUrl.search;
+  window.galleryHosting = fetch(configUrl).then(async response => {
     if (!response.ok) throw new Error(`Cannot load gallery hosting: ${response.status}`);
     const config = await response.json();
     for (const key of ['galleryUrl', 'mediaBaseUrl']) {
