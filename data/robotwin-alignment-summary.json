@@ -177,8 +177,10 @@
         "toolCalls": 10,
         "wallSeconds": 247.136
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle_r00.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/adjust_bottle_r00_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/adjust_bottle_r00_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/adjust_bottle_r00_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/adjust_bottle_r00_after.jpg"
     },
     {
       "episodeKey": "place_mouse_pad_r08",
@@ -203,8 +205,10 @@
         "toolCalls": 16,
         "wallSeconds": 236.484
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_place_mouse_pad_r08.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_place_mouse_pad_r08.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/place_mouse_pad_r08_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/place_mouse_pad_r08_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/place_mouse_pad_r08_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/place_mouse_pad_r08_after.jpg"
     },
     {
       "episodeKey": "rotate_qrcode_r00",
@@ -229,8 +233,10 @@
         "toolCalls": 15,
         "wallSeconds": 218.312
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_rotate_qrcode_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_rotate_qrcode_r00.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/rotate_qrcode_r00_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/rotate_qrcode_r00_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/rotate_qrcode_r00_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/rotate_qrcode_r00_after.jpg"
     },
     {
       "episodeKey": "scan_object_r01",
@@ -255,8 +261,10 @@
         "toolCalls": 26,
         "wallSeconds": 447.901
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_scan_object_r01.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_scan_object_r01.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/scan_object_r01_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/scan_object_r01_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/scan_object_r01_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/scan_object_r01_after.jpg"
     },
     {
       "episodeKey": "move_can_pot_r01",
@@ -281,8 +289,10 @@
         "toolCalls": 30,
         "wallSeconds": 408.205
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_move_can_pot_r01.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_move_can_pot_r01.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/move_can_pot_r01_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/move_can_pot_r01_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/move_can_pot_r01_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/move_can_pot_r01_after.jpg"
     },
     {
       "episodeKey": "pick_dual_bottles_r00",
@@ -307,8 +317,10 @@
         "toolCalls": 24,
         "wallSeconds": 282.734
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_pick_dual_bottles_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_pick_dual_bottles_r00.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/pick_dual_bottles_r00_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/pick_dual_bottles_r00_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/pick_dual_bottles_r00_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/pick_dual_bottles_r00_after.jpg"
     },
     {
       "episodeKey": "place_dual_shoes_r00",
@@ -333,8 +345,10 @@
         "toolCalls": 60,
         "wallSeconds": 831.141
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes_r00.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/place_dual_shoes_r00_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/place_dual_shoes_r00_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/place_dual_shoes_r00_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/place_dual_shoes_r00_after.jpg"
     },
     {
       "episodeKey": "dump_bin_bigbin_r00",
@@ -359,8 +373,10 @@
         "toolCalls": 72,
         "wallSeconds": 1277.505
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_dump_bin_bigbin_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_dump_bin_bigbin_r00.jpg"
+      "beforeVideo": "media/blog/robotwin/pairs/dump_bin_bigbin_r00_before.mp4",
+      "beforePoster": "media/blog/robotwin/pairs/dump_bin_bigbin_r00_before.jpg",
+      "afterVideo": "media/blog/robotwin/pairs/dump_bin_bigbin_r00_after.mp4",
+      "afterPoster": "media/blog/robotwin/pairs/dump_bin_bigbin_r00_after.jpg"
     }
   ]
 }

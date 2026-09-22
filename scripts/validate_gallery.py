@@ -352,6 +352,27 @@ def validate_blog_media(root):
     return paths
 
 
+def validate_robotwin_blog_media(root):
+    """Allow explicitly paired RoboTwin before/after blog clips."""
+    path = root / "data/robotwin-alignment-summary.json"
+    if not path.exists():
+        return set()
+    catalog = read_json(path)
+    public_metadata(catalog, "data/robotwin-alignment-summary.json")
+    paths = set()
+    for case in catalog.get("cases", []):
+        require(isinstance(case, dict) and case.get("episodeKey"),
+                "Invalid RoboTwin blog case")
+        for key, suffix in (("beforeVideo", ".mp4"), ("afterVideo", ".mp4"),
+                            ("beforePoster", ".jpg"), ("afterPoster", ".jpg")):
+            relative = case.get(key)
+            asset = local_asset(root, relative, f"RoboTwin blog {key}")
+            require(PurePosixPath(relative).parts[0] == "media" and asset.suffix == suffix,
+                    f"RoboTwin blog {key} must reference a {suffix} file under media")
+            paths.add(relative)
+    return paths
+
+
 def validate_media_inventory(root, media_paths, external_media=()):
     actual_media = {path.relative_to(root).as_posix() for path in (root / "media").rglob("*") if path.is_file()}
     require(media_paths - set(external_media) <= actual_media <= media_paths,
@@ -766,6 +787,8 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     media_paths.update(demo_paths)
     videos.extend(demo_videos)
     blog_paths = validate_blog_media(root)
+    robotwin_blog_paths = validate_robotwin_blog_media(root)
+    blog_paths.update(robotwin_blog_paths)
     additional_blog_paths = blog_paths - media_paths
     blog_bytes = sum((root / relative).stat().st_size for relative in additional_blog_paths)
     media_paths.update(blog_paths)

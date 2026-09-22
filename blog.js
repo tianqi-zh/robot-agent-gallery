@@ -94,17 +94,10 @@
     const assessment = correction ? 'Agent claimed completion · corrected to incomplete' : clip.nativeSuccess ? 'Bench judges success' : clip.agentAssessment === 'visually_complete' ? 'Agent considers the task complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent reports unable to continue' : 'No completion claim · control budget exhausted';
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(url(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
-  function renderMedia(media) {
-    document.querySelector('#paired-cases').innerHTML = media.pairs.map((pair,index) => {
-      const before = media.clips[pair.before], after = media.clips[pair.after];
-      const sources = (pair.sourceLinks || []).filter(link => link.label === 'Task BDDL');
-      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(pair.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(descriptions[pair.id] || pair.note)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
-    }).join('');
-    document.querySelector('#failure-cases').innerHTML = media.failureCases.map(item => {
-      const clip = media.clips[item.clip];
-      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))} / ${item.task.successes}/${item.task.episodes} TASK SUCCESSES</p><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p></div>${clipMarkup(clip,'Failure example')}<div class="failure-description"><p>${esc(failureDetails[item.id] || '')}</p></div></section>`;
-    }).join('');
+  function setupPairs() {
     document.querySelectorAll('.play-pair').forEach(button => {
+      if (button.dataset.bound === 'true') return;
+      button.dataset.bound = 'true';
       const section = button.closest('.case');
       const videos = Array.from(section.querySelectorAll('video'));
       button.addEventListener('click', async () => {
@@ -128,16 +121,37 @@
         if (videos.every(item => item.paused || item.ended)) button.textContent = 'Play both from start';
       }));
     });
-    // Posters load immediately; full recordings load only when the reader chooses to play.
-    document.querySelectorAll('video').forEach(video => video.addEventListener('error', () => {
-      const meta = video.closest('figure').querySelector('.clip-meta');
-      if (!meta.querySelector('.media-error')) meta.insertAdjacentHTML('beforeend','<br><span class="media-error" role="alert">Playback unavailable. Try the MP4 download link.</span>');
-    }));
+    document.querySelectorAll('video').forEach(video => {
+      if (video.dataset.errorBound === 'true') return;
+      video.dataset.errorBound = 'true';
+      video.addEventListener('error', () => {
+        const meta = video.closest('figure').querySelector('.clip-meta');
+        if (!meta.querySelector('.media-error')) meta.insertAdjacentHTML('beforeend','<br><span class="media-error" role="alert">Playback unavailable. Try the MP4 download link.</span>');
+      });
+    });
+  }
+  function renderMedia(media) {
+    document.querySelector('#paired-cases').innerHTML = media.pairs.map((pair,index) => {
+      const before = media.clips[pair.before], after = media.clips[pair.after];
+      const sources = (pair.sourceLinks || []).filter(link => link.label === 'Task BDDL');
+      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(pair.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(descriptions[pair.id] || pair.note)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
+    }).join('');
+    document.querySelector('#failure-cases').innerHTML = media.failureCases.map(item => {
+      const clip = media.clips[item.clip];
+      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))} / ${item.task.successes}/${item.task.episodes} TASK SUCCESSES</p><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p></div>${clipMarkup(clip,'Failure example')}<div class="failure-description"><p>${esc(failureDetails[item.id] || '')}</p></div></section>`;
+    }).join('');
+    setupPairs();
   }
   function outcomeText(record) {
     const agent = record.agentSuccess ? 'agent success' : 'agent false';
     const bench = record.benchSuccess ? 'bench success' : 'bench false';
     return `${agent} / ${bench}`;
+  }
+  function robotwinClip(item, stage, label) {
+    const record = item[stage];
+    const video = item[`${stage}Video`];
+    const poster = item[`${stage}Poster`];
+    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${record.benchSuccess ? 'success' : 'failure'}">${esc(outcomeText(record))}</span></div><video controls playsinline preload="none" poster="${esc(url(poster))}" src="${esc(url(video))}" aria-label="${esc('RoboTwin ' + item.episodeKey + ' ' + label)}"></video><figcaption><p class="clip-instruction">${stage === 'before' ? 'Original instruction run' : 'Goal-spec rerun'}</p><p class="clip-meta">${record.steps || 0} actions · ${record.toolCalls || 0} tool calls · ${Math.round(record.wallSeconds || 0)} s wall time · <a href="${esc(url(video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
   function renderRobotwin(data) {
     document.querySelector('#robotwin-comparison').innerHTML =
@@ -157,8 +171,9 @@
       const title = fixed ? 'Mismatch fixed by public goal criteria' :
         item.after.agentSuccess && !item.after.benchSuccess ? 'Still visually complete, still rejected' :
         'Execution remains difficult';
-      return `<section class="robotwin-case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(url(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${fixed ? 'The earlier run was a classic agent-success/bench-false disagreement. The goal-spec rerun gives the agent the benchmark-relevant observable criterion and the native checker now agrees.' : 'The public goal criteria make the target clearer, but this episode still exposes execution, perception, or precision limits. Alignment improves at the benchmark level, not every task becomes easy.'}</p></div></section>`;
+      return `<section class="robotwin-case case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3><p class="robotwin-transition">${esc(item.episodeKey)} · ${esc(outcomeText(item.before))} → ${esc(outcomeText(item.after))}</p></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>After benchmark verdict</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="paired-videos robotwin-pair">${robotwinClip(item, 'before', 'Before · original instruction')}${robotwinClip(item, 'after', 'After · goal spec')}</div><div class="case-foot"><p>${fixed ? 'This is the intended alignment evidence: the same episode was previously an agent-success/bench-false disagreement, and the goal-spec rerun reaches a state the native checker accepts.' : 'This pair shows the same before/after intervention even when the remaining difficulty is execution, perception, precision, or a still-unmet benchmark condition.'}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Cropped to the first RoboTwin camera view; side wrist views and black margins are omitted.</span><p class="play-status" aria-live="polite"></p></div></div></section>`;
     }).join('');
+    setupPairs();
   }
   Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
     const response = await fetch(url(path));
