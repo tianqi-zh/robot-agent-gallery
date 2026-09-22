@@ -1,6 +1,6 @@
 # Agent as Policy
 
-**Small instruction edits. Better-aligned benchmarks.** The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) uses GPT as a proxy for a human robot operator to diagnose instruction–evaluator mismatches in LIBERO and RoboTwin. It explains the motivation, evaluation method, instruction repairs and results, remaining difficulties, and implications for reusing existing demonstrations. This GitHub repository contains the essay, its 26 selected example videos and posters, analysis data, and validation tools.
+**Small instruction edits. Better-aligned benchmarks.** The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) uses GPT as a proxy for a human robot operator to diagnose instruction–evaluator mismatches in LIBERO and RoboTwin. It explains the motivation, evaluation method, instruction repairs and results, remaining difficulties, and implications for reusing existing demonstrations. This GitHub repository contains the essay, its local example videos and posters, analysis data, and validation tools.
 
 **[Open the video gallery on Hugging Face](https://huggingface.co/spaces/Alan0928/robot-agent-gallery)** · [Video Dataset](https://huggingface.co/datasets/Alan0928/robot-agent-gallery) · [Gallery source](https://huggingface.co/spaces/Alan0928/robot-agent-gallery/tree/main)
 
@@ -21,7 +21,7 @@ The HF archive also preserves the 50 older Robotwin episodes, 490 training refer
 python3 -m http.server 8080
 ```
 
-Open http://localhost:8080/. The essay's 26 video players load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
+Open http://localhost:8080/. The essay's 21 video players load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
 
 [gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The archive media URL is pinned to a verified HF Dataset commit and is retained for validation and recovering missing files. Article playback uses local media; adopting a new example requires updating the evidence catalog and local assets together.
 
@@ -49,7 +49,7 @@ npx playwright install chromium
 npm run test:blog
 ```
 
-The browser check decodes all 26 local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, its 52 explicitly selected video/poster files (about 24.4 MB), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
+The browser check decodes all 21 embedded local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, the 52 video/poster files retained in its evidence catalog (about 24.4 MB), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
 
 GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
@@ -61,4 +61,4 @@ GitHub Pages is configured to publish the repository root from `robotwin-blog-co
 - [RoboTwin alignment summary](data/robotwin-alignment-summary.json)
 - [Verbatim RoboTwin instruction comparisons and source provenance](data/robotwin-instruction-examples.json)
 
-Only article-selected videos and posters remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.
+Only videos and posters in the article evidence catalog remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.

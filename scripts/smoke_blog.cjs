@@ -10,6 +10,15 @@ const prefix = '/project-preview/robot-agent-gallery/';
 const hosting = JSON.parse(fs.readFileSync(path.join(root, 'gallery-hosting.json'), 'utf8'));
 const robotwin = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-alignment-summary.json'), 'utf8'));
 const robotwinInstructions = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-instruction-examples.json'), 'utf8'));
+const liberoMedia = JSON.parse(fs.readFileSync(path.join(root, 'data/libero-blog-media.json'), 'utf8'));
+const selectedLiberoFailures = ['plate-control-budget','bottom-drawer-sequence'];
+const selectedRobotwinFailures = ['move_can_pot_r01','place_dual_shoes_r00'];
+const displayedRobotwinCases = robotwin.cases.filter(item=>item.after.benchSuccess || selectedRobotwinFailures.includes(item.episodeKey));
+const displayedVideoPaths = [
+  ...liberoMedia.pairs.flatMap(pair=>[liberoMedia.clips[pair.before].video,liberoMedia.clips[pair.after].video]),
+  ...selectedLiberoFailures.map(id=>liberoMedia.clips[liberoMedia.failureCases.find(item=>item.id===id).clip].video),
+  ...displayedRobotwinCases.map(item=>item.video)
+];
 const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.mp4':'video/mp4', '.csv':'text/csv'};
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
@@ -119,14 +128,20 @@ const server = http.createServer((request, response) => {
       }
       assert.equal(await page.locator('.case').count(),7);
       assert.equal(await page.locator('.failure-case').count(),4);
-      assert.equal(await page.locator('#paired-cases video, #failure-cases video').count(),18);
+      assert.equal(await page.locator('#failure-cases .failure-case').count(),2);
+      assert.equal(await page.locator('#robotwin-failure-cases .failure-case').count(),2);
+      assert.equal(await page.locator('#paired-cases video, #failure-cases video').count(),16);
       assert.equal(await page.locator('#robotwin-cases video').count(),robotwin.cases.filter(item=>item.after.benchSuccess).length);
-      assert.equal(await page.locator('#robotwin-failure-cases video').count(),robotwin.cases.filter(item=>!item.after.benchSuccess).length);
-      assert.equal(await page.locator('video').count(),26);
-      assert.equal(await page.locator('video').evaluateAll(videos=>new Set(videos.map(video=>video.src)).size),26,'Each selected article recording appears once');
-      for (const item of robotwin.cases) {
-        const container = item.after.benchSuccess ? '#robotwin-cases' : '#robotwin-failure-cases';
-        const card = page.locator(`${container} [data-episode="${item.episodeKey}"]`);
+      assert.equal(await page.locator('#robotwin-failure-cases video').count(),2);
+      assert.equal(await page.locator('#failures video').count(),4);
+      assert.equal(await page.locator('video').count(),21);
+      assert.equal(await page.locator('video').evaluateAll(videos=>new Set(videos.map(video=>video.src)).size),21,'Each selected article recording appears once');
+      assert.deepEqual((await page.locator('video').evaluateAll(videos=>videos.map(video=>video.src))).sort(),displayedVideoPaths.map(video=>base+video).sort(),'Render the selected failure episodes and preserve all result videos');
+      assert.doesNotMatch(await page.locator('#failures').innerText(),/disagreement|agent (?:considers|claims?|claimed|reports)|completion (?:claim|judgment)|bench judges|before:|after:/i,'Failure analysis must focus on physical task difficulty');
+      assert.equal(await page.locator('#failures .instruction-comparison, #failures .cross-table').count(),0);
+      assert.deepEqual(await page.locator('#failures .task-rate strong').allTextContents(),['20% · 2/10','0% · 0/10','0% · 0/10','40% · 4/10']);
+      for (const item of robotwin.cases.filter(item=>item.after.benchSuccess)) {
+        const card = page.locator(`#robotwin-cases [data-episode="${item.episodeKey}"]`);
         const instruction = robotwinInstructions.cases.find(record=>record.episodeKey===item.episodeKey);
         assert.equal(await card.count(),1,`Place ${item.episodeKey} according to its actual revised outcome`);
         assert.equal(await card.locator('.instruction-base').textContent(),instruction.revisedBaseInstruction);
@@ -138,29 +153,36 @@ const server = http.createServer((request, response) => {
         assert.equal(await card.locator('.instruction-baseline').count(),instruction.sameBaseInstruction ? 0 : 1);
         if (!instruction.sameBaseInstruction) assert.equal(await card.locator('.instruction-baseline').textContent(),instruction.baselineInstruction);
         if (!instruction.sameSceneSeed) assert.match(await card.locator('.instruction-provenance').textContent(),/not a matched-scene instruction-only comparison/);
-        if (!item.after.benchSuccess) assert.match(await card.locator('h3').textContent(),/Remaining disagreement/);
+      }
+      for (const episodeKey of selectedRobotwinFailures) {
+        const card = page.locator(`#robotwin-failure-cases [data-episode="${episodeKey}"]`);
+        const instruction = robotwinInstructions.cases.find(record=>record.episodeKey===episodeKey);
+        assert.equal(await card.count(),1);
+        assert.equal(await card.locator('.instruction-text').textContent(),`“${instruction.revisedBaseInstruction}”`);
+        assert.equal(await card.locator('.instruction-label').textContent(),'Base instruction');
+        assert.equal(await card.locator('.clip-header > span:first-child').textContent(),'Goal-spec rerun');
+        assert.match(await card.locator('.clip-meta').textContent(),new RegExp(`seed ${instruction.revisedSeed}`));
       }
       assert.deepEqual(await page.locator('#robotwin-comparison .score-top > span').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`n = ${stats.n}`));
       assert.deepEqual(await page.locator('#robotwin-comparison .score-value').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`${(100*stats.instinctAlignment).toFixed(2)}%`));
       const mediaUrls = await page.locator('video').evaluateAll(videos=>videos.flatMap(video=>[video.src,video.poster]));
-      assert.equal(mediaUrls.length,52);
+      assert.equal(mediaUrls.length,42);
       assert.ok(mediaUrls.every(url=>url.startsWith(base+'media/')),'All article videos and posters must load from this site');
       const downloads = await page.locator('.clip-meta a[download]').evaluateAll(links=>links.map(link=>link.href));
-      assert.equal(downloads.length,26);
+      assert.equal(downloads.length,21);
       assert.ok(downloads.every(link=>link.startsWith(base+'media/') && !new URL(link).search),'Article downloads must use local video files');
       assert.ok((await page.locator('[data-gallery-path]').evaluateAll(links=>links.map(link=>link.href))).every(url=>url.startsWith(hosting.galleryUrl) && new URL(url).pathname.endsWith('/index.html')));
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
-      assert.match(await page.locator('#failure-plate-control-budget .clip-meta').innerText(),/Agent reports unable to continue/);
-      assert.match(await page.locator('#failure-plate-wrong-object .clip-meta').innerText(),/Agent claimed completion · corrected to incomplete/);
-      assert.match(await page.locator('#failure-bottom-drawer-sequence .clip-meta').innerText(),/No completion claim · control budget exhausted/);
-      for (const id of ['bottom-drawer-sequence','microwave-sequence']) assert.equal(await page.locator(`#failure-${id} .clip-header > span:first-child`).textContent(),'Unchanged instruction · baseline recording');
-      for (const id of ['plate-wrong-object','plate-control-budget']) assert.equal(await page.locator(`#failure-${id} .clip-header > span:first-child`).textContent(),'Revised instruction · revision 2');
+      for (const id of selectedLiberoFailures) assert.match(await page.locator(`#failure-${id} .clip-meta`).innerText(),/500 control steps/);
+      assert.equal(await page.locator('#failure-bottom-drawer-sequence .clip-header > span:first-child').textContent(),'Unchanged instruction · baseline recording');
+      assert.equal(await page.locator('#failure-plate-control-budget .clip-header > span:first-child').textContent(),'Revised instruction · revision 2');
       assert.match(await page.locator('#case-book-compartment .clip-meta').first().innerText(),/Agent considers the task complete/);
       assert.match(await page.locator('#case-book-compartment .clip-meta').last().innerText(),/Bench judges success/);
       assert.equal(await page.locator('#review-note').count(),1);
       assert.doesNotMatch(await page.locator('.clip-meta').allTextContents().then(items=>items.join(' ')),/Human review:|Completion: success|Agent: visually complete/);
-      assert.ok((await page.locator('.clip-header .status').allTextContents()).every(text=>['Bench judges success','Bench judges failure'].includes(text)));
+      assert.ok((await page.locator('#results .clip-header .status').allTextContents()).every(text=>['Bench judges success','Bench judges failure'].includes(text)));
+      assert.deepEqual(await page.locator('#failures .clip-header .status').allTextContents(),Array(4).fill('Failed episode'));
       assert.match(await page.locator('#review-accounting').textContent(),/357, 0, and 43/);
       assert.match(await page.locator('#review-accounting').textContent(),/agent considers the task complete and the bench judges failure/);
       assert.doesNotMatch(await page.locator('#review-accounting').textContent(),/human review|adjudication/i);
@@ -175,8 +197,8 @@ const server = http.createServer((request, response) => {
         const response = await page.request.head(link);
         assert.equal(response.ok(),true,`Broken link: ${link}`);
       }
-      // Decode all 18 LIBERO and 8 RoboTwin clips while HF media is blocked.
-      for(let i=0;i<26;i++) {
+      // Decode all 16 LIBERO and 5 RoboTwin clips while HF media is blocked.
+      for(let i=0;i<displayedVideoPaths.length;i++) {
         await page.locator('video').nth(i).evaluate(video => {video.preload='metadata';video.load();});
         await page.waitForFunction(index => {
           const video = document.querySelectorAll('video')[index];
@@ -200,6 +222,7 @@ const server = http.createServer((request, response) => {
         await page.locator('#results').screenshot({path:path.join(output,'desktop-results.png')});
         await page.locator('#libero .table-scroll').screenshot({path:path.join(output,'desktop-instructions.png')});
         await page.locator('.case').first().screenshot({path:path.join(output,'desktop-case.png')});
+        await page.locator('#failures').screenshot({path:path.join(output,'desktop-failures.png')});
         const robotwinExample = page.locator('#robotwin-cases .robotwin-case').first();
         await robotwinExample.locator('details').first().evaluate(details => { details.open = true; });
         await robotwinExample.screenshot({path:path.join(output,'desktop-robotwin-case.png')});
@@ -208,7 +231,8 @@ const server = http.createServer((request, response) => {
         await page.screenshot({path:path.join(output,'mobile-hero.png')});
         await page.locator('#results').screenshot({path:path.join(output,'mobile-results.png')});
         await robotwinExample.screenshot({path:path.join(output,'mobile-robotwin-case.png')});
-        await page.locator('#robotwin-failure-cases .robotwin-case').first().screenshot({path:path.join(output,'mobile-robotwin-disagreement.png')});
+        await page.locator('#failures').screenshot({path:path.join(output,'mobile-failures.png')});
+        await page.locator('#robotwin-failure-cases .robotwin-case').first().screenshot({path:path.join(output,'mobile-robotwin-failure.png')});
         await robotwinExample.locator('details').first().evaluate(details => { details.open = false; });
         await page.setViewportSize({width:1440,height:1000});
       }
@@ -242,7 +266,7 @@ const server = http.createServer((request, response) => {
     await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
     assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
     await noScript.close();
-    assert.ok(localMediaRequests.length >= 52,'Article media must load from the local site under both mounts');
+    assert.ok(localMediaRequests.length >= 42,'Article media must load from the local site under both mounts');
     assert.deepEqual(externalMediaRequests,[],'Article playback must not depend on HF media');
     // Escaping remains intact when diff markup encounters punctuation and HTML-like words.
     const escapedData = structuredClone(alignment);
@@ -251,7 +275,7 @@ const server = http.createServer((request, response) => {
     escapedTask.instructionAfter = 'place "book" & <caddy> safely beside the tray <img src="x" onerror="throw 1">';
     await page.route('**/data/libero-alignment.json',route=>route.fulfill({json:escapedData}));
     const escapedRobotwin = structuredClone(robotwinInstructions);
-    const escapedExample = escapedRobotwin.cases[0];
+    const escapedExample = escapedRobotwin.cases.find(item=>robotwin.cases.some(record=>record.episodeKey===item.episodeKey && record.after.benchSuccess));
     escapedExample.revisedBaseInstruction = 'Lift the "bottle" & <stand>.';
     escapedExample.addedGoalSpec = 'height > 0.90 m; x < 0.15 m\n<img src="x" onerror="throw 1">';
     escapedExample.revisedInstruction = `${escapedExample.revisedBaseInstruction}\n\n${escapedExample.addedGoalSpec}`;
@@ -269,6 +293,6 @@ const server = http.createServer((request, response) => {
     assert.equal(await escapedRobotwinCard.locator('img,stand,script').count(),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(badResponses,[]);
-    console.log(`Blog smoke passed: five article sections, two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted LIBERO instructions, 8 verbatim RoboTwin instruction comparisons, escaped markup, 7 LIBERO pairs, 4 labeled LIBERO failures, 3 RoboTwin successes and 5 residual disagreements, ${decoded} local video decodes with HF media blocked, responsive layouts and HF forwarding.`);
+    console.log(`Blog smoke passed: five article sections, two mount paths, fixed 400-episode comparison, explicit judgment labels in results, 9 exact highlighted LIBERO instructions, 3 verbatim RoboTwin instruction comparisons, escaped markup, 7 LIBERO pairs, 3 RoboTwin successes, 2 LIBERO and 2 RoboTwin physical-task failure examples, ${decoded} local video decodes with HF media blocked, responsive layouts and HF forwarding.`);
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error);process.exitCode=1;});

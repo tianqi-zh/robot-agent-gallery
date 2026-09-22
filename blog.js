@@ -29,21 +29,20 @@
     'plate-near-stove': '“In front” maps to a fixed 8 × 8 cm tabletop region. The final phrase adds proximity to the stove’s front edge, while leaving manipulation to the policy. Only two of ten episodes succeed: this remains a difficult pushing task, even with the clarified goal.',
     'spatial-regression': 'This is a success → failure pair, included deliberately. The native on-plate check combines contact, height, and a center-distance threshold below 3 cm. Explicitly asking for the center did not improve this task in these ten runs.'
   };
-  const failureDetails = {
-    'plate-wrong-object':'This is an object-grounding error. The task names the stove, but the policy acts on its mistaken identification of another fixture and then reports completion. More specific spatial language cannot repair a wrong referent on its own.',
-    'plate-control-budget':'Small errors accumulate during pushing: the gripper can ride onto the rim or lose contact, and nearby clutter restricts the approach. Repeated repositioning consumes the control budget before the plate reaches the target.',
-    'bottom-drawer-sequence':'The final closure remains incomplete. Placing an object inside a drawer is only part of the goal; the policy must then move to an effective pushing contact and verify the articulated state within the remaining budget.',
-    'microwave-sequence':'The final door closure remains incomplete. Placement and door motion require different contacts and viewpoints; succeeding at an earlier substep does not ensure that the full conjunction of native goals is satisfied.'
+  const liberoFailureDetails = {
+    'plate-control-budget': ['Sustained contact while pushing a plate', 'The plate must slide into a small region near the stove. The policy repeatedly repositions the gripper but does not finish within 500 control steps: sustained contact and small positional corrections remain difficult.'],
+    'bottom-drawer-sequence': ['Placement followed by drawer closure', 'The bowl reaches the drawer, but the drawer remains open after 500 control steps. The task requires a change of contact after placement, followed by a controlled push to complete the closure.']
+  };
+  // Cohort rates verified against archived data/gallery.json identified by
+  // data/robotwin-instruction-examples.json revisedSource (SHA-256 aca0bfc4a669…).
+  const robotwinFailureDetails = {
+    move_can_pot_r01: {title:'Placing a can at a precise pose',successes:0,episodes:10,detail:'The can must be positioned beside the pot, aligned in position and orientation, and released on the table. This episode illustrates the difficulty of combining a precise final pose with a stable placement.'},
+    place_dual_shoes_r00: {title:'Two shoes, two precise placements',successes:4,episodes:10,detail:'Both shoes must fit into the box at the required positions and orientations. Reorienting, lowering, and releasing each shoe creates repeated contact transitions; both placements must succeed in the same episode.'}
   };
   const robotwinCaseDetails = {
     adjust_bottle: ['Specify height and side', 'The appendix makes the required bottle height and side of the table explicit. This rerun passes the unchanged native checker.'],
     place_mouse_pad: ['Center, align, then release', 'The revised instruction specifies centering, orientation, and open grippers. This rerun passes the unchanged native checker.'],
-    rotate_qrcode: ['Make orientation and release explicit', 'The appendix gives an orientation target, a height condition, and a release condition. This is richer guidance than a short natural-language edit; this rerun passes the unchanged native checker.'],
-    scan_object: ['Remaining disagreement · scanner alignment', 'The added criteria specify a close relative pose between the scanner and object while both grippers remain closed. The agent still claims completion and the benchmark rejects the result. The failed predicate has not been isolated from this recording.'],
-    move_can_pot: ['Remaining disagreement · position and orientation', 'The added criteria combine side, relative position, orientation, table height, and release. The agent still claims completion and the benchmark rejects the result; that disagreement alone does not identify which condition was missed.'],
-    pick_dual_bottles: ['Remaining disagreement · two simultaneous goals', 'Both bottles must meet their assigned position and height criteria. The agent still claims completion and the benchmark rejects the result. This is a residual disagreement, not an independently established control failure.'],
-    place_dual_shoes: ['Remaining disagreement · two placements', 'Each shoe has a target position, orientation, and support height, with both grippers open. The revised episode introduces a completion claim that the benchmark rejects; the earlier episode had no completion claim.'],
-    dump_bin_bigbin: ['Remaining disagreement · checking every item', 'The added criteria include the small bin’s height and the final height band of every item. The agent still claims completion and the benchmark rejects the result. Further inspection is needed to separate missed criteria from remaining ambiguity or control errors.']
+    rotate_qrcode: ['Make orientation and release explicit', 'The appendix gives an orientation target, a height condition, and a release condition. This is richer guidance than a short natural-language edit; this rerun passes the unchanged native checker.']
   };
   let reviewCorrections = new Map();
   function highlightInstructionChanges(original, improved) {
@@ -105,16 +104,25 @@
     const assessment = correction ? 'Agent claimed completion · corrected to incomplete' : clip.nativeSuccess ? 'Bench judges success' : clip.agentAssessment === 'visually_complete' ? 'Agent considers the task complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent reports unable to continue' : 'No completion claim · control budget exhausted';
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
+  function failureClipMarkup(clip, label, instruction, metadata, instructionLabel = '') {
+    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status failure">Failed episode</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + clip.episodeKey)}"></video><figcaption><p class="clip-instruction">${instructionLabel ? `<span class="instruction-label">${esc(instructionLabel)}</span>` : ''}<span class="instruction-text">“${esc(instruction)}”</span></p><p class="clip-meta">${esc(metadata)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
+  }
+  function failureTaskRate(successes, episodes) {
+    return `<div class="task-rate negative"><span>Task success rate</span><strong>${Math.round(100 * successes / episodes)}% · ${successes}/${episodes}</strong></div>`;
+  }
   function renderMedia(media) {
     document.querySelector('#paired-cases').innerHTML = media.pairs.map((pair,index) => {
       const before = media.clips[pair.before], after = media.clips[pair.after];
       const sources = (pair.sourceLinks || []).filter(link => link.label === 'Task BDDL');
       return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(pair.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(descriptions[pair.id] || pair.note)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
     }).join('');
-    document.querySelector('#failure-cases').innerHTML = media.failureCases.map(item => {
+    document.querySelector('#failure-cases').innerHTML = Object.entries(liberoFailureDetails).map(([id,[title,detail]]) => {
+      const item = media.failureCases.find(record => record.id === id);
       const clip = media.clips[item.clip];
+      if (clip.nativeSuccess) throw new Error(`Expected a failed LIBERO episode: ${item.clip}`);
       const label = clip.stage === 'baseline' ? 'Unchanged instruction · baseline recording' : `Revised instruction · revision ${clip.stage.slice(1)}`;
-      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))} / ${item.task.successes}/${item.task.episodes} TASK SUCCESSES</p><h3>${esc(item.title)}</h3><p>${esc(item.note)}</p></div>${clipMarkup(clip,label)}<div class="failure-description"><p>${esc(failureDetails[item.id] || '')}</p></div></section>`;
+      const metadata = `seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} control steps`;
+      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))}</p><h3>${esc(title)}</h3>${failureTaskRate(item.task.successes,item.task.episodes)}<p>${esc(detail)}</p></div>${failureClipMarkup(clip,label,clip.instruction,metadata)}</section>`;
     }).join('');
     document.querySelectorAll('.play-pair').forEach(button => {
       const section = button.closest('.case');
@@ -173,14 +181,20 @@
       ['Missing terminal results', data.coverage.afterMissingTerminalResults]
     ].map(([label,value]) => `<div class="mini-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
     const instructionByEpisode = new Map(instructions.cases.map(item => [item.episodeKey,item]));
-    const rendered = data.cases.map((item,index) => {
+    const instructionFor = item => {
       const instruction = instructionByEpisode.get(item.episodeKey);
       if (!instruction) throw new Error(`Missing RoboTwin instruction: ${item.episodeKey}`);
       if (instruction.baselineBenchSuccess !== item.before.benchSuccess || instruction.revisedBenchSuccess !== item.after.benchSuccess) throw new Error(`RoboTwin instruction outcome mismatch: ${item.episodeKey}`);
-      return {success:item.after.benchSuccess,html:robotwinCaseMarkup(item,instruction,index)};
-    });
-    document.querySelector('#robotwin-cases').innerHTML = rendered.filter(item => item.success).map(item => item.html).join('');
-    document.querySelector('#robotwin-failure-cases').innerHTML = rendered.filter(item => !item.success).map(item => item.html).join('');
+      return instruction;
+    };
+    document.querySelector('#robotwin-cases').innerHTML = data.cases.filter(item => item.after.benchSuccess).map((item,index) => robotwinCaseMarkup(item,instructionFor(item),index)).join('');
+    document.querySelector('#robotwin-failure-cases').innerHTML = Object.entries(robotwinFailureDetails).map(([episodeKey,detail]) => {
+      const item = data.cases.find(record => record.episodeKey === episodeKey);
+      if (!item || item.after.benchSuccess) throw new Error(`Expected a failed RoboTwin episode: ${episodeKey}`);
+      const instruction = instructionFor(item);
+      const metadata = `seed ${instruction.revisedSeed} · ${item.after.steps} actions · ${item.after.toolCalls} tool calls · ${Math.round(item.after.wallSeconds)} s wall time`;
+      return `<section class="failure-case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="failure-description"><p class="eyebrow">ROBOTWIN / ${esc(item.taskName)}</p><h3>${esc(detail.title)}</h3>${failureTaskRate(detail.successes,detail.episodes)}<p>${esc(detail.detail)}</p></div>${failureClipMarkup(item,'Goal-spec rerun',instruction.revisedBaseInstruction,metadata,'Base instruction')}</section>`;
+    }).join('');
   }
   window.galleryHosting.then(async config => {
     hosting = config;
