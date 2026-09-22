@@ -1,4 +1,4 @@
-name: Deploy evaluation gallery
+name: Deploy evaluation blog
 
 on:
   push:
@@ -21,10 +21,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out the gallery
+      - name: Check out the blog
         uses: actions/checkout@v6
-      - name: Validate the published evaluation matrix
-        run: python3 scripts/validate_gallery.py --require-robocasa --require-demos --release-media
       - name: Validate LIBERO comparison data and media
         run: python3 scripts/validate_libero_blog.py
       - name: Validate human-reviewed LIBERO labels

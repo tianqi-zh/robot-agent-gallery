@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Validate published LIBERO analysis, paired selections and media (no raw runs).
 
-Default checks use the standard library and hash the 18 referenced clips/posters.
+Default checks use the standard library and hash the 18 referenced clips/posters,
+fetching missing assets from Hugging Face into .gallery-cache/blog-media/.
+--media-root uses a local gallery export without network access.
 --probe additionally decodes every video with ffprobe. Public hashes bind the
 published assets; this does not replace the separate audit of private raw runs.
 """
@@ -18,7 +20,7 @@ import re
 import subprocess
 import sys
 
-from validate_gallery import ValidationError, local_asset, public_metadata, read_json, require, sha256
+from blog_validation import MediaResolver, ValidationError, local_asset, public_metadata, read_json, require, sha256
 
 ROOT = Path(__file__).resolve().parents[1]
 SUITES = ('libero_spatial', 'libero_goal', 'libero_object', 'libero_10')
@@ -205,7 +207,8 @@ def validate_probe(path,clip):
     require(abs(float(stream.get('duration',data['format']['duration']))-clip['durationSeconds'])<.001,'Video duration changed')
 
 
-def validate_documents(root,alignment,rows,media,*,probe=False):
+def validate_documents(root,alignment,rows,media,*,probe=False,media_root=None):
+    resolver=MediaResolver(root,media_root=media_root)
     for label,value in [('alignment',alignment),('episodes',rows),('media',media)]:
         check_public(value,label)
     by_task,provenance=validate_alignment(alignment,rows)
@@ -260,13 +263,15 @@ def validate_documents(root,alignment,rows,media,*,probe=False):
                 'Unexpected clip encoding fields')
         require(meta['codec']=='h264' and meta['pixelFormat']=='yuv420p','Wrong browser encoding')
         require(meta['posterFrame']==clip['frames']//2,'Poster frame differs from export contract')
+        resolved={}
         for kind,extension in [('video','mp4'),('poster','jpg')]:
-            path=local_asset(root,clip[kind],kind)
+            local_asset(resolver.media_root or resolver.root,clip[kind],kind,allow_missing=True)
             require(clip[kind]==f'{expected_root}/{key}.{extension}','Clip path does not identify its frozen episode')
             digest_string(meta[kind+'Sha256'],f'clip.{kind}.sha256')
-            require(path.stat().st_size==meta[kind+'Bytes'] and sha256(path)==meta[kind+'Sha256'],f'{clip_id}: {kind} hash/size mismatch')
+            path=resolver.resolve(clip[kind],kind,meta[kind+'Bytes'],meta[kind+'Sha256'],label=f'{clip_id}: {kind}')
+            resolved[kind]=path
             paths.append(path)
-        if probe:validate_probe(root/clip['video'],clip)
+        if probe:validate_probe(resolved['video'],clip)
     references=[];case_ids=[]
     require(6<=len(media['pairs'])<=8,'Expected six to eight paired examples')
     for pair in media['pairs']:
@@ -315,18 +320,19 @@ def load_documents(root):
     return alignment,rows,media
 
 
-def validate_libero_blog(root=ROOT,*,probe=False):
+def validate_libero_blog(root=ROOT,*,probe=False,media_root=None):
     root=Path(root).resolve()
-    return validate_documents(root,*load_documents(root),probe=probe)
+    return validate_documents(root,*load_documents(root),probe=probe,media_root=media_root)
 
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,default=ROOT)
+    parser.add_argument('--media-root',type=Path,help='Local gallery export root; use only these media assets without downloading')
     parser.add_argument('--probe',action='store_true',help='Decode all referenced videos with ffprobe')
     args=parser.parse_args()
     try:
-        result=validate_libero_blog(args.root,probe=args.probe)
+        result=validate_libero_blog(args.root,probe=args.probe,media_root=args.media_root)
     except (ValidationError, OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as exc:
         print(f'LIBERO blog validation failed: {exc}',file=sys.stderr)
         return 1

@@ -1,22 +1,26 @@
 (() => {
   'use strict';
   const siteRoot = new URL('./', document.currentScript.src);
+  let hosting;
   function redirectLegacyHash() {
     const old = new URLSearchParams(location.hash.slice(1));
     if (!['benchmark', 'task', 'episode', 'view'].some(key => old.has(key))) return false;
     const names = {libero:'libero',robotwin:'robotwin',robotwin_nvidia10:'robotwin',robocasa:'robocasa',robodojo:'robodojo'};
     const benchmark = old.get('benchmark') || (old.get('task') || old.get('episode') || '').split('_')[0];
-    const target = new URL(`gallery/${names[benchmark] ? names[benchmark] + '/' : ''}`, siteRoot);
+    const target = new URL(`gallery/${names[benchmark] ? names[benchmark] + '/' : ''}index.html`, hosting.galleryUrl);
     target.search = location.search;
     target.hash = location.hash;
     location.replace(target.href);
     return true;
   }
-  if (redirectLegacyHash()) return;
-  addEventListener('hashchange', redirectLegacyHash);
   const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const pct = value => (100 * value).toFixed(2);
-  const url = path => new URL(path, siteRoot).href;
+  const url = path => new URL(path, path.startsWith('media/') ? hosting.mediaBaseUrl : siteRoot).href;
+  const downloadUrl = path => {
+    const target = new URL(url(path));
+    target.searchParams.set('download', 'true');
+    return target.href;
+  };
   const suiteNames = {libero_10:'LIBERO-10',libero_goal:'Goal',libero_object:'Object',libero_spatial:'Spatial'};
   const taskLabel = (suite,id) => `${suiteNames[suite]} t${String(id).padStart(2,'0')}`;
   const descriptions = {
@@ -92,7 +96,7 @@
     const stage = {baseline:'baseline',r1:'round1',r2:'round2'}[clip.stage];
     const correction = reviewCorrections.get(`${stage}:${clip.episodeKey}`);
     const assessment = correction ? 'Agent claimed completion · corrected to incomplete' : clip.nativeSuccess ? 'Bench judges success' : clip.agentAssessment === 'visually_complete' ? 'Agent considers the task complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent reports unable to continue' : 'No completion claim · control budget exhausted';
-    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(url(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
+    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
   function renderMedia(media) {
     document.querySelector('#paired-cases').innerHTML = media.pairs.map((pair,index) => {
@@ -157,14 +161,21 @@
       const title = fixed ? 'Mismatch fixed by public goal criteria' :
         item.after.agentSuccess && !item.after.benchSuccess ? 'Still visually complete, still rejected' :
         'Execution remains difficult';
-      return `<section class="robotwin-case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(url(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${fixed ? 'The earlier run was a classic agent-success/bench-false disagreement. The goal-spec rerun gives the agent the benchmark-relevant observable criterion and the native checker now agrees.' : 'The public goal criteria make the target clearer, but this episode still exposes execution, perception, or precision limits. Alignment improves at the benchmark level, not every task becomes easy.'}</p></div></section>`;
+      return `<section class="robotwin-case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(downloadUrl(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${fixed ? 'The earlier run was a classic agent-success/bench-false disagreement. The goal-spec rerun gives the agent the benchmark-relevant observable criterion and the native checker now agrees.' : 'The public goal criteria make the target clearer, but this episode still exposes execution, perception, or precision limits. Alignment improves at the benchmark level, not every task becomes easy.'}</p></div></section>`;
     }).join('');
   }
-  Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
-    const response = await fetch(url(path));
-    if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
-    return response.json();
-  })).then(([data,media,review,robotwin]) => {
+  window.galleryHosting.then(async config => {
+    hosting = config;
+    if (redirectLegacyHash()) return;
+    addEventListener('hashchange', redirectLegacyHash);
+    document.querySelectorAll('[data-gallery-path]').forEach(link => {
+      link.href = new URL(link.dataset.galleryPath, hosting.galleryUrl).href;
+    });
+    const [data,media,review,robotwin] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
+      const response = await fetch(url(path));
+      if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
+      return response.json();
+    }));
     if (!media.complete) throw new Error('Media export is incomplete');
     if (review.reviewCoverageStatus !== 'complete' || !review.unchangedDisagreementsConfirmed) throw new Error('Human review coverage is not confirmed');
     reviewCorrections = new Map(review.corrections.map(item => [`${item.stage}:${item.episodeKey}`,item]));

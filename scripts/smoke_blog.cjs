@@ -7,12 +7,17 @@ const path = require('node:path');
 
 const root = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const prefix = '/project-preview/robot-agent-gallery/';
+const mediaRoot = process.env.MEDIA_ROOT ? path.resolve(process.env.MEDIA_ROOT) : null;
+const hosting = JSON.parse(fs.readFileSync(path.join(root, 'gallery-hosting.json'), 'utf8'));
+const robotwin = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-alignment-summary.json'), 'utf8'));
 const types = {'.html':'text/html', '.js':'text/javascript', '.css':'text/css', '.json':'application/json', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.mp4':'video/mp4', '.csv':'text/csv'};
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
-  const mount = url.pathname.startsWith(prefix) ? prefix : '/';
-  let file = path.resolve(root, decodeURIComponent(url.pathname.slice(mount.length)));
-  if (!file.startsWith(root + path.sep) && file !== root) { response.writeHead(403).end(); return; }
+  const fixture = mediaRoot && url.pathname.startsWith('/__hf_media__/');
+  const mount = fixture ? '/__hf_media__/' : url.pathname.startsWith(prefix) ? prefix : '/';
+  const directory = fixture ? mediaRoot : root;
+  let file = path.resolve(directory, decodeURIComponent(url.pathname.slice(mount.length)));
+  if (!file.startsWith(directory + path.sep) && file !== directory) { response.writeHead(403).end(); return; }
   try {
     if (fs.statSync(file).isDirectory()) file = path.join(file, 'index.html');
     const stat = fs.statSync(file);
@@ -38,7 +43,7 @@ const server = http.createServer((request, response) => {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${server.address().port}`;
   const browser = await chromium.launch({headless:true,args:['--no-sandbox']});
-  const errors = [], badResponses = [];
+  const errors = [], badResponses = [], localMediaRequests = [];
   const alignment = JSON.parse(fs.readFileSync(path.join(root,'data/libero-alignment.json'),'utf8'));
   const changedTasks = alignment.tasks.filter(task => task.changed);
   const expectedHighlights = {
@@ -58,6 +63,19 @@ const server = http.createServer((request, response) => {
   try {
     const page = await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
     page.on('pageerror',error => errors.push(error.message));
+    page.on('request', request => {
+      const url = new URL(request.url());
+      if (url.origin === origin && /\/media\//.test(url.pathname)) localMediaRequests.push(url.href);
+    });
+    // Exercise forwarding without depending on the live Space's gallery runtime.
+    await page.route(`${hosting.galleryUrl}**`, route => route.fulfill({contentType:'text/html',body:'<!doctype html><title>Hugging Face gallery destination</title><main>Gallery destination</main>'}));
+    if (mediaRoot) {
+      await page.route(`${hosting.mediaBaseUrl}**`, async route => {
+        const relative = route.request().url().slice(hosting.mediaBaseUrl.length);
+        const response = await route.fetch({url:`${origin}/__hf_media__/${relative}`});
+        await route.fulfill({response});
+      });
+    }
     page.on('response',response => { if(response.status()>=400) badResponses.push([response.status(),response.url()]); });
     for (const mount of ['/',prefix]) {
       const base = `${origin}${mount}`;
@@ -68,19 +86,19 @@ const server = http.createServer((request, response) => {
       assert.match(await page.title(),/When bench cannot judge actor/);
       assert.equal((await page.locator('h1').innerText()).replace(/\s+/g,' ').trim(),'When bench cannot judge actor');
       assert.equal(await page.locator('[data-scope]').count(),0);
-      assert.deepEqual(await page.locator('.score-top > span').allTextContents(),['n = 400','n = 400']);
-      assert.equal(await page.locator('.cross-table').count(),2);
-      assert.deepEqual(await page.locator('.cross-table caption').allTextContents(),Array(2).fill('Agent’s completion judgment × benchmark’s verdict'));
-      assert.deepEqual(await page.locator('.cross-table thead th').allTextContents(),Array(2).fill(['Agent’s completion judgment','Bench judges success','Bench judges failure']).flat());
-      assert.deepEqual(await page.locator('.cross-table tbody th').allTextContents(),Array(2).fill(['Agent considers complete','Agent does not consider complete']).flat());
+      assert.deepEqual(await page.locator('#comparison .score-top > span').allTextContents(),['n = 400','n = 400']);
+      assert.equal(await page.locator('#comparison .cross-table').count(),2);
+      assert.deepEqual(await page.locator('#comparison .cross-table caption').allTextContents(),Array(2).fill('Agent’s completion judgment × benchmark’s verdict'));
+      assert.deepEqual(await page.locator('#comparison .cross-table thead th').allTextContents(),Array(2).fill(['Agent’s completion judgment','Bench judges success','Bench judges failure']).flat());
+      assert.deepEqual(await page.locator('#comparison .cross-table tbody th').allTextContents(),Array(2).fill(['Agent considers complete','Agent does not consider complete']).flat());
       assert.doesNotMatch(await page.locator('#comparison').innerText(),/\b(?:agent|bench) (?:success|failure)\b/i);
-      assert.deepEqual(await page.locator('.score-value').allTextContents(),['88.25%','100.00%']);
-      assert.equal(await page.locator('.cross-table tbody tr').count(),4);
-      assert.deepEqual(await page.locator('.cross-table .success td:first-of-type').allTextContents(),['322','357']);
-      assert.deepEqual(await page.locator('.cross-table .failure td:last-of-type').allTextContents(),['31','43']);
-      assert.deepEqual(await page.locator('.cross-table .not-applicable').allTextContents(),['\\','\\']);
+      assert.deepEqual(await page.locator('#comparison .score-value').allTextContents(),['88.25%','100.00%']);
+      assert.equal(await page.locator('#comparison .cross-table tbody tr').count(),4);
+      assert.deepEqual(await page.locator('#comparison .cross-table .success td:first-of-type').allTextContents(),['322','357']);
+      assert.deepEqual(await page.locator('#comparison .cross-table .failure td:last-of-type').allTextContents(),['31','43']);
+      assert.deepEqual(await page.locator('#comparison .cross-table .not-applicable').allTextContents(),['\\','\\']);
       assert.doesNotMatch(await page.locator('body').innerText(),/unknown|no explicit finish assessment/i);
-      assert.deepEqual(await page.locator('.cross-table .mismatch').allTextContents(),['47','0']);
+      assert.deepEqual(await page.locator('#comparison .cross-table .mismatch').allTextContents(),['47','0']);
       assert.equal(await page.locator('#instruction-rows tr').count(),9);
       assert.equal(await page.locator('#instruction-rows .revision-label').count(),0);
       for (const task of changedTasks) {
@@ -93,7 +111,18 @@ const server = http.createServer((request, response) => {
       }
       assert.equal(await page.locator('.case').count(),7);
       assert.equal(await page.locator('.failure-case').count(),4);
-      assert.equal(await page.locator('video').count(),18);
+      assert.equal(await page.locator('#paired-cases video, #failure-cases video').count(),18);
+      assert.equal(await page.locator('#robotwin-cases video').count(),8);
+      assert.equal(await page.locator('video').count(),26);
+      assert.deepEqual(await page.locator('#robotwin-comparison .score-top > span').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`n = ${stats.n}`));
+      assert.deepEqual(await page.locator('#robotwin-comparison .score-value').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`${(100*stats.instinctAlignment).toFixed(2)}%`));
+      const mediaUrls = await page.locator('video').evaluateAll(videos=>videos.flatMap(video=>[video.src,video.poster]));
+      assert.equal(mediaUrls.length,52);
+      assert.ok(mediaUrls.every(url=>url.startsWith(hosting.mediaBaseUrl+'media/')),'All videos and posters must be hosted on HF');
+      const downloads = await page.locator('.clip-meta a[download]').evaluateAll(links=>links.map(link=>link.href));
+      assert.equal(downloads.length,26);
+      assert.ok(downloads.every(link=>link.startsWith(hosting.mediaBaseUrl+'media/') && new URL(link).searchParams.get('download') === 'true'),'HF download links must request attachment responses');
+      assert.ok((await page.locator('[data-gallery-path]').evaluateAll(links=>links.map(link=>link.href))).every(url=>url.startsWith(hosting.galleryUrl) && new URL(url).pathname.endsWith('/index.html')));
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
       assert.match(await page.locator('#failure-plate-control-budget .clip-meta').innerText(),/Agent reports unable to continue/);
@@ -109,8 +138,8 @@ const server = http.createServer((request, response) => {
       assert.doesNotMatch(await page.locator('#review-accounting').textContent(),/human review|adjudication/i);
       assert.match(await page.locator('#case-plate-near-stove .case-detail').innerText(),/8 × 8 cm/);
       assert.match(await page.locator('#case-spatial-regression .case-detail').innerText(),/success → failure/);
-      assert.match(await page.locator('.after .native-score').innerText(),/Bench judges success: 357\/400/);
-      // Check every local link; media payloads are fetched by video decoding below.
+      assert.match(await page.locator('#comparison .after .native-score').innerText(),/Bench judges success: 357\/400/);
+      // Check every local link; media URLs are on HF and decoded below.
       const links = await page.locator('a[href]').evaluateAll(as => [...new Set(as.map(a => a.href))]);
       for(const link of links) {
         const parsed = new URL(link);
@@ -118,12 +147,12 @@ const server = http.createServer((request, response) => {
         const response = await page.request.head(link);
         assert.equal(response.ok(),true,`Broken link: ${link}`);
       }
-      // Real decode of each full clip, including the new reruns under a project prefix.
-      for(let i=0;i<18;i++) {
+      // Decode all 18 LIBERO and 8 RoboTwin clips through their external HF URLs.
+      for(let i=0;i<26;i++) {
         await page.locator('video').nth(i).evaluate(video => {video.preload='metadata';video.load();});
         await page.waitForFunction(index => {
           const video = document.querySelectorAll('video')[index];
-          return video.readyState >= 2 && video.videoWidth === 1024 && video.videoHeight === 512 && video.duration > 0;
+          return video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0 && video.duration > 0;
         },i);
         decoded++;
       }
@@ -148,16 +177,36 @@ const server = http.createServer((request, response) => {
         await page.setViewportSize({width:1440,height:1000});
       }
       console.log(`Decoded all clips and checked layout at ${mount}`);
-      // Essay anchors stay on the essay; historical gallery hashes route to the child page.
+      // Essay anchors stay on the essay; historical links preserve query and hash on HF.
       await page.goto(`${base}#results`);
       assert.equal(new URL(page.url()).pathname,mount);
-      await page.goto(`${base}#benchmark=libero&task=libero_10_t05&episode=libero_10_t05_r00`);
-      await page.waitForURL(`**${mount}gallery/libero/**`);
-      await page.waitForFunction(() => document.querySelector('#episode-video').dataset.episode === 'libero_10_t05_r00');
-      await page.goto(`${base}#benchmark=robotwin_nvidia10`);
-      await page.waitForURL(`**${mount}gallery/robotwin/**`);
-      await page.waitForFunction(() => document.querySelectorAll('.task-card').length === 50);
+      await page.waitForFunction(() => document.documentElement.dataset.blogReady === 'true');
+      await page.evaluate(() => { location.hash = 'benchmark=robotwin'; });
+      await page.waitForURL(`${hosting.galleryUrl}gallery/robotwin/index.html#benchmark=robotwin`);
+      for (const [hash, target] of [
+        ['#benchmark=libero&task=libero_10_t05&episode=libero_10_t05_r00','gallery/libero/index.html'],
+        ['#benchmark=robotwin_nvidia10','gallery/robotwin/index.html'],
+        ['#task=robocasa_alpha&episode=robocasa_alpha_r00','gallery/robocasa/index.html'],
+        ['#view=all','gallery/index.html']
+      ]) {
+        await page.goto(`${base}?source=old-link${hash}`);
+        await page.waitForURL(`${hosting.galleryUrl}${target}?source=old-link${hash}`);
+      }
+      for (const name of ['', 'libero', 'robotwin', 'robotwin_nvidia10', 'robocasa', 'robodojo']) {
+        const route = `gallery/${name ? name + '/' : ''}`;
+        const target = (name === 'robotwin_nvidia10' ? 'gallery/robotwin/' : route) + 'index.html';
+        const state = '?source=bookmark#benchmark=libero&task=libero_10_t05&episode=libero_10_t05_r00';
+        await page.goto(`${base}${route}${state}`);
+        await page.waitForURL(`${hosting.galleryUrl}${target}${state}`);
+      }
     }
+    // Static forwarding links work when JavaScript is disabled.
+    const noScript = await browser.newContext({javaScriptEnabled:false});
+    const fallbackPage = await noScript.newPage();
+    await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
+    assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
+    await noScript.close();
+    assert.deepEqual(localMediaRequests,[],'The blog must never request media from GitHub Pages');
     // Escaping remains intact when diff markup encounters punctuation and HTML-like words.
     const escapedData = structuredClone(alignment);
     const escapedTask = escapedData.tasks.find(task=>task.changed);
@@ -172,6 +221,6 @@ const server = http.createServer((request, response) => {
     assert.equal(await escapedRow.locator('img,caddy,script').count(),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(badResponses,[]);
-    console.log(`Blog smoke passed: two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted instructions, escaped markup, 7 pairs, 4 failure cases, ${decoded} video decodes, responsive layouts and legacy links.`);
+    console.log(`Blog smoke passed: two mount paths, fixed 400-episode comparison, explicit judgment labels, 9 exact highlighted instructions, escaped markup, 7 LIBERO pairs, 4 LIBERO failure cases, 8 RoboTwin cases, ${decoded} external video decodes, responsive layouts and HF forwarding.`);
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error);process.exitCode=1;});

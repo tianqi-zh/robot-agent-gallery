@@ -7,5 +7,7 @@ __pycache__/
 *.log
 .gallery-cache/
 artifacts/
-# RoboCasa presentation MP4s stay available locally and are distributed as Release assets.
-/media/robocasa/*.mp4
+# Videos and posters belong to the Hugging Face Dataset.
+/media/
+
+.pytest_cache/

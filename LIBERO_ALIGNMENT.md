@@ -102,7 +102,7 @@ python3 scripts/validate_libero_blog.py --probe
 python3 scripts/review_libero_alignment.py --check --require-complete
 ```
 
-The second command requires `ffprobe` and checks all video streams. The third recomputes the reviewed tables, checks the correction against the frozen source record, and requires confirmed review coverage. This verifies published accounting and assets; regenerating from the raw runs additionally requires the source archives. Export scripts do not contain those archives. The original gallery remains [400 baseline episodes](gallery/libero/); the essay’s reruns are separate assets.
+The second command requires `ffprobe` and checks all video streams. The third recomputes the reviewed tables, checks the correction against the frozen source record, and requires confirmed review coverage. This verifies published accounting and assets; regenerating from the raw runs additionally requires the source archives. Export scripts do not contain those archives. The original gallery remains [400 baseline episodes](https://alan0928-robot-agent-gallery.static.hf.space/gallery/libero/index.html); the essay’s reruns are separate assets.
 
 ## Interpretation limits
 

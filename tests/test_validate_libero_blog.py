@@ -1,5 +1,6 @@
-"""Publication regressions using the committed public dataset; no private runs."""
+"""Frozen evidence regressions with synthetic media bytes; no network or private runs."""
 from copy import deepcopy
+import hashlib
 from pathlib import Path
 import sys
 import tempfile
@@ -14,13 +15,30 @@ from validate_libero_blog import (ValidationError, check_public, load_documents,
 class LiberoBlogPublicationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.documents=load_documents(ROOT)
+        cls.documents=deepcopy(load_documents(ROOT))
+        cls.media_directory=tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.media_directory.cleanup)
+        cls.media_root=Path(cls.media_directory.name)
+        # Keep the source evidence frozen; synthetic presentation bytes make the
+        # structural/hash tests independent of the separately published videos.
+        media=cls.documents[2]
+        for clip in media['clips'].values():
+            for kind in ('video','poster'):
+                path=cls.media_root/clip[kind]
+                path.parent.mkdir(parents=True,exist_ok=True)
+                payload=('synthetic '+clip[kind]).encode()
+                path.write_bytes(payload)
+                clip['media'][kind+'Bytes']=len(payload)
+                clip['media'][kind+'Sha256']=hashlib.sha256(payload).hexdigest()
+        media['validation']['newMediaBytes']=sum(
+            clip['media']['videoBytes']+clip['media']['posterBytes']
+            for clip in media['clips'].values() if not clip['reusedBaselineMedia'])
 
     def setUp(self):
         self.alignment,self.rows,self.media=deepcopy(self.documents)
 
     def validate(self):
-        return validate_documents(ROOT,self.alignment,self.rows,self.media)
+        return validate_documents(ROOT,self.alignment,self.rows,self.media,media_root=self.media_root)
 
     def test_complete_publication(self):
         result=self.validate()
