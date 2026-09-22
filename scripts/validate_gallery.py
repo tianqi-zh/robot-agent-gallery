@@ -32,8 +32,8 @@ EXPECTED_RUNS = {
                  "3a2a7f6939e18b5ee3fb6d6bac10d8f2f8704cd422d91efc8e56a038cf28c12c"),
     "robodojo": ("robodojo42_astra_firstpass_20260919",
                  "fe327cacc7615e868096a025c1287a8ad070408851bac9104cf132c1349f6fd4"),
-    "robotwin_nvidia10": ("robotwin_goal_spec_full_v1",
-                          "5044e7c5eaed3389b689c0534c0863966d5ee1b3fbafc9e4990a0c85960a5f88"),
+    "robotwin_nvidia10": ("robotwin_nvidia10_full_v1",
+                          "348c4f7a97e28e763a9c46158e60d164c5a95708093dbfbc178b860416200694"),
 }
 # Exact standard task matrix from the frozen RoboDojo manifest. Native names are
 # case-sensitive; gallery IDs are lowercased and the suite ID uses underscores.
@@ -366,8 +366,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
     expected_data_files = {"gallery.json", "episodes.csv", "export-report.json"}
     if (root / "data/task-demos.json").exists():
         expected_data_files.add("task-demos.json")
-    for name in ("libero-blog-media.json", "libero-alignment.json", "libero-alignment-episodes.csv",
-                 "libero-human-review.json", "robotwin-alignment-summary.json"):
+    for name in ("libero-blog-media.json", "libero-alignment.json", "libero-alignment-episodes.csv", "libero-human-review.json"):
         if (root / "data" / name).exists():
             expected_data_files.add(name)
     require({path.relative_to(root / "data").as_posix() for path in (root / "data").rglob("*") if path.is_file()}
@@ -398,12 +397,12 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
         expected_episodes += 42
         expected_tasks_total += 42
     if has_robotwin_nvidia10:
-        expected_episodes += 479
+        expected_episodes += 482
         expected_tasks_total += 50
-    require(gallery.get("evaluationDate") == ("2026-09-22" if has_robotwin_nvidia10 else "2026-09-19" if has_robodojo else "2026-09-18" if has_robocasa else "2026-09-17"),
+    require(gallery.get("evaluationDate") == ("2026-09-19" if has_robodojo or has_robotwin_nvidia10 else "2026-09-18" if has_robocasa else "2026-09-17"),
             "Unexpected evaluation date")
     if has_robocasa or has_robodojo or has_robotwin_nvidia10:
-        dates = ["2026-09-17"] + (["2026-09-18"] if has_robocasa else []) + (["2026-09-19"] if has_robodojo else []) + (["2026-09-22"] if has_robotwin_nvidia10 else [])
+        dates = ["2026-09-17"] + (["2026-09-18"] if has_robocasa else []) + (["2026-09-19"] if has_robodojo or has_robotwin_nvidia10 else [])
         require(gallery.get("evaluationDates") == dates, "Incorrect evaluation dates")
     require(report.get("expectedEpisodes") == expected_episodes and report.get("verifiedEpisodes") == expected_episodes,
             f"The export must contain {expected_episodes} verified episodes")
@@ -433,7 +432,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             public_fields(benchmark["summary"], set(counts([], 0)), "RoboDojo summary")
         require(is_robocasa or "videoHosting" not in benchmark, "Unexpected external hosting for a historical benchmark")
         if has_robocasa or has_robodojo or has_robotwin_nvidia10:
-            require(benchmark.get("evaluationDate") == ("2026-09-22" if is_robotwin_nvidia10 else "2026-09-19" if is_robodojo else "2026-09-18" if is_robocasa else "2026-09-17"),
+            require(benchmark.get("evaluationDate") == ("2026-09-19" if is_robodojo or is_robotwin_nvidia10 else "2026-09-18" if is_robocasa else "2026-09-17"),
                     f"Incorrect evaluation date: {benchmark_id}")
         expected_tasks, per_task = {"libero": (40, 10), "robotwin": (50, 1), "robocasa": (365, 1), "robodojo": (42, 1),
                                     "robotwin_nvidia10": (50, 10)}[benchmark_id]
@@ -614,8 +613,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             check_digest(selection["resultSha256"], "selected result")
             selected_attempt = selection["selectedAttempt"]
             if is_robotwin_nvidia10:
-                require(re.fullmatch(r"attempt_\d+_nvidia_goal_spec_full_v1", selected_attempt),
-                        "Invalid selected attempt identifier")
+                require(re.fullmatch(r"attempt_\d+_nvidia_api", selected_attempt), "Invalid selected attempt identifier")
             else:
                 require(re.fullmatch(r"attempt_\d+", selected_attempt), "Invalid selected attempt identifier")
             if is_robodojo:
@@ -696,7 +694,7 @@ def validate_gallery(root, *, check_interface=True, require_robocasa=False, rele
             require(excluded_count == {"libero": 4, "robotwin": 6, "robodojo": 0}[benchmark_id],
                     f"Unexpected historical retry count: {benchmark_id}")
         if is_robotwin_nvidia10:
-            require(run["excludedAttemptCount"] == 21, "Unexpected RoboTwin 10-rollout excluded episode count")
+            require(run["excludedAttemptCount"] == 18, "Unexpected RoboTwin 10-rollout excluded episode count")
     media = report["media"]
     require(len(media) == expected_episodes and {item["episode"] for item in media} == set(episodes), "Incomplete media provenance mapping")
     videos, video_bytes, poster_bytes = [], 0, 0

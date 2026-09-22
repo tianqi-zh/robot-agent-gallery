@@ -150,13 +150,6 @@ def clean_existing(gallery: dict, report: dict, demos: dict) -> None:
             del tasks[key]
 
 
-def clean_existing_media(root: Path) -> None:
-    for relative in (Path("media") / BENCHMARK_ID, Path("media") / "demos" / BENCHMARK_ID):
-        path = root / relative
-        if path.exists():
-            shutil.rmtree(path)
-
-
 def selected_attempt(result_path: Path) -> str:
     return result_path.parent.name
 
@@ -206,9 +199,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--gallery-root", type=Path, default=ROOT)
-    parser.add_argument("--attempt-suffix", default="nvidia_api")
-    parser.add_argument("--run-name", default=RUN_NAME)
-    parser.add_argument("--evaluation-date", default=EVALUATION_DATE)
     args = parser.parse_args()
 
     root = args.gallery_root.resolve()
@@ -221,12 +211,11 @@ def main() -> None:
     report = read_json(root / "data/export-report.json")
     demos = read_json(root / "data/task-demos.json")
     clean_existing(gallery, report, demos)
-    clean_existing_media(root)
 
     media_dir = root / "media" / BENCHMARK_ID
     media_dir.mkdir(parents=True, exist_ok=True)
 
-    result_paths = sorted((run_dir / "episodes").glob(f"*/attempt_*_{args.attempt_suffix}/result.nvidia_responses.json"))
+    result_paths = sorted((run_dir / "episodes").glob("*/attempt_*_nvidia_api/result.nvidia_responses.json"))
     result_keys = set()
     tasks: dict[str, dict] = {}
     jobs = []
@@ -343,16 +332,16 @@ def main() -> None:
     benchmark = {
         "id": BENCHMARK_ID,
         "name": "RoboTwin 10-rollout",
-        "evaluationDate": args.evaluation_date,
+        "evaluationDate": EVALUATION_DATE,
         "summary": suite_counts,
         "suites": [{"id": SUITE_ID, "name": "RoboTwin 10-rollout", **suite_counts}],
         "protocol": {
             "label": "Up to 10 episodes per task · playable scored rollouts only",
             "description": (
                 "50 official RoboTwin tasks were evaluated with ten requested seeds per task through the "
-                "NVIDIA Responses API model route. This public view includes scored success/failure "
-                "episodes that produced complete MP4 recordings; simulator/API infrastructure errors are "
-                "retained only in provenance."
+                "NVIDIA Responses API model route. This public view includes the 482 scored success/failure "
+                "episodes that produced complete MP4 recordings; 17 simulator errors and one API content-policy "
+                "block are retained only in provenance."
             ),
             "cameras": ["Head camera", "Left wrist", "Right wrist"],
             "videoNote": (
@@ -364,7 +353,7 @@ def main() -> None:
             "episodesPerTask": 10,
         },
         "provenance": {
-            "run": args.run_name,
+            "run": RUN_NAME,
             "manifestSha256": manifest_hash,
             "plannedEpisodes": len(manifest["episodes"]),
             "terminalResults": len(result_paths),
@@ -374,8 +363,8 @@ def main() -> None:
         "tasks": [tasks[key] for key in sorted(tasks)],
     }
     gallery["benchmarks"].append(benchmark)
-    gallery["evaluationDate"] = args.evaluation_date
-    dates = sorted({*(gallery.get("evaluationDates") or []), args.evaluation_date})
+    gallery["evaluationDate"] = EVALUATION_DATE
+    dates = sorted({*(gallery.get("evaluationDates") or []), EVALUATION_DATE})
     if "2026-09-17" not in dates:
         dates.insert(0, "2026-09-17")
     gallery["evaluationDates"] = dates
@@ -383,7 +372,7 @@ def main() -> None:
 
     report["runs"].append({
         "benchmark": BENCHMARK_ID,
-        "run": args.run_name,
+        "run": RUN_NAME,
         "manifestSha256": manifest_hash,
         "selectedEpisodes": len(all_episodes),
         "excludedAttemptCount": len(skipped) + (len(manifest["episodes"]) - len(result_paths)),
@@ -407,7 +396,7 @@ def main() -> None:
     report["selectionRule"] = (
         report["selectionRule"].rstrip()
         + " RoboTwin 10-rollout publishes every scored success/failure episode from "
-        + f"{args.run_name} that produced a complete MP4; simulator/API infrastructure errors are excluded from playable media."
+        + "robotwin_nvidia10_full_v1 that produced a complete MP4; simulator/API infrastructure errors are excluded from playable media."
     )
 
     demo_tasks = demos.setdefault("tasks", {})
