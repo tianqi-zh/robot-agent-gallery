@@ -70,6 +70,12 @@
     const incomplete = stats.matrix.failure.benchFailure;
     return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${after ? 'After · revised composite' : 'Before · original instructions'}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.ias)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.ias)}%</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Bench judges success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
   }
+  function robotwinScoreCard(stats, title, after) {
+    const accepted = stats.agentSuccessBenchSuccess;
+    const disagreement = stats.agentSuccessBenchFalse;
+    const incomplete = stats.agentFalseBenchFalse;
+    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${esc(title)}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.instinctAlignment)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.instinctAlignment)}%</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Bench judges success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
+  }
   function renderComparison(data) {
     if (data.before.n !== 400 || data.after.n !== 400) throw new Error('The comparison requires all 400 episodes');
     document.querySelector('#comparison').innerHTML = scoreCard(data.before, false) + scoreCard(data.after, true);
@@ -128,11 +134,37 @@
       if (!meta.querySelector('.media-error')) meta.insertAdjacentHTML('beforeend','<br><span class="media-error" role="alert">Playback unavailable. Try the MP4 download link.</span>');
     }));
   }
-  Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json'].map(async path => {
+  function outcomeText(record) {
+    const agent = record.agentSuccess ? 'agent success' : 'agent false';
+    const bench = record.benchSuccess ? 'bench success' : 'bench false';
+    return `${agent} / ${bench}`;
+  }
+  function renderRobotwin(data) {
+    document.querySelector('#robotwin-comparison').innerHTML =
+      robotwinScoreCard(data.before, 'Before · original RoboTwin instructions', false) +
+      robotwinScoreCard(data.after, 'After · public goal spec rerun', true);
+    const common = data.common;
+    document.querySelector('#robotwin-summary-grid').innerHTML = [
+      ['Common terminal episodes', common.n],
+      ['AS/BF fixed', common.fixedAgentSuccessBenchFalse],
+      ['AS/BF remaining', common.remainingAgentSuccessBenchFalse],
+      ['New AS/BF', common.newAgentSuccessBenchFalse],
+      ['Playable rerun videos', data.coverage.afterPlayableEpisodes],
+      ['Missing terminal results', data.coverage.afterMissingTerminalResults]
+    ].map(([label,value]) => `<div class="mini-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
+    document.querySelector('#robotwin-cases').innerHTML = data.cases.map((item,index) => {
+      const fixed = item.before.agentSuccess && !item.before.benchSuccess && item.after.benchSuccess;
+      const title = fixed ? 'Mismatch fixed by public goal criteria' :
+        item.after.agentSuccess && !item.after.benchSuccess ? 'Still visually complete, still rejected' :
+        'Execution remains difficult';
+      return `<section class="robotwin-case"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(url(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${fixed ? 'The earlier run was a classic agent-success/bench-false disagreement. The goal-spec rerun gives the agent the benchmark-relevant observable criterion and the native checker now agrees.' : 'The public goal criteria make the target clearer, but this episode still exposes execution, perception, or precision limits. Alignment improves at the benchmark level, not every task becomes easy.'}</p></div></section>`;
+    }).join('');
+  }
+  Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
     const response = await fetch(url(path));
     if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
     return response.json();
-  })).then(([data,media,review]) => {
+  })).then(([data,media,review,robotwin]) => {
     if (!media.complete) throw new Error('Media export is incomplete');
     if (review.reviewCoverageStatus !== 'complete' || !review.unchangedDisagreementsConfirmed) throw new Error('Human review coverage is not confirmed');
     reviewCorrections = new Map(review.corrections.map(item => [`${item.stage}:${item.episodeKey}`,item]));
@@ -140,6 +172,7 @@
     document.querySelector('#review-accounting').textContent = `The 400 original episodes comprise ${review.before.matrix.success.benchSuccess} where the agent considers the task complete and the bench judges success; ${review.before.matrix.success.benchFailure} where the agent considers the task complete and the bench judges failure; and ${review.before.matrix.failure.benchFailure} where the agent does not consider the task complete and the bench judges failure. In the revised composite of 400 episodes, those same categories contain ${review.after.matrix.success.benchSuccess}, ${review.after.matrix.success.benchFailure}, and ${review.after.matrix.failure.benchFailure} episodes, respectively.`;
     renderInstructions(data);
     renderMedia(media);
+    renderRobotwin(robotwin);
     document.documentElement.dataset.blogReady = 'true';
   }).catch(error => {
     document.querySelector('#load-error').hidden = false;

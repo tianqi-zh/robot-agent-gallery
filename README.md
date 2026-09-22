@@ -2,18 +2,18 @@
 
 The [homepage](https://tianqi-zh.github.io/robot-agent-gallery/) asks whether LIBERO’s instructions communicate the goals its evaluator expects. GPT-6 serves as a proxy for a human robot operator, acting from the instruction and live observations without access to demonstration videos or success-checker code. Paired recordings and public evidence document the instruction revisions and their outcomes.
 
-The [gallery](https://tianqi-zh.github.io/robot-agent-gallery/gallery/) presents **1,289 playable scored episodes from 497 task entries across four current collections**. Each benchmark has its own page:
+The [gallery](https://tianqi-zh.github.io/robot-agent-gallery/gallery/) presents **1,286 playable scored episodes from 497 task entries across four current collections**. Each benchmark has its own page:
 
 | Collection | Route | Experiment date | Tasks | Episodes | Successes | Failures, including timeouts | Success rate |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | LIBERO v5 r4 | [/gallery/libero/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/libero/) | 2026-09-17 | 40 | 400 | 322 | 78 | 80.5% |
-| Robotwin | [/gallery/robotwin/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robotwin/) | 2026-09-19 | 50 | 482 | 320 | 162 | 66.39% |
+| Robotwin | [/gallery/robotwin/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robotwin/) | 2026-09-22 | 50 | 479 | 396 | 83 | 82.67% |
 | RoboCasa365 | [/gallery/robocasa/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robocasa/) | 2026-09-18 | 365 | 365 | 165 | 200 | 45.2% |
 | RoboDojo | [/gallery/robodojo/](https://tianqi-zh.github.io/robot-agent-gallery/gallery/robodojo/) | 2026-09-19 | 42 | 42 | 6 | 36 | 14.29% |
 
-**Robotwin is the newer 10-rollout collection only**, internally identified as `robotwin_nvidia10`. It publishes 482 playable scored episodes from 500 planned rollouts; 18 planned rollouts did not yield a playable scored episode. The older 50-episode first-pass collection has no gallery entry, selector, search results or task cards. `/gallery/robotwin_nvidia10/` redirects to `/gallery/robotwin/`.
+**Robotwin is the newer 10-rollout collection only**, internally identified as `robotwin_nvidia10`. It publishes 479 playable scored episodes from 500 planned rollouts in the local goal-spec rerun; 21 planned rollouts did not yield a playable scored episode. The older 50-episode first-pass collection has no gallery entry, selector, search results or task cards. `/gallery/robotwin_nvidia10/` redirects to `/gallery/robotwin/`.
 
-The historical source archive remains intact: [gallery.json](data/gallery.json), [episodes.csv](data/episodes.csv), the export report and media retain **1,339 episodes and 547 task entries**, including the older 50 Robotwin episodes. **Download source CSV** deliberately downloads that complete archive, so its row count differs from the current gallery. The essay's diagnostic rerun clips are separate from both gallery evaluation totals.
+The historical source archive remains intact: [gallery.json](data/gallery.json), [episodes.csv](data/episodes.csv), the export report and media retain **1,336 episodes and 547 task entries**, including the older 50 Robotwin episodes. **Download source CSV** deliberately downloads that complete archive, so its row count differs from the current gallery. The essay's diagnostic rerun clips are separate from both gallery evaluation totals.
 
 LIBERO suite results are Spatial 95/100, Goal 79/100, Object 89/100 and LIBERO-10 59/100. RoboCasa includes 65 atomic tasks (28 successes) and 300 composite tasks (137 successes), with two timeouts. RoboDojo has zero timeouts and zero infrastructure errors. Different tasks, controls and budgets prevent direct comparison or a pooled success rate.
 
