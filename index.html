@@ -12,9 +12,9 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://tianqi-zh.github.io/robot-agent-gallery/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="blog.css?v=183687f020b7">
+  <link rel="stylesheet" href="blog.css?v=7d71de42744c">
   <script src="gallery-hosting.js?v=07c6812a48b6" defer></script>
-  <script src="blog.js?v=0c118510bfd1" defer></script>
+  <script src="blog.js?v=504e736d1c54" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#article">Skip to article</a>
@@ -28,6 +28,11 @@
       <h1>Small instruction edits.<br><em>Better-aligned benchmarks.</em></h1>
       <p class="deck">A robot can follow a reasonable reading of an instruction and still fail the benchmark. We use GPT as a proxy for a human operator to find these gaps in LIBERO and RoboTwin, then repair the instruction layer while preserving the success checkers and recorded demonstrations.</p>
       <div class="hero-meta"><span>Small instruction edits. Big gains in benchmark alignment.</span><span>GPT-6-Astra · high reasoning</span><a href="#results">See the results ↓</a></div>
+      <figure id="overview" class="overview-film" aria-labelledby="overview-heading">
+        <div class="overview-heading"><div><p class="eyebrow">VIDEO OVERVIEW</p><h2 id="overview-heading">Watch the study in action.</h2></div><span class="overview-duration">1:45 <span aria-hidden="true">·</span> Silent</span></div>
+        <div class="overview-player"><video id="overview-video" controls playsinline preload="none" width="1920" height="1080" poster="media/blog/overview/blog-showcase-v2.jpg" src="media/blog/overview/blog-showcase-v2.mp4" aria-label="Video overview of the instruction alignment study" aria-describedby="overview-caption">Your browser does not support embedded video. <a href="media/blog/overview/blog-showcase-v2.mp4">Download the overview</a>.</video></div>
+        <figcaption id="overview-caption" class="overview-caption"><span>Two LIBERO cases, results from both benchmarks, and the key takeaways.</span><a href="media/blog/overview/blog-showcase-v2.mp4" download>Download video <span aria-hidden="true">↓</span></a></figcaption>
+      </figure>
       <section id="takeaways" class="key-takeaways" aria-labelledby="takeaways-heading">
         <h2 id="takeaways-heading" class="eyebrow">KEY TAKEAWAYS</h2>
         <ol>
@@ -36,13 +41,6 @@
           <li><h3>An imperfect policy can still help debug benchmarks.</h3><p>GPT-6-Astra is not a ground-truth policy, yet its behavior and completion judgments help expose mismatches and guide instruction repairs that improve instruction–verification alignment, while preserving the checker and recorded demonstrations.</p></li>
         </ol>
       </section>
-      <div class="study-flow" aria-label="Audit the instruction, compare the judgments, repair the language, and reuse the demonstrations">
-        <div class="study-step"><span>01 / THE OPERATOR TEST</span><h3>Read the instruction.<br>Observe the scene.</h3><p>GPT controls the robot without demonstration videos or direct access to the success checker.</p></div>
-        <div class="study-step"><span>02 / THE DIAGNOSIS</span><h3>Looks complete.<br>Scores as failure.</h3><p>Review disagreements to separate missing goal information from mistakes by the agent.</p></div>
-        <div class="study-step"><span>03 / THE REPAIR</span><h3>Clarify what<br>completion requires.</h3><p>Edit LIBERO’s task text or supplement RoboTwin’s instruction-generation chain.</p></div>
-        <div class="study-step comparison-step"><span>04 / WHAT WE PRESERVE</span><h3>Keep the checker.<br>Reuse the recordings.</h3><p>Improve language–goal alignment without changing the native task or recollecting demonstrations.</p></div>
-      </div>
-      <p class="visual-caption">Two instruction layers: fixed task sentences in LIBERO; scene-dependent generated instructions in RoboTwin.</p>
     </section>
     <div class="article-layout wrap">
       <aside class="contents"><p class="eyebrow">IN THIS ESSAY</p><nav aria-label="Article contents"><a href="#introduction">1. Introduction</a><a href="#methods">2. Method & benchmarks</a><a href="#results">3. Instruction changes & results</a><a href="#failures">4. What remains difficult</a><a href="#conclusion">5. Conclusion</a></nav><a class="contents-gallery" data-gallery-path="gallery/index.html" href="https://alan0928-robot-agent-gallery.static.hf.space/gallery/index.html">Browse the full gallery on HF ↗</a></aside>
@@ -71,6 +69,13 @@
           <div class="prose">
             <p>We first evaluated the original instructions and compared the agent’s completion judgment with the benchmark’s verdict. Some rejected rollouts appeared to satisfy a reasonable reading of the instruction. We then inspected the videos, task definitions, and demonstration references to identify missing goal information. <strong>The audit can use those sources; the acting policy does not receive them directly.</strong> The revised instruction is the channel through which the repair reaches the policy.</p>
           </div>
+          <div class="study-flow" aria-label="Audit the instruction, compare the judgments, repair the language, and reuse the demonstrations">
+            <div class="study-step"><span>01 / THE OPERATOR TEST</span><h3>Read the instruction.<br>Observe the scene.</h3><p>GPT controls the robot without demonstration videos or direct access to the success checker.</p></div>
+            <div class="study-step"><span>02 / THE DIAGNOSIS</span><h3>Looks complete.<br>Scores as failure.</h3><p>Review disagreements to separate missing goal information from mistakes by the agent.</p></div>
+            <div class="study-step"><span>03 / THE REPAIR</span><h3>Clarify what<br>completion requires.</h3><p>Edit LIBERO’s task text or supplement RoboTwin’s instruction-generation chain.</p></div>
+            <div class="study-step comparison-step"><span>04 / WHAT WE PRESERVE</span><h3>Keep the checker.<br>Reuse the recordings.</h3><p>Improve language–goal alignment without changing the native task or recollecting demonstrations.</p></div>
+          </div>
+          <p class="visual-caption">Two instruction layers: fixed task sentences in LIBERO; scene-dependent generated instructions in RoboTwin.</p>
           <div id="review-note" class="callout"><strong>Check the proxy before blaming the benchmark.</strong><p>For LIBERO, we manually reviewed completion claims rejected by the checker in the before-and-after comparison. The review retained the disagreements that followed a reasonable reading of the instruction and rejected one claim: the agent mistook a cabinet for the stove. The LIBERO tables apply that correction; the original claim remains in the <a href="data/libero-human-review.json">review records</a>. The RoboTwin tables use the archived completion rule and should not be read as an equivalent human adjudication of every disagreement.</p></div>
           <div class="prose"><h3>Instinct-alignment score</h3><p>We define the <strong>instinct-alignment score (IAS)</strong> to summarize how often a benchmark rejects an outcome the operator considers complete:</p></div>
           <div class="formula"><span>Instinct-alignment score</span><strong>1 − <span class="fraction"><span>episodes judged complete by the agent but failed by the benchmark</span><span>episodes included in the comparison panel</span></span></strong></div>

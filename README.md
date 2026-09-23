@@ -21,7 +21,7 @@ The HF archive also preserves the 50 older Robotwin episodes, 490 training refer
 python3 -m http.server 8080
 ```
 
-Open http://localhost:8080/. The essay's 21 video players load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
+Open http://localhost:8080/. The essay's 22 video players (the overview and 21 episode examples) load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
 
 [gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The archive media URL is pinned to a verified HF Dataset commit and is retained for validation and recovering missing files. Article playback uses local media; adopting a new example requires updating the evidence catalog and local assets together.
 
@@ -49,7 +49,7 @@ npx playwright install chromium
 npm run test:blog
 ```
 
-The browser check decodes all 21 embedded local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, the 52 video/poster files retained in its evidence catalog (about 24.4 MB), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
+The browser check decodes all 22 embedded local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, the 52 video/poster files retained in its evidence catalog plus the overview video and poster (about 31.5 MB total), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
 
 GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
@@ -58,10 +58,12 @@ GitHub Pages is configured to publish the repository root from `robotwin-blog-co
 To render the silent 16:9 presentation video, install the browser dependencies above and FFmpeg, then run:
 
 ```bash
-python3 scripts/build_blog_video.py
+python3 scripts/build_blog_video.py --output artifacts/video/blog-showcase-v2.mp4
 ```
 
-The output is `artifacts/video/blog-showcase.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+The output is `artifacts/video/blog-showcase-v2.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+
+The article embeds a copy at `media/blog/overview/blog-showcase-v2.mp4` with a 16:9 poster, playback controls, and a download link. It loads only when the reader plays it.
 
 ## Evidence and methods
 
@@ -71,4 +73,4 @@ The output is `artifacts/video/blog-showcase.mp4` (1080p, 30 fps, approximately 
 - [RoboTwin alignment summary](data/robotwin-alignment-summary.json)
 - [Verbatim RoboTwin instruction comparisons and source provenance](data/robotwin-instruction-examples.json)
 
-Only videos and posters in the article evidence catalog remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.
+Only the article’s overview and evidence videos and posters remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.

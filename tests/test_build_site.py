@@ -44,8 +44,8 @@ def test_blog_build_includes_declared_examples_without_gallery_runtime(workspace
     build.main()
     assert contents(destination) == before
     assert all((root / name).read_bytes() == payload for name, payload in before.items())
-    assert len(list((destination / "media").rglob("*.mp4"))) == 2
-    assert len(list((destination / "media").rglob("*.jpg"))) == 2
+    assert len(list((destination / "media").rglob("*.mp4"))) == 3
+    assert len(list((destination / "media").rglob("*.jpg"))) == 3
     assert len(list((destination / "gallery").rglob("index.html"))) == 6
 
 
@@ -86,7 +86,8 @@ def test_unreferenced_blog_clip_is_not_staged(workspace):
 
 
 @pytest.mark.parametrize("missing", ["gallery-hosting.json", "gallery-redirect.js", "blog.js",
-                                     "data/robotwin-alignment-summary.json", "gallery/robotwin/index.html"])
+                                     "data/robotwin-alignment-summary.json", "gallery/robotwin/index.html",
+                                     "media/blog/overview/blog-showcase-v2.mp4", "media/blog/overview/blog-showcase-v2.jpg"])
 def test_missing_required_asset_preserves_previous_build(workspace, missing):
     root, destination = workspace
     (root / missing).unlink()

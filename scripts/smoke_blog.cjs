@@ -14,7 +14,9 @@ const liberoMedia = JSON.parse(fs.readFileSync(path.join(root, 'data/libero-blog
 const selectedLiberoFailures = ['plate-control-budget','bottom-drawer-sequence'];
 const selectedRobotwinFailures = ['move_can_pot_r01','place_dual_shoes_r00'];
 const displayedRobotwinCases = robotwin.cases.filter(item=>item.after.benchSuccess || selectedRobotwinFailures.includes(item.episodeKey));
+const overviewVideoPath = 'media/blog/overview/blog-showcase-v2.mp4';
 const displayedVideoPaths = [
+  overviewVideoPath,
   ...liberoMedia.pairs.flatMap(pair=>[liberoMedia.clips[pair.before].video,liberoMedia.clips[pair.after].video]),
   ...selectedLiberoFailures.map(id=>liberoMedia.clips[liberoMedia.failureCases.find(item=>item.id===id).clip].video),
   ...displayedRobotwinCases.map(item=>item.video)
@@ -92,6 +94,16 @@ const server = http.createServer((request, response) => {
       assert.equal(await page.locator('#load-error').isVisible(),false);
       assert.match(await page.title(),/Small instruction edits, better-aligned benchmarks/);
       assert.equal((await page.locator('h1').innerText()).replace(/\s+/g,' ').trim(),'Small instruction edits. Better-aligned benchmarks.');
+      const overview = page.locator('#overview-video');
+      assert.equal(await page.locator('.hero #overview #overview-video').count(),1);
+      assert.equal(await page.locator('#overview').evaluate(element => Boolean(element.compareDocumentPosition(document.querySelector('#takeaways')) & Node.DOCUMENT_POSITION_FOLLOWING)),true,'Place the overview before the key takeaways');
+      assert.deepEqual(await overview.evaluate(video => ({
+        src:video.src,poster:video.poster,controls:video.controls,playsInline:video.playsInline,
+        autoplay:video.autoplay,preload:video.preload,width:video.width,height:video.height
+      })),{src:base+overviewVideoPath,poster:base+overviewVideoPath.replace('.mp4','.jpg'),controls:true,playsInline:true,autoplay:false,preload:'none',width:1920,height:1080});
+      assert.equal(await overview.evaluate(video=>video.paused),true,'The overview must wait for a user to play it');
+      assert.equal(localMediaRequests.includes(base+overviewVideoPath),false,'Opening the article must not eagerly download the overview video');
+      assert.equal(await page.locator('#overview a[download]').getAttribute('href'),overviewVideoPath);
       const articleSections = ['introduction','methods','results','failures','conclusion'];
       assert.deepEqual(await page.locator('.article-body > section').evaluateAll(sections=>sections.map(section=>section.id)),articleSections);
       assert.deepEqual(await page.locator('[aria-label="Article contents"] a').evaluateAll(links=>links.map(link=>link.hash)),articleSections.map(id=>`#${id}`));
@@ -134,8 +146,8 @@ const server = http.createServer((request, response) => {
       assert.equal(await page.locator('#robotwin-cases video').count(),robotwin.cases.filter(item=>item.after.benchSuccess).length);
       assert.equal(await page.locator('#robotwin-failure-cases video').count(),2);
       assert.equal(await page.locator('#failures video').count(),4);
-      assert.equal(await page.locator('video').count(),21);
-      assert.equal(await page.locator('video').evaluateAll(videos=>new Set(videos.map(video=>video.src)).size),21,'Each selected article recording appears once');
+      assert.equal(await page.locator('video').count(),22);
+      assert.equal(await page.locator('video').evaluateAll(videos=>new Set(videos.map(video=>video.src)).size),22,'The overview and each selected article recording appear once');
       assert.deepEqual((await page.locator('video').evaluateAll(videos=>videos.map(video=>video.src))).sort(),displayedVideoPaths.map(video=>base+video).sort(),'Render the selected failure episodes and preserve all result videos');
       assert.doesNotMatch(await page.locator('#failures').innerText(),/disagreement|agent (?:considers|claims?|claimed|reports)|completion (?:claim|judgment)|bench judges|before:|after:/i,'Failure analysis must focus on physical task difficulty');
       assert.equal(await page.locator('#failures .instruction-comparison, #failures .cross-table').count(),0);
@@ -166,7 +178,7 @@ const server = http.createServer((request, response) => {
       assert.deepEqual(await page.locator('#robotwin-comparison .score-top > span').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`n = ${stats.n}`));
       assert.deepEqual(await page.locator('#robotwin-comparison .score-value').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`${(100*stats.instinctAlignment).toFixed(2)}%`));
       const mediaUrls = await page.locator('video').evaluateAll(videos=>videos.flatMap(video=>[video.src,video.poster]));
-      assert.equal(mediaUrls.length,42);
+      assert.equal(mediaUrls.length,44);
       assert.ok(mediaUrls.every(url=>url.startsWith(base+'media/')),'All article videos and posters must load from this site');
       const downloads = await page.locator('.clip-meta a[download]').evaluateAll(links=>links.map(link=>link.href));
       assert.equal(downloads.length,21);
@@ -197,7 +209,7 @@ const server = http.createServer((request, response) => {
         const response = await page.request.head(link);
         assert.equal(response.ok(),true,`Broken link: ${link}`);
       }
-      // Decode all 16 LIBERO and 5 RoboTwin clips while HF media is blocked.
+      // Decode the overview and all 16 LIBERO and 5 RoboTwin clips while HF media is blocked.
       for(let i=0;i<displayedVideoPaths.length;i++) {
         await page.locator('video').nth(i).evaluate(video => {video.preload='metadata';video.load();});
         await page.waitForFunction(index => {
@@ -206,6 +218,19 @@ const server = http.createServer((request, response) => {
         },i);
         decoded++;
       }
+      const overviewMetadata = await overview.evaluate(video=>({duration:video.duration,width:video.videoWidth,height:video.videoHeight}));
+      assert.ok(Math.abs(overviewMetadata.duration-105.133)<0.2,`Unexpected overview duration: ${overviewMetadata.duration}`);
+      assert.deepEqual([overviewMetadata.width,overviewMetadata.height],[1920,1080]);
+      await overview.evaluate(async video=>{await video.play();});
+      await page.waitForFunction(()=>{const video=document.querySelector('#overview-video');return !video.paused && video.currentTime>0;});
+      await overview.evaluate(video=>video.pause());
+      assert.equal(await overview.evaluate(video=>video.paused),true);
+      for(const time of [55,75]) {
+        await overview.evaluate((video,time)=>{video.currentTime=time;},time);
+        await page.waitForFunction(time=>{const video=document.querySelector('#overview-video');return !video.seeking && video.readyState>=2 && Math.abs(video.currentTime-time)<0.2;},time);
+        assert.equal(await overview.evaluate(video=>video.error),null,`Overview cannot seek to the results page at ${time}s`);
+      }
+      await overview.evaluate(video=>{video.pause();video.currentTime=0;});
       await page.locator('.play-pair').first().click();
       await page.waitForFunction(() => [...document.querySelectorAll('.case:first-child video')].every(v => !v.paused && v.currentTime > 0));
       await page.locator('.play-pair').first().click();
@@ -214,11 +239,18 @@ const server = http.createServer((request, response) => {
       for(const width of [360,390,768,1440]) {
         await page.setViewportSize({width,height:1000});
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),true,`Blog overflows at ${width}`);
+        const overviewBounds = await overview.boundingBox();
+        assert.ok(Math.abs(overviewBounds.width/overviewBounds.height-16/9)<0.01,`Overview must retain its 16:9 frame at ${width}px`);
+        assert.ok(overviewBounds.x>=0 && overviewBounds.x+overviewBounds.width<=width,`Overview must fit the viewport at ${width}px`);
       }
       await page.locator('.instruction-comparison details').evaluateAll(details => details.forEach(item => { item.open = false; }));
       if(mount === '/') {
+        // Capture the actual initial poster state, without residual native playback UI.
+        await page.reload();
+        await page.waitForFunction(() => document.documentElement.dataset.blogReady === 'true');
         await page.evaluate(() => scrollTo(0,0));
         await page.screenshot({path:path.join(output,'desktop-hero.png')});
+        await page.locator('#overview').screenshot({path:path.join(output,'desktop-overview.png')});
         await page.locator('#results').screenshot({path:path.join(output,'desktop-results.png')});
         await page.locator('#libero .table-scroll').screenshot({path:path.join(output,'desktop-instructions.png')});
         await page.locator('.case').first().screenshot({path:path.join(output,'desktop-case.png')});
@@ -229,6 +261,7 @@ const server = http.createServer((request, response) => {
         await page.setViewportSize({width:390,height:844});
         await page.evaluate(() => scrollTo(0,0));
         await page.screenshot({path:path.join(output,'mobile-hero.png')});
+        await page.locator('#overview').screenshot({path:path.join(output,'mobile-overview.png')});
         await page.locator('#results').screenshot({path:path.join(output,'mobile-results.png')});
         await robotwinExample.screenshot({path:path.join(output,'mobile-robotwin-case.png')});
         await page.locator('#failures').screenshot({path:path.join(output,'mobile-failures.png')});
@@ -266,7 +299,7 @@ const server = http.createServer((request, response) => {
     await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
     assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
     await noScript.close();
-    assert.ok(localMediaRequests.length >= 42,'Article media must load from the local site under both mounts');
+    assert.ok(localMediaRequests.length >= 44,'Article media must load from the local site under both mounts');
     assert.deepEqual(externalMediaRequests,[],'Article playback must not depend on HF media');
     // Escaping remains intact when diff markup encounters punctuation and HTML-like words.
     const escapedData = structuredClone(alignment);
@@ -293,6 +326,6 @@ const server = http.createServer((request, response) => {
     assert.equal(await escapedRobotwinCard.locator('img,stand,script').count(),0);
     assert.deepEqual(errors,[]);
     assert.deepEqual(badResponses,[]);
-    console.log(`Blog smoke passed: five article sections, two mount paths, fixed 400-episode comparison, explicit judgment labels in results, 9 exact highlighted LIBERO instructions, 3 verbatim RoboTwin instruction comparisons, escaped markup, 7 LIBERO pairs, 3 RoboTwin successes, 2 LIBERO and 2 RoboTwin physical-task failure examples, ${decoded} local video decodes with HF media blocked, responsive layouts and HF forwarding.`);
+    console.log(`Blog smoke passed: five article sections, two mount paths, 1080p overview playback and seeking, fixed 400-episode comparison, explicit judgment labels in results, 9 exact highlighted LIBERO instructions, 3 verbatim RoboTwin instruction comparisons, escaped markup, 7 LIBERO pairs, 3 RoboTwin successes, 2 LIBERO and 2 RoboTwin physical-task failure examples, ${decoded} local video decodes with HF media blocked, responsive layouts and HF forwarding.`);
   } finally { await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => {console.error(error);process.exitCode=1;});

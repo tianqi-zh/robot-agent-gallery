@@ -149,7 +149,7 @@
       }));
     });
     // Posters load immediately; full recordings load only when the reader chooses to play.
-    document.querySelectorAll('video').forEach(video => video.addEventListener('error', () => {
+    document.querySelectorAll('.clip video').forEach(video => video.addEventListener('error', () => {
       const meta = video.closest('figure').querySelector('.clip-meta');
       if (!meta.querySelector('.media-error')) meta.insertAdjacentHTML('beforeend','<br><span class="media-error" role="alert">Playback unavailable. Try the MP4 download link.</span>');
     }));
