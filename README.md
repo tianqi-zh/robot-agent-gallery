@@ -61,7 +61,7 @@ To render the silent 16:9 presentation video, install the browser dependencies a
 python3 scripts/build_blog_video.py
 ```
 
-The output is `artifacts/video/blog-showcase.mp4` (1080p, 30 fps, approximately 87 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. The closing slides show both benchmark result tables and the three core takeaways. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+The output is `artifacts/video/blog-showcase.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
 
 ## Evidence and methods
 

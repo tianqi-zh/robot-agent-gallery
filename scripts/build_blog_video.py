@@ -87,7 +87,7 @@ def make_manifest(speed):
         scenes.append({"id": case_id, "kind": "case", "startFrame": start_frame,
                        "frames": total_frames, "rightRevealFrame": start_frame + reveal_frame})
         start_frame += total_frames
-    for scene_id in ("results", "takeaways"):
+    for scene_id in ("results-libero", "results-robotwin", "takeaways"):
         frames = 18 * FPS
         scenes.append({"id": scene_id, "kind": "slide", "startFrame": start_frame, "frames": frames})
         start_frame += frames
