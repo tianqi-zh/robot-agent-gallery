@@ -53,6 +53,16 @@ The browser check decodes all 21 embedded local videos with HF media requests bl
 
 GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
+## Render the presentation video
+
+To render the silent 16:9 presentation video, install the browser dependencies above and FFmpeg, then run:
+
+```bash
+python3 scripts/build_blog_video.py
+```
+
+The output is `artifacts/video/blog-showcase.mp4` (1080p, 30 fps, approximately 87 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. The closing slides show both benchmark result tables and the three core takeaways. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+
 ## Evidence and methods
 
 - [LIBERO accounting and audit methods](LIBERO_ALIGNMENT.md)
