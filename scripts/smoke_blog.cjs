@@ -15,7 +15,11 @@ const liberoMedia = JSON.parse(fs.readFileSync(path.join(root, 'data/libero-blog
 const selectedLiberoTasks = ['libero_goal_t05','libero_spatial_t04'];
 const selectedLiberoPairs = ['plate-near-stove','spatial-regression'];
 const selectedLiberoFailures = ['plate-control-budget','bottom-drawer-sequence'];
-const selectedRobotwinExamples = ['adjust_bottle_r00','place_object_basket_r01'];
+const selectedRobotwinExamples = ['adjust_bottle_r01','place_object_basket_r01'];
+const expectedRobotwinHighlights = {
+  adjust_bottle_r01:['keep it upright','move it to the right side of the table.'],
+  place_object_basket_r01:['and then lift the basket with the toy car inside.']
+};
 const selectedRobotwinFailures = ['move_can_pot_r01','place_dual_shoes_r00'];
 const displayedRobotwinFailures = robotwin.cases.filter(item=>selectedRobotwinFailures.includes(item.episodeKey));
 const overviewVideoPath = 'media/blog/overview/blog-showcase-v2.mp4';
@@ -158,7 +162,7 @@ const server = http.createServer((request, response) => {
         assert.equal(await row.locator('.instruction-original').textContent(),item.before.instruction);
         assert.equal(await row.locator('.instruction-original *').count(),0,'Original instruction must be unformatted');
         assert.equal(await row.locator('.instruction-improved').textContent(),item.after.instruction,'Highlighting must preserve exact instruction text');
-        assert.ok(await row.locator('.instruction-improved strong').count()>0,'Highlight the instruction edits');
+        assert.deepEqual(await row.locator('.instruction-improved strong').allTextContents(),expectedRobotwinHighlights[item.episodeKey]);
         assert.equal(await row.locator('.instruction-improved :not(strong)').count(),0);
         assert.equal(await row.locator('td').last().textContent(),'failure → success');
         const card = page.locator(`#robotwin-cases [data-episode="${item.episodeKey}"]`);
@@ -210,7 +214,9 @@ const server = http.createServer((request, response) => {
       assert.match(await page.locator('#review-accounting').textContent(),/agent considers the task complete and the bench judges failure/);
       assert.doesNotMatch(await page.locator('#review-accounting').textContent(),/human review|adjudication/i);
       assert.deepEqual(await page.locator('#paired-cases .task-rate strong').allTextContents(),['0/10 → 2/10','5/10 → 4/10']);
-      assert.deepEqual(await page.locator('#case-spatial-regression .clip-header .status').allTextContents(),['Bench judges success','Bench judges failure']);
+      assert.deepEqual(await page.locator('#case-spatial-regression .clip-header .status').allTextContents(),['Bench judges failure','Bench judges success']);
+      assert.match(await page.locator('#case-spatial-regression .clip-meta').first().innerText(),/Agent considers the task complete/);
+      assert.ok((await page.locator('#case-spatial-regression .clip-meta').allTextContents()).every(text=>text.includes('seed 4 · init 4')));
       assert.match(await page.locator('#comparison .after .native-score').innerText(),/Bench judges success: 357\/400/);
       // Check every local link; local media is decoded below.
       const links = await page.locator('a[href]').evaluateAll(as => [...new Set(as.map(a => a.href))]);

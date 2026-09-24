@@ -17625,43 +17625,43 @@
   ],
   "selectedExamples": [
     {
-      "episodeKey": "adjust_bottle_r00",
+      "episodeKey": "adjust_bottle_r01",
       "taskId": 0,
-      "episodeNumber": 1,
+      "episodeNumber": 2,
       "taskName": "adjust_bottle",
       "title": "Adjust bottle",
-      "label": "RoboTwin · Task 00 · EPISODE 01",
+      "label": "RoboTwin · Task 00 · EPISODE 02",
       "sameSceneSeed": true,
-      "galleryUrl": "https://benchmend-gallery.static.hf.space/gallery/robotwin/?episode=robotwin_nvidia10_before_adjust_bottle_r00",
+      "galleryUrl": "https://benchmend-gallery.static.hf.space/gallery/robotwin/?episode=robotwin_nvidia10_before_adjust_bottle_r01",
       "before": {
-        "id": "robotwin_nvidia10_before_adjust_bottle_r00",
+        "id": "robotwin_nvidia10_before_adjust_bottle_r01",
         "instruction": "Position the bottle with white neck and red top head-up and lift it",
         "status": "failure",
         "seed": 100001,
-        "steps": 24,
-        "toolCalls": 17,
-        "wallSeconds": 240.906,
-        "durationSeconds": 2.5,
+        "steps": 25,
+        "toolCalls": 18,
+        "wallSeconds": 231.362,
+        "durationSeconds": 2.6,
         "width": 1536,
         "height": 384,
-        "frames": 25,
+        "frames": 26,
         "benchSuccess": false,
         "agentSuccess": true,
         "agentOutcome": "visually_complete",
         "agentOutcomeAvailability": "recorded",
         "source": {
           "catalog": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/gallery.json",
-          "episodeObjectSha256": "3ccb205e61392065d070fe9230929956693ce89034841057cb3af2e5c91636c0",
+          "episodeObjectSha256": "eaf4831824d383191cdb76aa121233b55cf3034d239b42f3a46c3c30c1d763c7",
           "selection": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/robotwin-original-disagreement-selection.json"
         },
         "mediaSources": {
           "video": {
-            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_nvidia10_before/robotwin_nvidia10_before_adjust_bottle_r00.mp4",
-            "sha256": "c022d0279341be65ebaa0c58386458785b739cd59952a8f23c55f0dc9bcbb287",
-            "bytes": 583899,
+            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_nvidia10_before/robotwin_nvidia10_before_adjust_bottle_r01.mp4",
+            "sha256": "91988817c3d63f4480b52c690b064a913cf6fb5fbbff6ec6c3fa4a65bdd98f5d",
+            "bytes": 592289,
             "metadata": {
               "format": "mov,mp4,m4a,3gp,3g2,mj2",
-              "durationSeconds": 2.5,
+              "durationSeconds": 2.6,
               "streams": [
                 {
                   "codec_name": "h264",
@@ -17669,16 +17669,16 @@
                   "width": 1536,
                   "height": 384,
                   "r_frame_rate": "10/1",
-                  "nb_frames": "25",
+                  "nb_frames": "26",
                   "pix_fmt": "yuv420p"
                 }
               ]
             }
           },
           "poster": {
-            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_nvidia10_before/robotwin_nvidia10_before_adjust_bottle_r00.jpg",
-            "sha256": "b60e70bcef656fa47d514eef79ec70a3eb16ae204655ab1986e1033040f22d82",
-            "bytes": 17178,
+            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_nvidia10_before/robotwin_nvidia10_before_adjust_bottle_r01.jpg",
+            "sha256": "0d4271de8cedea2534d094fe919f02f950fbcc6179096e8eedf524aaf693e729",
+            "bytes": 19487,
             "metadata": {
               "codec_name": "mjpeg",
               "width": 1536,
@@ -17687,38 +17687,38 @@
             }
           }
         },
-        "video": "media/blog/robotwin/adjust_bottle_r00-original.mp4",
-        "poster": "media/blog/robotwin/adjust_bottle_r00-original.jpg"
+        "video": "media/blog/robotwin/adjust_bottle_r01-original.mp4",
+        "poster": "media/blog/robotwin/adjust_bottle_r01-original.jpg"
       },
       "after": {
-        "id": "robotwin_v4_manual_adjust_bottle_r00_v4m001",
+        "id": "robotwin_v4_manual_adjust_bottle_r01_v4m002",
         "instruction": "Lift the bottle with the white neck and red top head-up, keep it upright, and move it to the right side of the table.",
         "status": "success",
         "seed": 100001,
-        "steps": 15,
-        "toolCalls": 17,
-        "wallSeconds": 288.34,
-        "durationSeconds": 1.6,
+        "steps": 11,
+        "toolCalls": 13,
+        "wallSeconds": 230.012,
+        "durationSeconds": 1.2,
         "width": 1536,
         "height": 384,
-        "frames": 16,
+        "frames": 12,
         "benchSuccess": true,
         "agentSuccess": true,
         "agentOutcome": null,
         "agentOutcomeAvailability": "not_exported",
         "source": {
           "catalog": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/gallery.json",
-          "episodeObjectSha256": "719983877f7e84b52a592156b731e2c81e40e5905cc061999e40a886e9147060",
+          "episodeObjectSha256": "18314bc79c9dd1c28cf397fb306c2791eed64c601f03f80967f257a296152c99",
           "selection": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/robotwin-original-disagreement-selection.json"
         },
         "mediaSources": {
           "video": {
-            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_adjust_bottle_r00_v4m001.mp4",
-            "sha256": "55aaa970bf2b6cd984e54b44fae59f48f155fc60abe1757388d1d218622b636a",
-            "bytes": 446425,
+            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_adjust_bottle_r01_v4m002.mp4",
+            "sha256": "54c8e3a7a7b56b18cc613af4ea7762e0431d13a7f907e1d140be225cb9d7ecf0",
+            "bytes": 284473,
             "metadata": {
               "format": "mov,mp4,m4a,3gp,3g2,mj2",
-              "durationSeconds": 1.6,
+              "durationSeconds": 1.2,
               "streams": [
                 {
                   "codec_name": "h264",
@@ -17726,16 +17726,16 @@
                   "width": 1536,
                   "height": 384,
                   "r_frame_rate": "10/1",
-                  "nb_frames": "16",
+                  "nb_frames": "12",
                   "pix_fmt": "yuv420p"
                 }
               ]
             }
           },
           "poster": {
-            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_adjust_bottle_r00_v4m001.jpg",
-            "sha256": "8e88205d1e603dc1dd39f727eaaab916a0594efe2fa6b65b53048b726ab220be",
-            "bytes": 17479,
+            "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_adjust_bottle_r01_v4m002.jpg",
+            "sha256": "77a03a73d200be0eced815b82f4b71de0a1612f3fe55ac330fac2f6b092ecc07",
+            "bytes": 17252,
             "metadata": {
               "codec_name": "mjpeg",
               "width": 1536,
@@ -17744,8 +17744,8 @@
             }
           }
         },
-        "video": "media/blog/robotwin/adjust_bottle_r00-revision.mp4",
-        "poster": "media/blog/robotwin/adjust_bottle_r00-revision.jpg"
+        "video": "media/blog/robotwin/adjust_bottle_r01-revision.mp4",
+        "poster": "media/blog/robotwin/adjust_bottle_r01-revision.jpg"
       }
     },
     {

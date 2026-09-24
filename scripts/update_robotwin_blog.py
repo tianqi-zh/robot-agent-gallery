@@ -19,7 +19,7 @@ DEFAULT_OUTPUT = ROOT / "data/robotwin-alignment-summary.json"
 DEFAULT_HUMAN_REVIEW = ROOT / "data/robotwin-human-review.json"
 ARCHIVED_KEYS = ("move_can_pot_r01", "place_dual_shoes_r00")
 ARCHIVED_REVISION = "a853415121ee6363d34db7ce892631f909af9ba0"
-SELECTED_KEYS = ("adjust_bottle_r00", "place_object_basket_r01")
+SELECTED_KEYS = ("adjust_bottle_r01", "place_object_basket_r01")
 
 
 def require(condition, message):
@@ -74,7 +74,7 @@ def summarize(rows, phase, expected):
 def selected_examples(manifest, rows, root):
     by_key = {row["episodeKey"]: row for row in rows}
     require(tuple(item["sourceEpisodeKey"] for item in manifest["examples"]) == SELECTED_KEYS,
-            "Expected exactly Task 00 / Episode 01 and Task 32 / Episode 02")
+            "Expected exactly Task 00 / Episode 02 and Task 32 / Episode 02")
     examples = []
     for item in manifest["examples"]:
         row = by_key[item["sourceEpisodeKey"]]

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generatedAt": "2026-09-21T05:04:10.557340+00:00",
   "complete": true,
-  "selectionPolicy": "Purposefully chosen explanatory cases, not a random sample or an estimate from the displayed clips. Paired examples use the lowest rollout index showing the stated transition, without rerunning a policy failure. Every task rate includes all ten frozen initial states for its named stage. Revisions were developed after source/demo inspection; these are diagnostic reruns, not held-out causal estimates.",
+  "selectionPolicy": "Purposefully chosen explanatory cases, not a random sample or an estimate from the displayed clips. Paired examples use the lowest rollout index with benchmark failure → success in their two frozen runs, without rerunning a policy failure. Every task rate includes all ten frozen initial states for its named stage. Revisions were developed after source/demo inspection; these are diagnostic reruns, not held-out causal estimates.",
   "videoNote": "Original full episode frames at 20 fps, including the initial frame and ten warmup steps. Agent view is left and wrist view is right. Inference waiting time is omitted. Success is the native environment predicate; automatic success termination does not imply an independent agent completion judgment.",
   "encoding": {
     "codec": "h264",
@@ -345,14 +345,14 @@
     },
     {
       "id": "spatial-regression",
-      "title": "Clearer wording can still regress",
+      "title": "From disagreement to benchmark success",
       "suite": "libero_spatial",
       "taskId": 4,
-      "rolloutIndex": 5,
-      "seed": 5,
-      "initStateId": 5,
-      "before": "baseline:libero_spatial_t04_r05",
-      "after": "r1:libero_spatial_t04_r05",
+      "rolloutIndex": 4,
+      "seed": 4,
+      "initStateId": 4,
+      "before": "baseline:libero_spatial_t04_r04",
+      "after": "r1:libero_spatial_t04_r04",
       "beforeTask": {
         "successes": 5,
         "episodes": 10,
@@ -369,8 +369,8 @@
         "F→S": 2,
         "F→F": 3
       },
-      "selectionRule": "Lowest rollout index with success → failure in these two frozen runs.",
-      "note": "Adding “in the center” did not consistently improve this task: 5/10 became 4/10, with both improvements and regressions across paired initial states.",
+      "selectionRule": "Lowest rollout index with failure → success in these two frozen runs.",
+      "note": "This matched initial state changes from benchmark failure to success. Across all ten initial states, task success remains 5/10 before and 4/10 after, with both improvements and regressions.",
       "sourceLinks": [
         {
           "label": "Native predicate implementation",
@@ -1086,114 +1086,6 @@
         "verified": true
       }
     },
-    "baseline:libero_spatial_t04_r05": {
-      "id": "baseline:libero_spatial_t04_r05",
-      "stage": "baseline",
-      "stageLabel": "Original instructions",
-      "episodeId": "libero_spatial_t04_r05",
-      "episodeKey": "libero_spatial_t04_r05",
-      "suite": "libero_spatial",
-      "taskId": 4,
-      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
-      "rolloutIndex": 5,
-      "seed": 5,
-      "initStateId": 5,
-      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
-      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
-      "status": "success",
-      "nativeSuccess": true,
-      "agentAssessment": "unknown",
-      "stopReason": "libero_success",
-      "steps": 471,
-      "maxSteps": 500,
-      "video": "media/libero/libero_spatial_t04_r05.mp4",
-      "poster": "media/libero/libero_spatial_t04_r05.jpg",
-      "width": 1024,
-      "height": 512,
-      "frames": 482,
-      "fps": 20,
-      "durationSeconds": 24.1,
-      "reusedBaselineMedia": true,
-      "task": {
-        "successes": 5,
-        "episodes": 10,
-        "successRate": 0.5
-      },
-      "source": {
-        "run": "astra_libero_v5_calibrated_parallel10_r4",
-        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
-        "resultSha256": "d83789a2d1b19e3b5c218bd99e5262baf65e264a9ffbf68c32ed1b92e30091c0",
-        "videoSha256": "c482ff9c18eca694a217bc794ddfdbe62856ced77e61ba66bd159a707597413d",
-        "selectedAttempt": "attempt_001",
-        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
-        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
-      },
-      "media": {
-        "videoSha256": "860c19e36bd1e1ce077c75a391c8d413374ad4ef5899a72276bf73d84cfb5db0",
-        "videoBytes": 843367,
-        "posterSha256": "e8a49245fd94e177027ed51df14f74279a1becb18c129d84848878022aeb97ba",
-        "posterBytes": 38615,
-        "posterFrame": 241,
-        "codec": "h264",
-        "pixelFormat": "yuv420p",
-        "fastStart": true,
-        "verified": true
-      }
-    },
-    "r1:libero_spatial_t04_r05": {
-      "id": "r1:libero_spatial_t04_r05",
-      "stage": "r1",
-      "stageLabel": "First instruction revision",
-      "episodeId": "libero_spatial_t04_r05",
-      "episodeKey": "libero_spatial_t04_r05",
-      "suite": "libero_spatial",
-      "taskId": 4,
-      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
-      "rolloutIndex": 5,
-      "seed": 5,
-      "initStateId": 5,
-      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it in the center of the plate",
-      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
-      "status": "failure",
-      "nativeSuccess": false,
-      "agentAssessment": "unknown",
-      "stopReason": "step_budget",
-      "steps": 500,
-      "maxSteps": 500,
-      "video": "media/blog/libero/r1/libero_spatial_t04_r05.mp4",
-      "poster": "media/blog/libero/r1/libero_spatial_t04_r05.jpg",
-      "width": 1024,
-      "height": 512,
-      "frames": 511,
-      "fps": 20,
-      "durationSeconds": 25.55,
-      "reusedBaselineMedia": false,
-      "task": {
-        "successes": 4,
-        "episodes": 10,
-        "successRate": 0.4
-      },
-      "source": {
-        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
-        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
-        "resultSha256": "33298d66b6d5a958218fd67e859a8fe4f83b3aade078b59ece072e555e9fda59",
-        "videoSha256": "845dfd38a0afa2a1045a8797b58935496556e42b16e75f85f038a23b0de6d82a",
-        "selectedAttempt": "attempt_001",
-        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
-        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
-      },
-      "media": {
-        "videoSha256": "49fb1a34e438c31fefbdd039e1c3b14ecccb8c2d2d6974682102f16ddc14b6d7",
-        "videoBytes": 1081202,
-        "posterSha256": "c0ae00c4bf66e18dd6f6bfc09addd041dab1c085e434c8f9bd27e8b6b7b37434",
-        "posterBytes": 37296,
-        "posterFrame": 255,
-        "codec": "h264",
-        "pixelFormat": "yuv420p",
-        "fastStart": true,
-        "verified": true
-      }
-    },
     "r2:libero_goal_t05_r05": {
       "id": "r2:libero_goal_t05_r05",
       "stage": "r2",
@@ -1409,6 +1301,114 @@
         "fastStart": true,
         "verified": true
       }
+    },
+    "baseline:libero_spatial_t04_r04": {
+      "id": "baseline:libero_spatial_t04_r04",
+      "stage": "baseline",
+      "stageLabel": "Original instructions",
+      "episodeId": "libero_spatial_t04_r04",
+      "episodeKey": "libero_spatial_t04_r04",
+      "suite": "libero_spatial",
+      "taskId": 4,
+      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+      "rolloutIndex": 4,
+      "seed": 4,
+      "initStateId": 4,
+      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "status": "failure",
+      "nativeSuccess": false,
+      "agentAssessment": "visually_complete",
+      "stopReason": "agent_finished",
+      "steps": 495,
+      "maxSteps": 500,
+      "video": "media/libero/libero_spatial_t04_r04.mp4",
+      "poster": "media/libero/libero_spatial_t04_r04.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 506,
+      "fps": 20,
+      "durationSeconds": 25.3,
+      "reusedBaselineMedia": true,
+      "task": {
+        "successes": 5,
+        "episodes": 10,
+        "successRate": 0.5
+      },
+      "source": {
+        "run": "astra_libero_v5_calibrated_parallel10_r4",
+        "manifestSha256": "df08694520ff7ea3e9bfee061a29223e46c4db76bc54a07e637cbfcbe93f42f8",
+        "resultSha256": "b15a8ae05669af8be50e113e3a27e94bad4223e83fabd7b6cff4a8145ef71291",
+        "videoSha256": "f0cd4302e90524acb2a4d403c561fb95a90f2b3fed2da4d4c6ac17036d4d5432",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
+        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
+      },
+      "media": {
+        "videoSha256": "f0cd4302e90524acb2a4d403c561fb95a90f2b3fed2da4d4c6ac17036d4d5432",
+        "videoBytes": 7684965,
+        "posterSha256": "d9d5f7cc65b587a5481fec6a8461172a6ee540ebea309be549643f030aa19da3",
+        "posterBytes": 43953,
+        "posterFrame": 253,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
+    },
+    "r1:libero_spatial_t04_r04": {
+      "id": "r1:libero_spatial_t04_r04",
+      "stage": "r1",
+      "stageLabel": "First instruction revision",
+      "episodeId": "libero_spatial_t04_r04",
+      "episodeKey": "libero_spatial_t04_r04",
+      "suite": "libero_spatial",
+      "taskId": 4,
+      "taskName": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+      "rolloutIndex": 4,
+      "seed": 4,
+      "initStateId": 4,
+      "instruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it in the center of the plate",
+      "originalInstruction": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+      "status": "success",
+      "nativeSuccess": true,
+      "agentAssessment": "unknown",
+      "stopReason": "libero_success",
+      "steps": 464,
+      "maxSteps": 500,
+      "video": "media/blog/libero/r1/libero_spatial_t04_r04.mp4",
+      "poster": "media/blog/libero/r1/libero_spatial_t04_r04.jpg",
+      "width": 1024,
+      "height": 512,
+      "frames": 475,
+      "fps": 20,
+      "durationSeconds": 23.75,
+      "reusedBaselineMedia": false,
+      "task": {
+        "successes": 4,
+        "episodes": 10,
+        "successRate": 0.4
+      },
+      "source": {
+        "run": "astra_libero_v5_instruction_refined_parallel8_r1",
+        "manifestSha256": "1fe4a3d8fadb450d032d237c5e77f0da1e5275f7452de9988b8fa5c9f28ce269",
+        "resultSha256": "8e6433c9f83ec33719909b90a7df297144166a16e68b760db57e1e4d25cf3fe2",
+        "videoSha256": "1a872037d53f9402884fc79e3882d97fe75d4614cfbad4462692084f2555755d",
+        "selectedAttempt": "attempt_001",
+        "bddlSha256": "4371189e11d9fd29bb548ab9a8adcd741bb0ce41bb66c612672d0e8cb29a52a9",
+        "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
+      },
+      "media": {
+        "videoSha256": "182b1b45f7817396a126d0b24cd46521ab781de10743415e74fdd08b7b2efc4d",
+        "videoBytes": 882209,
+        "posterSha256": "dde5bc775256c22a3c5f57372e59467711243eaabcbeffc91792a3e6ce429577",
+        "posterBytes": 33423,
+        "posterFrame": 237,
+        "codec": "h264",
+        "pixelFormat": "yuv420p",
+        "fastStart": true,
+        "verified": true
+      }
     }
   },
   "validation": {
@@ -1418,6 +1418,6 @@
     "verifiedClips": 18,
     "newClips": 9,
     "reusedClips": 9,
-    "newMediaBytes": 5709583
+    "newMediaBytes": 5506717
   }
 }

@@ -41,6 +41,8 @@ artifacts/
 !/media/blog/libero/r1/libero_object_t00_r00.mp4
 !/media/blog/libero/r1/libero_spatial_t04_r05.jpg
 !/media/blog/libero/r1/libero_spatial_t04_r05.mp4
+!/media/blog/libero/r1/libero_spatial_t04_r04.jpg
+!/media/blog/libero/r1/libero_spatial_t04_r04.mp4
 !/media/blog/libero/r2/libero_10_t05_r00.jpg
 !/media/blog/libero/r2/libero_10_t05_r00.mp4
 !/media/blog/libero/r2/libero_goal_t05_r02.jpg
@@ -67,6 +69,8 @@ artifacts/
 !/media/libero/libero_object_t00_r00.mp4
 !/media/libero/libero_spatial_t04_r05.jpg
 !/media/libero/libero_spatial_t04_r05.mp4
+!/media/libero/libero_spatial_t04_r04.jpg
+!/media/libero/libero_spatial_t04_r04.mp4
 !/media/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle_r00.jpg
 !/media/robotwin_nvidia10/robotwin_nvidia10_adjust_bottle_r00.mp4
 !/media/robotwin_nvidia10/robotwin_nvidia10_dump_bin_bigbin_r00.jpg
@@ -83,3 +87,9 @@ artifacts/
 !/media/robotwin_nvidia10/robotwin_nvidia10_rotate_qrcode_r00.mp4
 !/media/robotwin_nvidia10/robotwin_nvidia10_scan_object_r01.jpg
 !/media/robotwin_nvidia10/robotwin_nvidia10_scan_object_r01.mp4
+
+# RoboTwin Task 00 / Episode 02 article comparison.
+!/media/blog/robotwin/adjust_bottle_r01-original.mp4
+!/media/blog/robotwin/adjust_bottle_r01-original.jpg
+!/media/blog/robotwin/adjust_bottle_r01-revision.mp4
+!/media/blog/robotwin/adjust_bottle_r01-revision.jpg

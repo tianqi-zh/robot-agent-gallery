@@ -22,7 +22,12 @@
   const taskLabel = (suite,id) => `${suiteNames[suite]} t${String(id).padStart(2,'0')}`;
   const liberoExamples = {
     'plate-near-stove': {taskId:'libero_goal_t05',title:'A failure becomes a success',detail:'The selected episode changes from a benchmark failure to a success at the same initial state. Across all ten initial states, successes increase from 0/10 to 2/10; eight episodes still fail.'},
-    'spatial-regression': {taskId:'libero_spatial_t04',title:'A success becomes a failure',detail:'The selected episode changes from success to failure at the same initial state. Across ten initial states, two failures become successes while three successes become failures, reducing the total from 5/10 to 4/10.'}
+    'spatial-regression': {taskId:'libero_spatial_t04',title:'A failure becomes a success',detail:'At initial state 4, the original rollout is judged complete by the agent but rejected by the benchmark; the revised rollout passes. Across all ten initial states, two failures become successes while three successes become failures, so task-level successes change from 5/10 to 4/10.'}
+  };
+  // Emphasize the added goal information in these two editorial examples.
+  const robotwinInstructionHighlights = {
+    adjust_bottle_r01: ['keep it upright', 'move it to the right side of the table.'],
+    place_object_basket_r01: ['and then lift the basket with the toy car inside.']
   };
   const liberoFailureDetails = {
     'plate-control-budget': ['Sustained contact while pushing a plate', 'The plate must slide into a small region near the stove. The policy repeatedly repositions the gripper but does not finish within 500 control steps: sustained contact and small positional corrections remain difficult.'],
@@ -35,7 +40,19 @@
     place_dual_shoes_r00: {title:'Two shoes, two precise placements',successes:4,episodes:10,detail:'Both shoes must fit into the box at the required positions and orientations. Reorienting, lowering, and releasing each shoe creates repeated contact transitions; both placements must succeed in the same episode.'}
   };
   let reviewCorrections = new Map();
-  function highlightInstructionChanges(original, improved) {
+  function highlightInstructionChanges(original, improved, phrases) {
+    if (phrases?.length) {
+      let cursor = 0;
+      const spans = [];
+      for (const phrase of phrases) {
+        const start = improved.indexOf(phrase, cursor);
+        // If an instruction is edited later, fall back to the word comparison.
+        if (start < 0) return highlightInstructionChanges(original, improved);
+        spans.push(esc(improved.slice(cursor, start)), `<strong>${esc(phrase)}</strong>`);
+        cursor = start + phrase.length;
+      }
+      return spans.join('') + esc(improved.slice(cursor));
+    }
     // Match words case-insensitively; retain the improved sentence's exact
     // whitespace and punctuation, and escape every span before adding markup.
     const wordPattern = /[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu;
@@ -174,7 +191,7 @@
     document.querySelector('#robotwin-alignment-note').textContent = data.after.agentUnknownBenchFalse
       ? `Original agent–benchmark disagreements total ${data.before.agentSuccessBenchFalse}, giving IAS ${pct(data.before.instinctAlignment)}%. The revised composite has ${data.after.agentUnknownBenchFalse} failed reruns with unpublished agent completion judgments. Its IAS is between ${pct(data.after.instinctAlignmentBounds.min)}% and ${pct(data.after.instinctAlignmentBounds.max)}%; these records remain unclassified in the table.`
       : `Agent–benchmark disagreements fall from ${data.before.agentSuccessBenchFalse} to ${data.after.agentSuccessBenchFalse}, raising IAS from ${pct(data.before.instinctAlignment)}% to ${pct(data.after.instinctAlignment)}%.`;
-    document.querySelector('#robotwin-instruction-rows').innerHTML = data.selectedExamples.map(item => `<tr data-episode="${esc(item.episodeKey)}"><th scope="row" class="task-ref"><span>Task ${String(item.taskId).padStart(2,'0')}</span><span>EPISODE ${String(item.episodeNumber).padStart(2,'0')}</span></th><td class="instruction-original">${esc(item.before.instruction)}</td><td class="instruction-improved">${highlightInstructionChanges(item.before.instruction,item.after.instruction)}</td><td>${benchOutcome(item.before)} → <strong>${benchOutcome(item.after)}</strong></td></tr>`).join('');
+    document.querySelector('#robotwin-instruction-rows').innerHTML = data.selectedExamples.map(item => `<tr data-episode="${esc(item.episodeKey)}"><th scope="row" class="task-ref"><span>Task ${String(item.taskId).padStart(2,'0')}</span><span>EPISODE ${String(item.episodeNumber).padStart(2,'0')}</span></th><td class="instruction-original">${esc(item.before.instruction)}</td><td class="instruction-improved">${highlightInstructionChanges(item.before.instruction,item.after.instruction,robotwinInstructionHighlights[item.episodeKey])}</td><td>${benchOutcome(item.before)} → <strong>${benchOutcome(item.after)}</strong></td></tr>`).join('');
     document.querySelector('#robotwin-cases').innerHTML = data.selectedExamples.map(item => {
       if (item.before.seed !== item.after.seed) throw new Error(`RoboTwin example scene mismatch: ${item.episodeKey}`);
       return robotwinCaseMarkup(item);

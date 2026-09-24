@@ -11,15 +11,14 @@
   <meta property="og:description" content="Repair the instruction layer. Preserve the demonstrations. A human-proxy policy helps debug LIBERO and RoboTwin.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://tianqi-zh.github.io/robot-agent-gallery/">
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="blog.css?v=d367715342e8">
+  <link rel="stylesheet" href="blog.css?v=506c33df6a6a">
   <script src="gallery-hosting.js?v=07c6812a48b6" defer></script>
-  <script src="blog.js?v=d8e958357e80" defer></script>
+  <script src="blog.js?v=60d873323fdb" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#article">Skip to article</a>
   <header class="site-header wrap">
-    <a class="brand" href="./"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 24V8h10v16M15 8h12v8H15M5 16h10M21 16v8h6"/></svg>Agent as Policy</a>
+    <a class="brand" href="./">benchmend</a>
     <nav aria-label="Main navigation"><a href="./" aria-current="page">Essay</a><a data-benchmend-gallery href="https://benchmend-gallery.static.hf.space/index.html">Gallery <span aria-hidden="true">↗</span></a><a href="https://github.com/tianqi-zh/robot-agent-gallery">GitHub</a></nav>
   </header>
   <main id="article">
@@ -93,7 +92,7 @@
             <div class="prose"><p>Across the 400-episode comparison, human-reviewed agent–benchmark disagreements fall from <strong>47 to zero</strong>, raising IAS from <strong>88.25% to 100%</strong>. Native success rises from <strong>322/400 to 357/400</strong> (80.50% → 89.25%): 35 more episodes pass the same benchmark checker.</p></div>
             <div id="instructions" class="prose"><h4>Two task-level examples</h4><p><strong>Goal t05</strong> improves from 0/10 to 2/10 native successes, while <strong>Spatial t04</strong> changes from 5/10 to 4/10. The table shows these two examples; the overall results above include all 40 tasks.</p></div>
             <div class="table-scroll" tabindex="0" role="region" aria-label="LIBERO instructions and task success rates"><table class="instruction-table"><thead><tr><th scope="col">Task</th><th scope="col">Original instruction</th><th scope="col">Improved instruction</th><th scope="col">Native successes</th></tr></thead><tbody id="instruction-rows"></tbody></table></div>
-            <div id="cases" class="prose"><h4>Before-and-after rollouts</h4><p>Each pair starts from the same initial state and seed. Goal t05 shows a failed episode becoming successful; Spatial t04 shows a successful episode becoming a failure. Each card reports the task’s result across all ten episodes.</p></div>
+            <div id="cases" class="prose"><h4>Before-and-after rollouts</h4><p>Each pair starts from the same initial state and seed. Both Goal t05 and Spatial t04 show a failed episode becoming successful. Each card also reports the task’s result across all ten episodes.</p></div>
             <p class="small">Full recordings at 20 fps, with scene and wrist views. Thinking time is omitted. Native success may stop the recording before release.</p>
             <div id="paired-cases"></div>
             <div class="prose"><p>In Spatial t04, rejected completion claims fall from <strong>three to zero</strong> even as native success falls from <strong>5/10 to 4/10</strong>. Better agreement about completion does not guarantee more reliable execution. The two metrics capture different aspects of the outcome.</p></div>
@@ -102,7 +101,7 @@
             <h3 id="robotwin-heading" class="subsection-title">3.2 RoboTwin</h3>
             <div id="robotwin-comparison" class="comparison"></div>
             <p class="small">All 50 tasks: 500 original episodes versus a composite retaining 369 original episodes and replacing the 131 episodes with agent–benchmark disagreements.</p>
-            <div class="prose"><p>In the latest gallery results, native success rises from <strong>336/500 to 429/500</strong> (67.20% → 85.80%). Of the 131 revised episodes, <strong>93 now pass the benchmark</strong>; 38 remain unsuccessful, including one timeout.</p><p id="robotwin-alignment-note"></p><h4>Two episode examples</h4><p><strong>Task 00 · Episode 01</strong> and <strong>Task 32 · Episode 02</strong> both change from benchmark failure to success. Each pair uses the same episode slot and effective seed. The table shows the recorded instructions, followed by the original and revised videos.</p></div>
+            <div class="prose"><p>In the latest gallery results, native success rises from <strong>336/500 to 429/500</strong> (67.20% → 85.80%). Of the 131 revised episodes, <strong>93 now pass the benchmark</strong>; 38 remain unsuccessful, including one timeout.</p><p id="robotwin-alignment-note"></p><h4>Two episode examples</h4><p><strong>Task 00 · Episode 02</strong> and <strong>Task 32 · Episode 02</strong> both change from benchmark failure to success. Each pair uses the same episode slot and effective seed. The table shows the recorded instructions, followed by the original and revised videos.</p></div>
             <div class="table-scroll" tabindex="0" role="region" aria-label="RoboTwin example instructions and episode outcomes"><table class="instruction-table"><thead><tr><th scope="col">Episode</th><th scope="col">Original instruction</th><th scope="col">Revised instruction</th><th scope="col">Bench outcome</th></tr></thead><tbody id="robotwin-instruction-rows"></tbody></table></div>
             <div id="robotwin-cases"></div>
             <p class="small"><a href="data/robotwin-alignment-summary.json">RoboTwin results, episode records and provenance</a> · <a href="https://huggingface.co/spaces/benchmend/gallery/blob/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/robotwin-original-disagreement-selection.json">September 24 gallery snapshot</a> · <a href="https://benchmend-gallery.static.hf.space/gallery/robotwin/index.html">Full RoboTwin gallery ↗</a></p>

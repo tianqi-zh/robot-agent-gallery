@@ -186,7 +186,7 @@ def test_symlinked_example_is_rejected(workspace, parent_symlink):
 
 def test_symlinked_public_asset_is_rejected(workspace):
     root, destination = workspace
-    asset = root / "assets/favicon.svg"
+    asset = root / "blog.css"
     asset.unlink()
     secret = root / "private.txt"
     secret.write_text("private")

@@ -11,7 +11,7 @@ DESTINATION = ROOT / "_site"
 PUBLIC_FILES = (
     "index.html", "blog.js", "blog.css", ".nojekyll",
     "gallery-hosting.json", "gallery-hosting.js", "gallery-redirect.js",
-    "METHODOLOGY.md", "LIBERO_ALIGNMENT.md", "assets/favicon.svg",
+    "METHODOLOGY.md", "LIBERO_ALIGNMENT.md",
     "data/libero-alignment.json", "data/libero-alignment-episodes.csv",
     "data/libero-blog-media.json", "data/libero-human-review.json",
     "data/robotwin-alignment-summary.json", "data/robotwin-instruction-examples.json",
