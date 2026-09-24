@@ -13,6 +13,10 @@ short_description: Original and repaired instructions, episode by episode.
 
 **Agent-Guided Instruction Repair for Robotics Benchmarks.**
 
+The live shared Space hosts this app at
+[`gallery/libero/index.html`](https://benchmend-gallery.static.hf.space/gallery/libero/index.html)
+alongside RoboTwin. See [shared deployment notes](SHARED_SPACE.md) before publishing.
+
 Browse **490 LIBERO videos**: 400 original-instruction evaluations and 90
 evaluations with revised instructions. The **Revision** collection uses the
 latest instruction for each of nine tasks, with the same 10 initial states per

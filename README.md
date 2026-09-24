@@ -2,9 +2,9 @@
 
 **Small instruction edits. Better-aligned benchmarks.** The [essay](https://tianqi-zh.github.io/robot-agent-gallery/) uses GPT as a proxy for a human robot operator to diagnose instruction–evaluator mismatches in LIBERO and RoboTwin. It explains the motivation, evaluation method, instruction repairs and results, remaining difficulties, and implications for reusing existing demonstrations. This GitHub repository contains the essay, its local example videos and posters, analysis data, and validation tools.
 
-**[BenchMend LIBERO gallery](https://huggingface.co/spaces/benchmend/gallery)** · [LIBERO Dataset](https://huggingface.co/datasets/benchmend/libero)
+**[BenchMend gallery](https://huggingface.co/spaces/benchmend/gallery)** · [LIBERO Dataset](https://huggingface.co/datasets/benchmend/libero)
 
-The BenchMend collection contains **400 original-instruction LIBERO evaluations and one 90-episode revision**. The revision keeps 70 recordings from the first repair run and replaces the two further-refined tasks (`libero_goal_t05` and `libero_10_t05`) with their 20 second-run recordings. All 490 selected videos are retained byte-for-byte, with instructions, native outcomes, matched initial states, provenance hashes, and preview images. Its LIBERO-only gallery offers Original and Revision views with suite, outcome, and text filters, playback, and instruction comparisons. The article’s final 400-episode comparison combines 310 unchanged originals with the 90 revision episodes. See [the Space source](hf-space/README.md) and [exporter](scripts/export_benchmend_libero.py).
+The BenchMend collection contains **400 original-instruction LIBERO evaluations and one 90-episode revision**. The revision keeps 70 recordings from the first repair run and replaces the two further-refined tasks (`libero_goal_t05` and `libero_10_t05`) with their 20 second-run recordings. All 490 selected videos are retained byte-for-byte, with instructions, native outcomes, matched initial states, provenance hashes, and preview images. Its [LIBERO page](https://benchmend-gallery.static.hf.space/gallery/libero/index.html) offers Original and Revision views with suite, outcome, and text filters, playback, and instruction comparisons. The article’s final 400-episode comparison combines 310 unchanged originals with the 90 revision episodes. The shared Space also preserves the contributor’s RoboTwin Before (482 videos) and V4 (182 videos) collections. See [the LIBERO app source](hf-space/README.md), [shared Space maintenance notes](hf-space/SHARED_SPACE.md), and [exporter](scripts/export_benchmend_libero.py).
 
 **Historical multi-benchmark archive:** [Gallery](https://huggingface.co/spaces/Alan0928/robot-agent-gallery) · [Video Dataset](https://huggingface.co/datasets/Alan0928/robot-agent-gallery) · [Gallery source](https://huggingface.co/spaces/Alan0928/robot-agent-gallery/tree/main)
 
@@ -57,7 +57,7 @@ The browser check decodes all 22 embedded local videos with HF media requests bl
 
 GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
-## Reproduce the BenchMend LIBERO Dataset and Space
+## Reproduce the BenchMend LIBERO Dataset and app
 
 The exporter reads the three archived evaluation runs without modifying them. It checks every selected result against the audited article data, copies the original video bytes, fully decodes each recording, and generates posters and public metadata. Keep the Dataset output outside this Git repository.
 
@@ -66,13 +66,9 @@ python3 scripts/export_benchmend_libero.py --runs /path/to/robot-agent/eval_runs
 python3 scripts/publish_benchmend.py --dataset-root /path/to/benchmend-libero --validate-only
 ```
 
-Publishing requires `huggingface_hub` and a Hugging Face login with write access to `benchmend`. This uploads the Dataset, verifies all remote file hashes, pins the static gallery to the resulting Dataset commit, and uploads the Space:
+The source in `hf-space/` is the standalone LIBERO app. The live shared Space hosts it under `gallery/libero/` alongside the contributor's RoboTwin pages. Videos remain in their respective HF repositories; existing article example videos are independent of the Space.
 
-```bash
-python3 scripts/publish_benchmend.py --dataset-root /path/to/benchmend-libero
-```
-
-The Space source is in `hf-space/`; video files remain in the separate Dataset. Existing article example videos and the historical multi-benchmark archive are independent of this LIBERO release.
+`scripts/publish_benchmend.py` supports a new or existing standalone LIBERO Space, with HF authentication and hash verification. It now refuses to publish over a Space containing other contributors' files, before any remote changes. Maintain `benchmend/gallery` with targeted changes against its latest revision as described in [the shared Space notes](hf-space/SHARED_SPACE.md).
 
 ## Render the presentation video
 

@@ -12,6 +12,7 @@ import re
 import shutil
 
 from huggingface_hub import HfApi
+from huggingface_hub.errors import RepositoryNotFoundError
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -169,6 +170,28 @@ def verify_remote(api, repo, kind, revision, root, names):
     return info.sha
 
 
+def check_space_inventory(api, repo):
+    """Reject shared Spaces before this LIBERO-only publisher changes any repo."""
+    try:
+        info = api.repo_info(repo, repo_type="space", files_metadata=True)
+    except RepositoryNotFoundError as error:
+        # Authentication failures can use the same exception as a missing repo.
+        # Only an actual 404 permits the initial Space creation workflow.
+        if error.response is not None and error.response.status_code == 404:
+            return None
+        raise
+    remote = {item.rfilename: item for item in info.siblings}
+    extra = sorted(set(remote) - SPACE_PUBLIC_FILES - {"style.css"})
+    require(not extra,
+            f"Refusing to publish the LIBERO-only interface over shared Space {repo}; "
+            f"preserve its additional files with the shared gallery workflow: {extra}")
+    boilerplate = remote.get("style.css")
+    if boilerplate:
+        require(boilerplate.blob_id == "114adf441e9032febb46bc056b2a8bb651075f0d",
+                "Unexpected style.css on the Space; preserve it for review")
+    return info
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-root", type=Path, default=Path("/playpen-ssd/tianqizh/benchmend-libero-merged"))
@@ -184,6 +207,9 @@ def main():
         return
 
     api = HfApi()
+    # A collaborator may have expanded this Space beyond the original LIBERO app.
+    # Detect that before even creating or uploading the separate Dataset repo.
+    check_space_inventory(api, args.space)
     # The active user's normal HF authentication is used; credentials are never exported.
     api.create_repo(args.dataset, repo_type="dataset", private=False, exist_ok=True)
     api.create_repo(args.space, repo_type="space", space_sdk="static", private=False, exist_ok=True)
@@ -217,15 +243,15 @@ def main():
     require(not any(path.is_symlink() for path in args.space_root.rglob("*")), "Space staging must not contain symlinks")
     # A new static Space includes HF's boilerplate style.css. This app uses
     # styles.css; remove only the verified template, never an unknown stylesheet.
-    existing = api.repo_info(args.space, repo_type="space", files_metadata=True)
+    existing = check_space_inventory(api, args.space)
+    require(existing is not None, "Space disappeared during publication")
     boilerplate = next((item for item in existing.siblings if item.rfilename == "style.css"), None)
-    if boilerplate:
-        require(boilerplate.blob_id == "114adf441e9032febb46bc056b2a8bb651075f0d",
-                "Unexpected style.css on the Space; preserve it for review")
     commit = api.upload_folder(
         repo_id=args.space, repo_type="space", folder_path=args.space_root,
         allow_patterns=sorted(space_names), commit_message="Show original and consolidated revision in the LIBERO gallery",
         delete_patterns=["style.css"] if boilerplate else None,
+        # An update after the last inventory check must not be overwritten either.
+        parent_commit=existing.sha,
     )
     space_sha = verify_remote(api, args.space, "space", commit.oid, args.space_root, space_names)
     report = {
