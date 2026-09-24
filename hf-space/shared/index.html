@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f0">
+  <meta name="description" content="Explore LIBERO and RoboTwin side by side. Browse original and revised instructions, watch robot rollouts, and inspect benchmark outcomes.">
+  <title>BenchMend — LIBERO &amp; RoboTwin Gallery</title>
+  <link rel="canonical" href="https://benchmend-gallery.static.hf.space/gallery/index.html">
+  <meta property="og:title" content="BenchMend — LIBERO &amp; RoboTwin Gallery">
+  <meta property="og:description" content="Two benchmarks. Original and revised instructions. Explore the complete rollout collections.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="benchmend-shell.css">
+  <script src="entry.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#benchmarks">Skip to benchmarks</a>
+  <header class="bm-header bm-wrap">
+    <a class="bm-brand" href="index.html" aria-label="BenchMend overview"><span class="bm-monogram" aria-hidden="true">b<span>m</span></span><span>BenchMend</span></a>
+    <nav class="bm-nav" aria-label="Benchmarks"><a href="index.html" aria-current="page">Overview</a><a href="libero/index.html">LIBERO</a><a href="robotwin/index.html">RoboTwin</a></nav>
+    <a class="bm-essay" href="https://tianqi-zh.github.io/robot-agent-gallery/" target="_blank" rel="noopener">Read the essay <span aria-hidden="true">↗</span></a>
+  </header>
+  <main class="bm-wrap">
+    <section class="overview-hero" aria-labelledby="overview-heading">
+      <div><p class="eyebrow"><span class="signal-dot" aria-hidden="true"></span>THE BENCHMEND VIDEO GALLERY</p><h1 id="overview-heading">Two benchmarks.<br><em>A clearer goal.</em></h1></div>
+      <div class="overview-intro"><p>Small instruction edits, made visible. Explore LIBERO and RoboTwin, watch the agent's rollouts, and see how the instructions describe each task.</p><p class="overview-meta"><span>Original &amp; revised instructions</span><span>GPT-6-Astra rollouts</span></p></div>
+    </section>
+    <section class="benchmark-grid" id="benchmarks" aria-label="Choose a benchmark">
+      <article class="benchmark-card" data-benchmark-card="libero" aria-labelledby="libero-heading">
+        <div class="benchmark-image"><img src="https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_10_t05_r00.jpg" alt="A robot manipulates a book beside a compartmentalized caddy in LIBERO." width="640" height="320" fetchpriority="high"><span class="image-label"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1 11 6 3 11Z"/></svg>From the evaluation recordings</span></div>
+        <div class="benchmark-body">
+          <div class="benchmark-heading"><h2 id="libero-heading">LIBERO</h2><span class="rollout-count"><strong>490</strong> rollouts</span></div>
+          <p class="benchmark-description">Everyday manipulation across four task suites. Compare original and revised instructions on the same initial states.</p>
+          <div class="version-grid" aria-label="LIBERO instruction versions"><a class="version-link" href="libero/index.html"><span class="version-name">Original</span><strong>400</strong><small>40 tasks</small><span class="version-arrow" aria-hidden="true">↗</span></a><a class="version-link" href="libero/index.html?version=revision"><span class="version-name">Revision</span><strong>90</strong><small>9 tasks</small><span class="version-arrow" aria-hidden="true">↗</span></a></div>
+          <a class="benchmark-cta" href="libero/index.html">Explore LIBERO <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+      <article class="benchmark-card" data-benchmark-card="robotwin" aria-labelledby="robotwin-heading">
+        <div class="benchmark-image"><img src="https://huggingface.co/spaces/benchmend/gallery/resolve/600b54fc1c253ea2f61c9329da69577180fed016/media/robotwin_nvidia10_before/robotwin_nvidia10_before_stack_blocks_three_r00.jpg" alt="Two robot arms manipulate colored blocks on a tabletop in RoboTwin." width="1536" height="384" fetchpriority="high"><span class="image-label"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1 11 6 3 11Z"/></svg>From the evaluation recordings</span></div>
+        <div class="benchmark-body">
+          <div class="benchmark-heading"><h2 id="robotwin-heading">RoboTwin</h2><span class="rollout-count"><strong>664</strong> rollouts</span></div>
+          <p class="benchmark-description">Bimanual manipulation across varied scenes. Explore the before-repair recordings and the V4 instruction collection.</p>
+          <div class="version-grid" aria-label="RoboTwin instruction versions"><a class="version-link" href="robotwin_nvidia10_before/index.html"><span class="version-name">Before</span><strong>482</strong><small>50 tasks</small><span class="version-arrow" aria-hidden="true">↗</span></a><a class="version-link" href="robotwin_v4_manual/index.html"><span class="version-name">V4</span><strong>182</strong><small>30 tasks</small><span class="version-arrow" aria-hidden="true">↗</span></a></div>
+          <a class="benchmark-cta" href="robotwin/index.html">Explore RoboTwin <span aria-hidden="true">↗</span></a>
+        </div>
+      </article>
+    </section>
+    <aside class="reading-note" aria-label="About these collections"><p>Each collection includes successful and unsuccessful rollouts. Task coverage differs between versions; outcomes are reported within each benchmark.</p><a href="https://tianqi-zh.github.io/robot-agent-gallery/" target="_blank" rel="noopener">Read the story behind BenchMend ↗</a></aside>
+  </main>
+  <footer class="overview-footer bm-wrap"><span><strong>BenchMend</strong> · Agent-Guided Instruction Repair for Robotics Benchmarks</span><a href="https://huggingface.co/benchmend" target="_blank" rel="noopener">On Hugging Face ↗</a></footer>
+</body>
+</html>

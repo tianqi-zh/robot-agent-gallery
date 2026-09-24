@@ -10,13 +10,22 @@ The [playback repair](https://huggingface.co/spaces/benchmend/gallery/commit/600
 restored the LIBERO entry, corrected media routing, and recovered missing
 comparison videos while preserving the contributor's latest catalogs.
 
+The [shared overview refinement](https://huggingface.co/spaces/benchmend/gallery/commit/6aebacab729c9842f037092225dda0748430e7e4)
+gave LIBERO and RoboTwin equal entrances and consistent navigation, with their
+instruction versions grouped within the corresponding benchmark page.
+
 ## Current layout
 
+- `gallery/index.html`: neutral overview with equally sized LIBERO and RoboTwin
+  cards, each linking to its benchmark page and both instruction versions.
+- `gallery/benchmend-shell.css`: shared BenchMend navigation with Overview,
+  LIBERO, and RoboTwin visible on desktop and mobile.
 - `gallery/libero/`: the standalone LIBERO app, 400 Original and 90 Revision
-  episodes, with links back to the shared gallery. Its five local files are
+  episodes, with the shared benchmark navigation. Its five local files are
   `index.html`, `app.js`, `styles.css`, `media-hosting.js`, and `episodes.json`.
-- `gallery/index.html`: RoboTwin Before (482 episodes) and V4 (182 episodes),
-  plus an entrance to LIBERO. The contributor's catalogs remain unchanged.
+- `gallery/robotwin/index.html`: RoboTwin overview with Before (482 episodes)
+  and V4 (182 episodes) controls. Dedicated version pages and episode links
+  remain available. The contributor's catalogs remain unchanged.
 - Root `app.js` and `media-hosting.js`: shared RoboTwin UI and media routing.
 - Root comparison HTML pages and corresponding JSON: permanent HF media URLs.
 
@@ -24,6 +33,11 @@ LIBERO streams from the pinned `benchmend/libero` Dataset. Before/V4 stream from
 the Space. Archived comparison videos stream from the pinned
 `Alan0928/robot-agent-gallery` Dataset; 19 recovered After videos and posters
 live in the Space. Their bytes match the contributor's export report.
+
+The local `hf-space/shared/` directory contains the neutral overview, its
+styles, shared navigation styles, and legacy-entry routing script. These files
+deploy under `gallery/` in the Space. The benchmark pages and their media
+catalogs remain in the remote Space; start from that source when making changes.
 
 ## Publishing a change
 
