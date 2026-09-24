@@ -8,6 +8,7 @@ const path = require('node:path');
 const root = path.resolve(process.argv[2] || path.join(__dirname, '..'));
 const prefix = '/project-preview/robot-agent-gallery/';
 const hosting = JSON.parse(fs.readFileSync(path.join(root, 'gallery-hosting.json'), 'utf8'));
+const benchmendGallery = 'https://benchmend-gallery.static.hf.space/index.html';
 const robotwin = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-alignment-summary.json'), 'utf8'));
 const robotwinInstructions = JSON.parse(fs.readFileSync(path.join(root, 'data/robotwin-instruction-examples.json'), 'utf8'));
 const liberoMedia = JSON.parse(fs.readFileSync(path.join(root, 'data/libero-blog-media.json'), 'utf8'));
@@ -184,6 +185,9 @@ const server = http.createServer((request, response) => {
       assert.equal(downloads.length,21);
       assert.ok(downloads.every(link=>link.startsWith(base+'media/') && !new URL(link).search),'Article downloads must use local video files');
       assert.ok((await page.locator('[data-gallery-path]').evaluateAll(links=>links.map(link=>link.href))).every(url=>url.startsWith(hosting.galleryUrl) && new URL(url).pathname.endsWith('/index.html')));
+      assert.deepEqual(await page.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>({href:link.href,legacy:link.hasAttribute('data-gallery-path')}))),Array(3).fill({href:benchmendGallery,legacy:false}),'Main and LIBERO entries must retain the new gallery URL after legacy hosting initializes');
+      assert.equal(await page.locator('.contents-gallery').textContent(),'Browse LIBERO gallery on HF ↗');
+      assert.equal(await page.locator('.site-footer a').last().getAttribute('href'),'https://huggingface.co/spaces/benchmend/gallery');
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t05"]').innerText(),/close to its front edge/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
       for (const id of selectedLiberoFailures) assert.match(await page.locator(`#failure-${id} .clip-meta`).innerText(),/500 control steps/);
@@ -296,6 +300,10 @@ const server = http.createServer((request, response) => {
     // Static forwarding links work when JavaScript is disabled.
     const noScript = await browser.newContext({javaScriptEnabled:false});
     const fallbackPage = await noScript.newPage();
+    for (const mount of ['/',prefix]) {
+      await fallbackPage.goto(`${origin}${mount}`);
+      assert.deepEqual(await fallbackPage.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>link.href)),Array(4).fill(benchmendGallery),'All four BenchMend entries, including noscript, must work without JavaScript');
+    }
     await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
     assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
     await noScript.close();
