@@ -85,6 +85,46 @@ def test_unreferenced_blog_clip_is_not_staged(workspace):
     assert (root / "media/libero/example.mp4").is_file()
 
 
+def add_paired_robotwin_example(root):
+    manifest = root / "data/robotwin-alignment-summary.json"
+    data = json.loads(manifest.read_text())
+    pair = {phase: {"video": f"media/blog/robotwin/pair-{phase}.mp4",
+                    "poster": f"media/blog/robotwin/pair-{phase}.jpg"}
+            for phase in ("before", "after")}
+    data["selectedExamples"] = [{"episodeKey": "paired_r00", **pair}]
+    manifest.write_text(json.dumps(data))
+    for clip in pair.values():
+        for name in clip.values():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(f"paired asset {name}".encode())
+    return pair
+
+
+def test_paired_robotwin_recordings_and_posters_are_staged(workspace):
+    root, destination = workspace
+    pair = add_paired_robotwin_example(root)
+    before = contents(root)
+    build.main()
+    assert contents(destination) == before
+    for clip in pair.values():
+        for name in clip.values():
+            assert (destination / name).read_bytes() == (root / name).read_bytes()
+
+
+@pytest.mark.parametrize("phase", ["before", "after"])
+def test_missing_paired_video_preserves_previous_build(workspace, phase):
+    root, destination = workspace
+    pair = add_paired_robotwin_example(root)
+    (root / pair[phase]["video"]).unlink()
+    destination.mkdir()
+    (destination / "previous.html").write_text("previous successful build")
+    with pytest.raises(SystemExit, match="Missing blog video"):
+        build.main()
+    assert contents(destination) == {"previous.html": b"previous successful build"}
+    assert not list(root.glob(".blog-build-*"))
+
+
 @pytest.mark.parametrize("missing", ["gallery-hosting.json", "gallery-redirect.js", "blog.js",
                                      "data/robotwin-alignment-summary.json", "gallery/robotwin/index.html",
                                      "media/blog/overview/blog-showcase-v2.mp4", "media/blog/overview/blog-showcase-v2.jpg"])

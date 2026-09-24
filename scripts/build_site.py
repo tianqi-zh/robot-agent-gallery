@@ -15,6 +15,7 @@ PUBLIC_FILES = (
     "data/libero-alignment.json", "data/libero-alignment-episodes.csv",
     "data/libero-blog-media.json", "data/libero-human-review.json",
     "data/robotwin-alignment-summary.json", "data/robotwin-instruction-examples.json",
+    "data/robotwin-human-review.json",
     "media/blog/overview/blog-showcase-v2.mp4", "media/blog/overview/blog-showcase-v2.jpg",
 )
 GALLERY_PAGES = (
@@ -33,8 +34,17 @@ def blog_media_files():
             and libero["clips"], "Missing LIBERO blog clips")
     require(isinstance(robotwin, dict) and isinstance(robotwin.get("cases"), list)
             and robotwin["cases"], "Missing RoboTwin blog cases")
+    selected = robotwin.get("selectedExamples", [])
+    require(isinstance(selected, list), "Invalid RoboTwin selected examples")
+    paired_clips = []
+    for example in selected:
+        require(isinstance(example, dict), "Invalid RoboTwin selected example")
+        for phase in ("before", "after"):
+            require(isinstance(example.get(phase), dict),
+                    f"Missing RoboTwin selected example {phase} recording")
+            paired_clips.append(example[phase])
     assets = set()
-    for clip in (*libero["clips"].values(), *robotwin["cases"]):
+    for clip in (*libero["clips"].values(), *robotwin["cases"], *paired_clips):
         require(isinstance(clip, dict), "Invalid blog clip")
         for kind, suffix in (("video", ".mp4"), ("poster", ".jpg")):
             relative = clip.get(kind)

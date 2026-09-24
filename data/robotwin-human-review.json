@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "snapshot": {
+    "space": "benchmend/gallery",
+    "revision": "88d4de7466bf55f29d8643791055e5c9c5cc1bed"
+  },
+  "date": "2026-09-24",
+  "source": {
+    "kind": "project_author_confirmation",
+    "description": "The project author confirmed that all 36 listed revised episodes remain agent-benchmark disagreements."
+  },
+  "decision": "agent_benchmark_disagreement",
+  "scope": "The 36 selected V4 native failures whose raw finish assessments are not exported in this pinned snapshot.",
+  "provenanceNote": "This is author-provided confirmation, not recovered raw result logs. Preserve agentOutcome as null and agentOutcomeAvailability as not_exported for these episodes.",
+  "episodeKeys": [
+    "blocks_ranking_rgb_r00",
+    "blocks_ranking_rgb_r08",
+    "blocks_ranking_size_r02",
+    "blocks_ranking_size_r04",
+    "blocks_ranking_size_r08",
+    "dump_bin_bigbin_r00",
+    "dump_bin_bigbin_r01",
+    "dump_bin_bigbin_r02",
+    "dump_bin_bigbin_r03",
+    "dump_bin_bigbin_r04",
+    "dump_bin_bigbin_r06",
+    "handover_block_r02",
+    "handover_mic_r00",
+    "handover_mic_r02",
+    "handover_mic_r03",
+    "handover_mic_r04",
+    "handover_mic_r05",
+    "handover_mic_r06",
+    "handover_mic_r07",
+    "handover_mic_r09",
+    "open_laptop_r08",
+    "place_bread_skillet_r01",
+    "place_cans_plasticbox_r05",
+    "place_mouse_pad_r09",
+    "place_object_basket_r02",
+    "rotate_qrcode_r03",
+    "rotate_qrcode_r08",
+    "scan_object_r02",
+    "scan_object_r03",
+    "scan_object_r04",
+    "scan_object_r05",
+    "scan_object_r06",
+    "scan_object_r08",
+    "scan_object_r09",
+    "stamp_seal_r05",
+    "stamp_seal_r09"
+  ]
+}

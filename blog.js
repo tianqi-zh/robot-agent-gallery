@@ -20,14 +20,9 @@
   const downloadUrl = url;
   const suiteNames = {libero_10:'LIBERO-10',libero_goal:'Goal',libero_object:'Object',libero_spatial:'Spatial'};
   const taskLabel = (suite,id) => `${suiteNames[suite]} t${String(id).padStart(2,'0')}`;
-  const descriptions = {
-    'book-compartment': 'The intended target is the rear of the two small central compartments, between the large side bins. The original phrase leaves that distinction implicit. The native check tests the book’s body origin against a target volume; it does not require release or a particular orientation. The earlier “narrow back compartment” revision also scored 0/10.',
-    'alphabet-soup': 'In the eight original failures, the policy moved the tomato-sauce can instead of the alphabet-soup can. Adding the blue-and-yellow appearance gives the policy a visible cue for the benchmark’s asset identity.',
-    'middle-drawer': 'The native open condition requires more than 14 cm of extension. The two original failures stopped at roughly 12.8 and 13.7 cm: visibly open, but below that threshold. “Fully” gives a stronger observable stopping cue without exposing the numeric joint limit.',
-    'wine-rack': 'The original failures placed the bottle on the upper tier, outside the target region. The added phrase identifies where its base should sit. The native check combines rack contact with a body-origin region; it does not directly enforce the orientation described by the revised instruction.',
-    'mug-and-pudding': 'Two spatial requirements interact: the mug must be centered on the plate, and the pudding must lie inside a fixed tabletop region to its right; that region does not move with the plate. A broad reading of “to the right” can miss that region. The revision adds centering and proximity cues.',
-    'plate-near-stove': '“In front” maps to a fixed 8 × 8 cm tabletop region. The final phrase adds proximity to the stove’s front edge, while leaving manipulation to the policy. Only two of ten episodes succeed: this remains a difficult pushing task, even with the clarified goal.',
-    'spatial-regression': 'This is a success → failure pair, included deliberately. The native on-plate check combines contact, height, and a center-distance threshold below 3 cm. Explicitly asking for the center did not improve this task in these ten runs.'
+  const liberoExamples = {
+    'plate-near-stove': {taskId:'libero_goal_t05',title:'A failure becomes a success',detail:'The selected episode changes from a benchmark failure to a success at the same initial state. Across all ten initial states, successes increase from 0/10 to 2/10; eight episodes still fail.'},
+    'spatial-regression': {taskId:'libero_spatial_t04',title:'A success becomes a failure',detail:'The selected episode changes from success to failure at the same initial state. Across ten initial states, two failures become successes while three successes become failures, reducing the total from 5/10 to 4/10.'}
   };
   const liberoFailureDetails = {
     'plate-control-budget': ['Sustained contact while pushing a plate', 'The plate must slide into a small region near the stove. The policy repeatedly repositions the gripper but does not finish within 500 control steps: sustained contact and small positional corrections remain difficult.'],
@@ -38,11 +33,6 @@
   const robotwinFailureDetails = {
     move_can_pot_r01: {title:'Placing a can at a precise pose',successes:0,episodes:10,detail:'The can must be positioned beside the pot, aligned in position and orientation, and released on the table. This episode illustrates the difficulty of combining a precise final pose with a stable placement.'},
     place_dual_shoes_r00: {title:'Two shoes, two precise placements',successes:4,episodes:10,detail:'Both shoes must fit into the box at the required positions and orientations. Reorienting, lowering, and releasing each shoe creates repeated contact transitions; both placements must succeed in the same episode.'}
-  };
-  const robotwinCaseDetails = {
-    adjust_bottle: ['Specify height and side', 'The appendix makes the required bottle height and side of the table explicit. This rerun passes the unchanged native checker.'],
-    place_mouse_pad: ['Center, align, then release', 'The revised instruction specifies centering, orientation, and open grippers. This rerun passes the unchanged native checker.'],
-    rotate_qrcode: ['Make orientation and release explicit', 'The appendix gives an orientation target, a height condition, and a release condition. This is richer guidance than a short natural-language edit; this rerun passes the unchanged native checker.']
   };
   let reviewCorrections = new Map();
   function highlightInstructionChanges(original, improved) {
@@ -84,7 +74,11 @@
     const accepted = stats.agentSuccessBenchSuccess;
     const disagreement = stats.agentSuccessBenchFalse;
     const incomplete = stats.agentFalseBenchFalse;
-    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${esc(title)}</h3><span>n = ${stats.n}</span></div><p class="score-value">${pct(stats.instinctAlignment)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${disagreement} / ${stats.n} = ${pct(stats.instinctAlignment)}%</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${accepted}</td><td class="mismatch">${disagreement}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${incomplete}</td></tr></tbody></table><p class="native-score">Bench judges success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
+    const unavailable = stats.agentUnknownBenchFalse || 0;
+    const alignment = unavailable ? `${pct(stats.instinctAlignmentBounds.min)}–${pct(stats.instinctAlignmentBounds.max)}` : pct(stats.instinctAlignment);
+    const equation = unavailable ? `Exact IAS awaits ${unavailable} unpublished agent judgments.` : `1 − ${disagreement} / ${stats.n} = ${alignment}%`;
+    const unavailableRow = unavailable ? `<tr class="unclassified"><th scope="row">Agent judgment not published</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${unavailable}</td></tr>` : '';
+    return `<div class="score-card ${after ? 'after' : 'before'}"><div class="score-top"><h3>${esc(title)}</h3><span>n = ${stats.n}</span></div><p class="score-value${unavailable ? ' score-range' : ''}">${alignment}<span>%</span></p><p class="score-label">Instinct-alignment score${unavailable ? ' · possible range' : ''}</p><p class="score-equation">${equation}</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${accepted}</td><td class="mismatch">${disagreement}${unavailable ? ' confirmed' : ''}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${incomplete}</td></tr>${unavailableRow}</tbody></table><p class="native-score">Bench judges success: <strong>${stats.benchSuccess}/${stats.n} · ${pct(stats.benchSuccess / stats.n)}%</strong></p></div>`;
   }
   function renderComparison(data) {
     if (data.before.n !== 400 || data.after.n !== 400) throw new Error('The comparison requires all 400 episodes');
@@ -92,8 +86,8 @@
     document.querySelector('#scope-note').textContent = 'All 40 tasks: 400 original episodes versus a composite preserving 310 original episodes and replacing all 90 episodes from the nine revised tasks.';
   }
   function renderInstructions(data) {
-    const order = ['libero_goal','libero_object','libero_10','libero_spatial'];
-    document.querySelector('#instruction-rows').innerHTML = data.tasks.filter(task => task.changed).sort((a,b) => order.indexOf(a.suite) - order.indexOf(b.suite) || a.taskId - b.taskId).map(task => {
+    const taskIds = Object.values(liberoExamples).map(example => example.taskId);
+    document.querySelector('#instruction-rows').innerHTML = taskIds.map(id => data.tasks.find(task => task.id === id)).map(task => {
       const delta = task.after.benchSuccess - task.before.benchSuccess;
       return `<tr data-task="${esc(task.id)}"><th scope="row" class="task-ref"><span>${esc(taskLabel(task.suite,task.taskId))}</span></th><td class="instruction-original">${esc(task.instructionBefore)}</td><td class="instruction-improved">${highlightInstructionChanges(task.instructionBefore,task.instructionAfter)}</td><td>${task.before.benchSuccess}/10 → <strong>${task.after.benchSuccess}/10</strong><span class="delta ${delta < 0 ? 'negative' : ''}">${delta > 0 ? '+' : ''}${delta} successes</span></td></tr>`;
     }).join('');
@@ -111,10 +105,11 @@
     return `<div class="task-rate negative"><span>Task success rate</span><strong>${Math.round(100 * successes / episodes)}% · ${successes}/${episodes}</strong></div>`;
   }
   function renderMedia(media) {
-    document.querySelector('#paired-cases').innerHTML = media.pairs.map((pair,index) => {
+    document.querySelector('#paired-cases').innerHTML = Object.entries(liberoExamples).map(([id,example],index) => {
+      const pair = media.pairs.find(item => item.id === id);
       const before = media.clips[pair.before], after = media.clips[pair.after];
       const sources = (pair.sourceLinks || []).filter(link => link.label === 'Task BDDL');
-      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(pair.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(descriptions[pair.id] || pair.note)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
+      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(example.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(example.detail)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
     }).join('');
     document.querySelector('#failure-cases').innerHTML = Object.entries(liberoFailureDetails).map(([id,[title,detail]]) => {
       const item = media.failureCases.find(record => record.id === id);
@@ -124,6 +119,8 @@
       const metadata = `seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} control steps`;
       return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))}</p><h3>${esc(title)}</h3>${failureTaskRate(item.task.successes,item.task.episodes)}<p>${esc(detail)}</p></div>${failureClipMarkup(clip,label,clip.instruction,metadata)}</section>`;
     }).join('');
+  }
+  function bindVideoControls() {
     document.querySelectorAll('.play-pair').forEach(button => {
       const section = button.closest('.case');
       const videos = Array.from(section.querySelectorAll('video'));
@@ -155,31 +152,33 @@
     }));
   }
   function outcomeText(record) {
-    const agent = record.agentSuccess ? 'agent considers complete' : 'agent does not consider complete';
     const bench = record.benchSuccess ? 'bench judges success' : 'bench judges failure';
+    if (!record.agentOutcome) return bench;
+    const agent = record.agentOutcome === 'visually_complete' ? 'agent considers complete' : 'agent does not consider complete';
     return `${agent} / ${bench}`;
   }
-  function robotwinInstructionMarkup(instruction) {
-    const baseline = instruction.sameBaseInstruction ? '' : `<details><summary>Baseline instruction</summary><p class="instruction-baseline">${esc(instruction.baselineInstruction)}</p></details>`;
-    return `<div class="instruction-comparison"><p class="instruction-label">Base instruction</p><p class="instruction-base">${esc(instruction.revisedBaseInstruction)}</p><details><summary>Added goal criteria</summary><p class="instruction-goal-criteria">${esc(instruction.addedGoalSpec)}</p></details><details><summary>Full revised instruction</summary><p class="instruction-full">${esc(instruction.revisedInstruction)}</p></details>${baseline}<p class="instruction-provenance">${esc(instruction.comparisonNote)} Baseline seed ${instruction.baselineSeed}; revised seed ${instruction.revisedSeed}. Base instruction and added criteria above come from the same revised-run record.</p></div>`;
+  const robotwinEpisodeLabel = item => `RoboTwin · Task ${String(item.taskId).padStart(2,'0')} · EPISODE ${String(item.episodeNumber).padStart(2,'0')}`;
+  const benchOutcome = record => record.benchSuccess ? 'success' : 'failure';
+  function robotwinClipMarkup(item, stage) {
+    const clip = item[stage];
+    const label = stage === 'before' ? 'Before' : 'After';
+    return `<figure class="clip"><div class="clip-header"><span>${label}</span><span class="status ${benchOutcome(clip)}">Bench judges ${benchOutcome(clip)}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(`${label}: ${robotwinEpisodeLabel(item)}`)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">seed ${esc(clip.seed)} · ${esc(clip.steps)} actions · ${esc(clip.toolCalls)} tool calls · ${Math.round(clip.wallSeconds)} s wall time<br>${esc(outcomeText(clip))} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
-  function robotwinCaseMarkup(item, instruction, index) {
-    const [title, detail] = robotwinCaseDetails[item.taskName];
-    return `<section class="robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="case-head"><div><p class="eyebrow">ROBOTWIN CASE ${String(index+1).padStart(2,'0')} / ${esc(item.taskName)}</p><h3>${esc(title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Revised-run outcome</span><strong>${item.after.benchSuccess ? 'success' : 'failure'}</strong></div></div><div class="robotwin-case-body"><figure class="clip"><div class="clip-header"><span>Goal-spec rerun · ${esc(item.episodeKey)}</span><span class="status ${item.after.benchSuccess ? 'success' : 'failure'}">Bench judges ${item.after.benchSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(item.poster))}" src="${esc(url(item.video))}" aria-label="${esc('RoboTwin ' + item.episodeKey)}"></video><figcaption><p class="clip-instruction">Before: ${esc(outcomeText(item.before))}<br>After: ${esc(outcomeText(item.after))}</p><p class="clip-meta">${item.after.steps || 0} actions · ${item.after.toolCalls || 0} tool calls · ${Math.round(item.after.wallSeconds || 0)} s wall time · <a href="${esc(downloadUrl(item.video))}" download>Download MP4 ↓</a></p></figcaption></figure><p>${esc(detail)}</p>${robotwinInstructionMarkup(instruction)}</div></section>`;
+  function robotwinCaseMarkup(item) {
+    return `<section class="case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="case-head"><div><p class="eyebrow">${esc(robotwinEpisodeLabel(item))}</p><h3>${esc(item.title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Bench outcome</span><strong>${benchOutcome(item.before)} → ${benchOutcome(item.after)}</strong></div></div><div class="paired-videos">${robotwinClipMarkup(item,'before')}${robotwinClipMarkup(item,'after')}</div><div class="case-foot"><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same scene seed ${esc(item.before.seed)} · <a href="${esc(item.galleryUrl)}">View episode in gallery ↗</a></span><span class="play-status" role="status"></span></div></div></section>`;
   }
   function renderRobotwin(data, instructions) {
     document.querySelector('#robotwin-comparison').innerHTML =
       robotwinScoreCard(data.before, 'Before · original RoboTwin instructions', false) +
-      robotwinScoreCard(data.after, 'After · public goal spec rerun', true);
-    const common = data.common;
-    document.querySelector('#robotwin-summary-grid').innerHTML = [
-      ['Common terminal episodes', common.n],
-      ['Original disagreements removed', common.fixedAgentSuccessBenchFalse],
-      ['Original disagreements retained', common.remainingAgentSuccessBenchFalse],
-      ['New disagreements', common.newAgentSuccessBenchFalse],
-      ['Playable rerun videos', data.coverage.afterPlayableEpisodes],
-      ['Missing terminal results', data.coverage.afterMissingTerminalResults]
-    ].map(([label,value]) => `<div class="mini-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join('');
+      robotwinScoreCard(data.after, 'After · revised composite', true);
+    document.querySelector('#robotwin-alignment-note').textContent = data.after.agentUnknownBenchFalse
+      ? `Original agent–benchmark disagreements total ${data.before.agentSuccessBenchFalse}, giving IAS ${pct(data.before.instinctAlignment)}%. The revised composite has ${data.after.agentUnknownBenchFalse} failed reruns with unpublished agent completion judgments. Its IAS is between ${pct(data.after.instinctAlignmentBounds.min)}% and ${pct(data.after.instinctAlignmentBounds.max)}%; these records remain unclassified in the table.`
+      : `Agent–benchmark disagreements fall from ${data.before.agentSuccessBenchFalse} to ${data.after.agentSuccessBenchFalse}, raising IAS from ${pct(data.before.instinctAlignment)}% to ${pct(data.after.instinctAlignment)}%.`;
+    document.querySelector('#robotwin-instruction-rows').innerHTML = data.selectedExamples.map(item => `<tr data-episode="${esc(item.episodeKey)}"><th scope="row" class="task-ref"><span>Task ${String(item.taskId).padStart(2,'0')}</span><span>EPISODE ${String(item.episodeNumber).padStart(2,'0')}</span></th><td class="instruction-original">${esc(item.before.instruction)}</td><td class="instruction-improved">${highlightInstructionChanges(item.before.instruction,item.after.instruction)}</td><td>${benchOutcome(item.before)} → <strong>${benchOutcome(item.after)}</strong></td></tr>`).join('');
+    document.querySelector('#robotwin-cases').innerHTML = data.selectedExamples.map(item => {
+      if (item.before.seed !== item.after.seed) throw new Error(`RoboTwin example scene mismatch: ${item.episodeKey}`);
+      return robotwinCaseMarkup(item);
+    }).join('');
     const instructionByEpisode = new Map(instructions.cases.map(item => [item.episodeKey,item]));
     const instructionFor = item => {
       const instruction = instructionByEpisode.get(item.episodeKey);
@@ -187,13 +186,12 @@
       if (instruction.baselineBenchSuccess !== item.before.benchSuccess || instruction.revisedBenchSuccess !== item.after.benchSuccess) throw new Error(`RoboTwin instruction outcome mismatch: ${item.episodeKey}`);
       return instruction;
     };
-    document.querySelector('#robotwin-cases').innerHTML = data.cases.filter(item => item.after.benchSuccess).map((item,index) => robotwinCaseMarkup(item,instructionFor(item),index)).join('');
     document.querySelector('#robotwin-failure-cases').innerHTML = Object.entries(robotwinFailureDetails).map(([episodeKey,detail]) => {
       const item = data.cases.find(record => record.episodeKey === episodeKey);
       if (!item || item.after.benchSuccess) throw new Error(`Expected a failed RoboTwin episode: ${episodeKey}`);
       const instruction = instructionFor(item);
       const metadata = `seed ${instruction.revisedSeed} · ${item.after.steps} actions · ${item.after.toolCalls} tool calls · ${Math.round(item.after.wallSeconds)} s wall time`;
-      return `<section class="failure-case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="failure-description"><p class="eyebrow">ROBOTWIN / ${esc(item.taskName)}</p><h3>${esc(detail.title)}</h3>${failureTaskRate(detail.successes,detail.episodes)}<p>${esc(detail.detail)}</p></div>${failureClipMarkup(item,'Goal-spec rerun',instruction.revisedBaseInstruction,metadata,'Base instruction')}</section>`;
+      return `<section class="failure-case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="failure-description"><p class="eyebrow">ROBOTWIN / ${esc(item.taskName)}</p><h3>${esc(detail.title)}</h3>${failureTaskRate(detail.successes,detail.episodes)}<p>${esc(detail.detail)}</p></div>${failureClipMarkup(item,'Revised instructions',instruction.revisedBaseInstruction,metadata,'Base instruction')}</section>`;
     }).join('');
   }
   window.galleryHosting.then(async config => {
@@ -216,6 +214,7 @@
     renderInstructions(data);
     renderMedia(media);
     renderRobotwin(robotwin,robotwinInstructions);
+    bindVideoControls();
     document.documentElement.dataset.blogReady = 'true';
   }).catch(error => {
     document.querySelector('#load-error').hidden = false;

@@ -4,7 +4,7 @@
 
 **[BenchMend gallery](https://huggingface.co/spaces/benchmend/gallery)** · [LIBERO Dataset](https://huggingface.co/datasets/benchmend/libero)
 
-The BenchMend collection contains **400 original-instruction LIBERO evaluations and one 90-episode revision**. The revision keeps 70 recordings from the first repair run and replaces the two further-refined tasks (`libero_goal_t05` and `libero_10_t05`) with their 20 second-run recordings. All 490 selected videos are retained byte-for-byte, with instructions, native outcomes, matched initial states, provenance hashes, and preview images. Its [LIBERO page](https://benchmend-gallery.static.hf.space/gallery/libero/index.html) offers Original and Revision views with suite, outcome, and text filters, playback, and instruction comparisons. The article’s final 400-episode comparison combines 310 unchanged originals with the 90 revision episodes. The shared Space also preserves the contributor’s RoboTwin Before (482 videos) and V4 (182 videos) collections. See [the LIBERO app source](hf-space/README.md), [shared Space maintenance notes](hf-space/SHARED_SPACE.md), and [exporter](scripts/export_benchmend_libero.py).
+The BenchMend collection contains **400 original-instruction LIBERO evaluations and one 90-episode revision**. The revision keeps 70 recordings from the first repair run and replaces the two further-refined tasks (`libero_goal_t05` and `libero_10_t05`) with their 20 second-run recordings. All 490 selected videos are retained byte-for-byte, with instructions, native outcomes, matched initial states, provenance hashes, and preview images. Its [LIBERO page](https://benchmend-gallery.static.hf.space/gallery/libero/index.html) offers Original and Revision views with suite, outcome, and text filters, playback, and instruction comparisons. The article’s final 400-episode comparison combines 310 unchanged originals with the 90 revision episodes. The shared Space also contains RoboTwin Original (500 videos: 482 original NVIDIA-run recordings plus 18 local Codex recoveries) and Revision (131 videos: one latest confirmed original-linked rerun per original agent-success / benchmark-failure disagreement, including the six latest dual-shoe revisions). See [the LIBERO app source](hf-space/README.md), [shared Space maintenance notes](hf-space/SHARED_SPACE.md), and [exporter](scripts/export_benchmend_libero.py).
 
 **Historical multi-benchmark archive:** [Gallery](https://huggingface.co/spaces/Alan0928/robot-agent-gallery) · [Video Dataset](https://huggingface.co/datasets/Alan0928/robot-agent-gallery) · [Gallery source](https://huggingface.co/spaces/Alan0928/robot-agent-gallery/tree/main)
 
@@ -25,9 +25,11 @@ The HF archive also preserves the 50 older Robotwin episodes, 490 training refer
 python3 -m http.server 8080
 ```
 
-Open http://localhost:8080/. The essay's 22 video players (the overview and 21 episode examples) load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
+Open http://localhost:8080/. The essay's 13 video players (the overview and 12 episode examples) load recordings from this repository and work without access to Hugging Face. No model API or credentials are needed. Existing `/gallery/` routes and historical episode/demo links forward to the Space while preserving query parameters and fragments.
 
 [gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The archive media URL is pinned to a verified HF Dataset commit and is retained for validation and recovering missing files. Article playback uses local media; adopting a new example requires updating the evidence catalog and local assets together.
+
+The RoboTwin result tables use the September 24 gallery snapshot `88d4de7466bf55f29d8643791055e5c9c5cc1bed`: 500 original episodes versus a composite retaining 369 originals and replacing 131 original disagreements. Native success changes from 336/500 to 429/500. The project author confirmed that the 36 failed V4 reruns remain agent–benchmark disagreements; the [review record](data/robotwin-human-review.json) identifies those episodes. IAS therefore rises from 73.8% to 92.8%. Task 00 / Episode 01 and Task 32 / Episode 02 show byte-preserved original/revision recordings and exact published instructions. The failure section retains separately labeled examples from the earlier evaluation.
 
 ## Validate and publish
 
@@ -53,7 +55,7 @@ npx playwright install chromium
 npm run test:blog
 ```
 
-The browser check decodes all 22 embedded local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, the 52 video/poster files retained in its evidence catalog plus the overview video and poster (about 31.5 MB total), and forwarding pages. Unrelated gallery media and the gallery application are excluded.
+The browser check decodes all 13 embedded local videos with HF media requests blocked, and covers evidence tables, mobile layouts, HF gallery links, and legacy redirects. The build stages the essay, public evidence, the video/poster files declared in its evidence catalogs, the overview video and poster, and forwarding pages. Unrelated gallery media and the gallery application are excluded.
 
 GitHub Pages is configured to publish the repository root from `robotwin-blog-copy-20260922`; pushing to that branch updates the public essay through GitHub's branch-based Pages build. The checked-in staging workflow is separate from that deployment setting. The standalone Space and media Dataset are updated separately in their HF repositories.
 
