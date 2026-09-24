@@ -4,35 +4,32 @@
   "benchmark": "LIBERO",
   "purpose": "evaluation",
   "summary": {
-    "episodes": 510,
+    "episodes": 490,
     "originalEpisodes": 400,
-    "revisedEpisodes": 110,
+    "revisedEpisodes": 90,
     "stageCounts": {
       "original": 400,
-      "revised_r1": 90,
-      "revised_r2": 20
+      "revision": 90
     },
     "nativeSuccessCounts": {
       "original": 322,
-      "revised_r1": 63,
-      "revised_r2": 12
+      "revision": 75
     },
     "finalComposite": {
       "episodes": 400,
       "stageCounts": {
         "original": 310,
-        "revised_r1": 70,
-        "revised_r2": 20
+        "revision": 90
       },
       "nativeSuccess": 357,
       "nativeSuccessRate": 0.8925
     },
     "originalNativeSuccess": 322,
     "originalNativeSuccessRate": 0.805,
-    "videoBytes": 2756875794
+    "videoBytes": 2639757236
   },
   "videoPreservation": "byte-for-byte copy; no re-encoding or remuxing",
   "agentSuccessMeaning": "Explicit finish declaration only; null means no declaration",
-  "finalMeaning": "400-slot composite: 310 original + 70 revised_r1 + 20 revised_r2",
+  "finalMeaning": "400-slot composite: 310 original + 90 revision",
   "gallery": "https://huggingface.co/spaces/benchmend/gallery"
 }

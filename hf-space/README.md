@@ -13,14 +13,14 @@ short_description: Original and repaired instructions, episode by episode.
 
 **Agent-Guided Instruction Repair for Robotics Benchmarks.**
 
-Browse 400 original-instruction LIBERO evaluations and 110 additional evaluations
-after instruction repair (90 in revision 1, 20 in revision 2). Video files and
+Browse **490 LIBERO videos**: 400 original-instruction evaluations and 90
+evaluations with revised instructions. The **Revision** collection uses the
+latest instruction for each of nine tasks, with the same 10 initial states per
+task as the original evaluation. Video files and
 episode metadata live in the separate [benchmend/libero dataset](https://huggingface.co/datasets/benchmend/libero).
 
-The **Final evaluation** view combines 310 unchanged original episodes, 70
-revision-1 episodes, and 20 revision-2 episodes. It contains 400 evaluations;
-it does not represent 400 additional rollouts. Native success is the result
-of the benchmark's original checker, which was not modified.
+Each revised task has one public revision. Native success is the result of the
+benchmark's original checker, which was not modified.
 
 The static app uses `episodes.json` for browsing and `media-hosting.js` to pin
 video and poster URLs to an immutable dataset revision. It has no backend,

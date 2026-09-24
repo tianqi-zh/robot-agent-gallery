@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export the 510 actual LIBERO evaluation videos as a sanitized HF VideoFolder.
+"""Export 400 original and 90 final-revision LIBERO videos as an HF VideoFolder.
 
 Source runs are read-only. Videos are copied byte-for-byte, decoded and hashed;
 only a strict public metadata schema and generated posters leave the archive.
@@ -21,15 +21,17 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RUNS = Path('/playpen/tianqi/code/robot-agent/eval_runs')
-DEFAULT_OUTPUT = Path('/playpen-ssd/tianqizh/benchmend-libero')
-STAGES = {
+DEFAULT_OUTPUT = Path('/playpen-ssd/tianqizh/benchmend-libero-merged')
+SOURCE_STAGES = {
     'original': ('baseline', 'astra_libero_v5_calibrated_parallel10_r4', 400),
     'revised_r1': ('round1', 'astra_libero_v5_instruction_refined_parallel8_r1', 90),
     'revised_r2': ('round2', 'astra_libero_v5_instruction_minimal_parallel4_r2', 20),
 }
+PUBLIC_STAGES = {'original': 400, 'revision': 90}
 PAIR_FIELDS = ('suite', 'task_id', 'task_name', 'rollout_id', 'init_state_id',
                'seed', 'bddl_sha256', 'init_sha256')
-EXPECTED_SUCCESS = {'original': 322, 'revised_r1': 63, 'revised_r2': 12}
+EXPECTED_SOURCE_SUCCESS = {'original': 322, 'revised_r1': 63, 'revised_r2': 12}
+EXPECTED_SUCCESS = {'original': 322, 'revision': 75}
 
 
 def require(condition, message):
@@ -105,7 +107,7 @@ def unique_valid_attempt(episode_dir):
 def collect_sources(run_root, root):
     reference, final, corrections = load_reference(root)
     sources, provenance, originals = [], [], {}
-    for stage, (audit_stage, run_name, expected_count) in STAGES.items():
+    for stage, (audit_stage, run_name, expected_count) in SOURCE_STAGES.items():
         run = run_root / run_name
         manifest_path = run / 'manifest.json'
         manifest = read_json(manifest_path)
@@ -186,7 +188,11 @@ def collect_sources(run_root, root):
             }
             sources.append({'row': row, 'source': video, 'expectedFrames': video_info['frames']})
         provenance.append({
-            'stage': stage, 'runName': run_name, 'episodeCount': expected_count,
+            'stage': 'original' if stage == 'original' else 'revision',
+            'runName': run_name, 'episodeCount': expected_count,
+            'publishedEpisodeCount': sum(item['row']['sourceRun'] == run_name
+                                         and (stage == 'original' or item['row']['final'])
+                                         for item in sources),
             'manifestSha256': manifest['manifest_sha256'],
             'manifestFileSha256': sha256(manifest_path),
             'requestedModel': manifest['config']['model'],
@@ -195,7 +201,35 @@ def collect_sources(run_root, root):
             'excludedInfrastructureAttempts': excluded_attempts,
         })
     require(len(sources) == 510, 'Wrong number of actual source episodes')
-    return sources, provenance
+    source_success = {stage: sum(item['row']['nativeSuccess'] for item in sources
+                                if item['row']['stage'] == stage)
+                      for stage in SOURCE_STAGES}
+    require(source_success == EXPECTED_SOURCE_SUCCESS,
+            'Native archived source success totals differ from the audit')
+    return select_public_sources(sources), provenance
+
+
+def select_public_sources(sources):
+    """Publish every original and only the article's audited final revision.
+
+    The later run replaces all ten initial states for two tasks, regardless of
+    success. Selection follows the audited afterStage, not a best-of outcome.
+    """
+    selected = []
+    for source in sources:
+        row = source['row']
+        if row['stage'] != 'original' and not row['final']:
+            continue
+        stage = 'original' if row['stage'] == 'original' else 'revision'
+        public_row = dict(row, stage=stage, id=f'{stage}/{row["pairKey"]}',
+                          video=f'{stage}/videos/{row["pairKey"]}.mp4',
+                          poster=f'{stage}/posters/{row["pairKey"]}.jpg')
+        selected.append(dict(source, row=public_row))
+    require(dict(Counter(item['row']['stage'] for item in selected)) == PUBLIC_STAGES,
+            'Public export must contain 400 original and 90 final revision videos')
+    require(len({item['row']['id'] for item in selected}) == len(selected),
+            'Duplicate public episode identity')
+    return selected
 
 
 def check_public(value):
@@ -259,17 +293,17 @@ def summarize(rows):
     require(len({row['pairKey'] for row in selected}) == len(selected) == 400,
             'Final composite must contain one source per original slot')
     counts = dict(Counter(row['stage'] for row in rows))
-    require(counts == {key: value[2] for key, value in STAGES.items()}, 'Wrong split counts')
+    require(counts == PUBLIC_STAGES, 'Wrong split counts')
     success = {stage: sum(row['nativeSuccess'] for row in rows if row['stage'] == stage)
-               for stage in STAGES}
+               for stage in PUBLIC_STAGES}
     require(success == EXPECTED_SUCCESS, 'Native source success totals differ from the audit')
     require(sum(row['nativeSuccess'] for row in selected) == 357, 'Wrong final success total')
     final_counts = dict(Counter(row['stage'] for row in selected))
-    require(final_counts == {'original': 310, 'revised_r1': 70, 'revised_r2': 20},
+    require(final_counts == {'original': 310, 'revision': 90},
             'Wrong final composite source composition')
-    require(len({row['sha256'] for row in rows}) == 510, 'Duplicate source recordings')
+    require(len({row['sha256'] for row in rows}) == 490, 'Duplicate source recordings')
     return {
-        'episodes': len(rows), 'originalEpisodes': 400, 'revisedEpisodes': 110,
+        'episodes': len(rows), 'originalEpisodes': 400, 'revisedEpisodes': 90,
         'stageCounts': counts, 'nativeSuccessCounts': success,
         'finalComposite': {'episodes': 400, 'stageCounts': final_counts,
                            'nativeSuccess': 357, 'nativeSuccessRate': 357 / 400},
@@ -297,23 +331,19 @@ configs:
     path:
     - original/videos/*.mp4
     - original/metadata.jsonl
-  - split: revised_r1
+  - split: revision
     path:
-    - revised_r1/videos/*.mp4
-    - revised_r1/metadata.jsonl
-  - split: revised_r2
-    path:
-    - revised_r2/videos/*.mp4
-    - revised_r2/metadata.jsonl
+    - revision/videos/*.mp4
+    - revision/metadata.jsonl
 ---
 
 # BenchMend: LIBERO evaluation videos
 
 **BenchMend: Agent-Guided Instruction Repair for Robotics Benchmarks.**
 
-This dataset contains **510 actual LIBERO evaluation recordings**: **400 with
-the original task instructions**, **90 with first-round revised instructions**,
-and **20 with second-round revised instructions**. It contains LIBERO only.
+This dataset contains **490 actual LIBERO evaluation recordings**: **400 with
+the original task instructions** and **90 with the final revised instructions**.
+It contains LIBERO only.
 These are evaluation rollouts, not LIBERO training demonstrations or a new
 training split. The native benchmark success checker was not changed.
 
@@ -322,8 +352,7 @@ training split. The native benchmark success checker was not changed.
 | Split | Actual videos | Tasks | Native successes |
 | --- | ---: | ---: | ---: |
 | `original` | 400 | 40 | 322 |
-| `revised_r1` | 90 | 9 | 63 |
-| `revised_r2` | 20 | 2 | 12 |
+| `revision` | 90 | 9 | 75 |
 
 The original evaluation covers four suites (`libero_spatial`, `libero_object`,
 `libero_goal`, `libero_10`), ten tasks per suite and ten initial states per task.
@@ -332,11 +361,16 @@ goal specification. Only tasks receiving an instruction edit were rerun.
 
 ## Actual reruns and the final comparison
 
-There are **110 actual revised-instruction videos**, not 400 new reruns.
+There are **90 published revised-instruction videos**, not 400 new reruns.
+The single `revision` split combines 70 recordings from the first revised run
+with 20 recordings from the later run. For `libero_goal_t05` and `libero_10_t05`,
+the later run replaces all ten initial states of the earlier revision. The
+superseded 20 videos are excluded from this dataset; their archived source runs
+remain unchanged. Selection follows the audited final instruction version for
+each task, never the most successful rollout for an individual initial state.
 The final 400-slot comparison selects **310 unchanged original recordings +
-70 first-round recordings + 20 second-round recordings**. The other 20
-first-round recordings are retained as revision history. `final: true` marks
-the 400 selected sources; `pairKey` links recordings of the same evaluation slot.
+90 revision recordings**. `final: true` marks the 400 selected sources;
+`pairKey` links recordings of the same evaluation slot.
 Original native success is 322/400 (80.5%); the final composite is 357/400 (89.25%).
 Do not treat the final composite as an independent 400-episode rerun.
 
@@ -344,7 +378,7 @@ Do not treat the final composite as an independent 400-episode rerun.
 
 Each split contains original MP4 bytes in `videos/`, generated JPEG preview
 images in `posters/`, and standard VideoFolder `metadata.jsonl` with a relative
-`file_name` pointing to its video. All 510 original MP4s are copied
+`file_name` pointing to its video. All 490 source MP4s are copied
 **byte-for-byte**: H.264, YUV420p, 1024 × 512, 20 fps. Their two camera views are
 agent view on the left and wrist view on the right. Initial and warmup frames
 are retained, with no cropping, speed changes, subtitles or added audio.
@@ -353,12 +387,11 @@ are retained, with no cropping, speed changes, subtitles or added audio.
 from datasets import load_dataset
 
 videos = load_dataset("benchmend/libero")
-original = videos["original"]        # 400 actual recordings
-revision_1 = videos["revised_r1"]   # 90 actual recordings
-revision_2 = videos["revised_r2"]   # 20 actual recordings
+original = videos["original"]  # 400 actual recordings
+revision = videos["revision"]  # 90 actual recordings, one revision per task
 ```
 
-Root `episodes.json`, `episodes.jsonl` and `episodes.csv` provide the same 510
+Root `episodes.json`, `episodes.jsonl` and `episodes.csv` provide the same 490
 flat records for gallery use and metadata-only analysis. Paths in these root
 files are relative to the dataset repository. The split metadata uses paths
 relative to its own split folder. `metadata.json` gives counts and conventions;
@@ -381,8 +414,8 @@ covers every public file except the checksum file itself.
   This field is not an independent ground-truth rating of every episode.
 - `humanCorrection` marks the one confirmed second-round correction
   (`libero_goal_t05_r05`). Its raw explicit declaration remains unchanged.
-  Confirmed disagreement review covers the original/final comparison, not all
-  intermediate first-round disagreements or all 510 videos.
+  Confirmed disagreement review covers reported disagreements in the
+  original/final comparison, not a full human rating of all 490 videos.
 - `sourceRun`, `sourceAttempt` and `sourceVideo` are relative archive identifiers;
   source manifest/result/video hashes bind the public record to the archived
   run. Absolute host paths, prompts, raw agent traces, credentials and runtime
@@ -412,7 +445,7 @@ def write_public_files(output, rows, provenance, summary):
         'purpose': 'evaluation', 'summary': summary,
         'videoPreservation': 'byte-for-byte copy; no re-encoding or remuxing',
         'agentSuccessMeaning': 'Explicit finish declaration only; null means no declaration',
-        'finalMeaning': '400-slot composite: 310 original + 70 revised_r1 + 20 revised_r2',
+        'finalMeaning': '400-slot composite: 310 original + 90 revision',
         'gallery': 'https://huggingface.co/spaces/benchmend/gallery',
     }
     for item in (rows, metadata, provenance):
@@ -425,7 +458,7 @@ def write_public_files(output, rows, provenance, summary):
         writer.writerows(rows)
     write_json(output / 'metadata.json', metadata)
     write_json(output / 'provenance.json', {'schemaVersion': 1, 'sources': provenance})
-    for stage in STAGES:
+    for stage in PUBLIC_STAGES:
         stage_rows = []
         for row in rows:
             if row['stage'] != stage:
@@ -454,6 +487,8 @@ def main(argv=None):
     require(1 <= args.workers <= 32, 'Workers must be between 1 and 32')
     require(not args.output.resolve().is_relative_to(args.runs.resolve()),
             'Output must not modify archived source runs')
+    require(not any((args.output / stage).exists() for stage in ('revised_r1', 'revised_r2')),
+            'Use a clean output directory; old public revision folders must not be retained')
     sources, provenance = collect_sources(args.runs, args.root)
     args.output.mkdir(parents=True, exist_ok=True)
     rows = []
@@ -463,7 +498,7 @@ def main(argv=None):
             rows.append(future.result())
             if len(rows) % 25 == 0 or len(rows) == len(sources):
                 print(f'Copied, decoded and verified {len(rows)}/{len(sources)} videos', flush=True)
-    order = {stage: index for index, stage in enumerate(STAGES)}
+    order = {stage: index for index, stage in enumerate(PUBLIC_STAGES)}
     rows.sort(key=lambda row: (order[row['stage']], row['suite'], row['taskId'], row['initStateIndex']))
     summary = summarize(rows)
     write_public_files(args.output, rows, provenance, summary)

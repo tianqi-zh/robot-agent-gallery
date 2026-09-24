@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
 const site = path.resolve(__dirname,'..');
-const dataset = path.resolve(process.argv[2] || '/playpen-ssd/tianqizh/benchmend-libero');
+const dataset = path.resolve(process.argv[2] || '/playpen-ssd/tianqizh/benchmend-libero-merged');
 const episodes = JSON.parse(fs.readFileSync(path.join(site,'episodes.json'),'utf8'));
 const output = path.resolve(__dirname,'../../artifacts/browser/benchmend');
 const mime = {'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.mp4':'video/mp4','.jpg':'image/jpeg'};
@@ -49,11 +49,14 @@ const server = http.createServer((request,response) => {
     assert.equal(await page.locator('.task-card').count(),40);
     assert.equal(await page.locator('.sample-dot').count(),400);
     assert.match(await page.locator('#version-score').innerText(),/322 \/ 400/);
-    for(const [version,count,tasks] of [['revised_r1',90,9],['revised_r2',20,2],['final',400,40],['original',400,40]]){
+    assert.equal(episodes.length,490);
+    assert.equal(await page.locator('#version-tabs button').count(),2);
+    assert.doesNotMatch(await page.locator('body').innerText(),/Revision [12]|Final evaluation|\bR[12]\b/);
+    for(const [version,count,tasks] of [['revision',90,9],['original',400,40]]){
       await page.locator(`[data-version="${version}"]`).click();
       assert.equal(await page.locator('.sample-dot').count(),count);
       assert.equal(await page.locator('.task-card').count(),tasks);
-      if(version==='final')assert.match(await page.locator('#version-score').innerText(),/357 \/ 400/);
+      if(version==='revision')assert.match(await page.locator('#version-score').innerText(),/75 \/ 90/);
     }
     await page.locator('#suite').selectOption('libero_goal');
     assert.equal(await page.locator('.task-card').count(),10);
@@ -70,19 +73,19 @@ const server = http.createServer((request,response) => {
     assert.ok((await page.locator('.task-card').count())>0);
     assert.ok((await page.locator('.task-card').count())<40);
     await page.locator('#search').fill('');
-    const revised=episodes.find(item=>item.stage==='revised_r2');
+    const revised=episodes.find(item=>item.id==='revision/libero_10_t05_r00');
     const original=episodes.find(item=>item.pairKey===revised.pairKey&&item.stage==='original');
     await page.locator(`.sample-dot[data-episode="${original.id}"]`).click();
     await page.waitForFunction(()=>document.querySelector('#episode-video').readyState>=2);
     assert.equal(await page.locator('#player-dialog').isVisible(),true);
-    assert.equal(await page.locator('#player-versions button').count(),3);
+    assert.equal(await page.locator('#player-versions button').count(),2);
     assert.ok((await page.locator('#revised-instruction strong').count())>0);
     assert.equal(await page.locator('#original-instruction').innerText(),original.instruction);
     assert.equal(new URL(page.url()).searchParams.get('episode'),original.id);
     await page.locator(`[data-player-episode="${revised.id}"]`).click();
     await page.waitForFunction(()=>document.querySelector('#episode-video').readyState>=2);
     assert.equal(await page.locator('#revised-instruction').innerText(),revised.instruction);
-    assert.equal(await page.locator('#player-version').innerText(),'Revision 2');
+    assert.equal(await page.locator('#player-version').innerText(),'Revision');
     assert.equal(await page.locator('#player-init').innerText(),String(revised.initStateIndex));
     await page.locator('#episode-video').evaluate(async video=>{video.currentTime=Math.min(2,video.duration/2);await video.play();});
     await page.waitForFunction(()=>document.querySelector('#episode-video').currentTime>2.1);
@@ -103,7 +106,7 @@ const server = http.createServer((request,response) => {
     assert.equal(new URL(page.url()).searchParams.get('episode'),revised.id);
     await page.goto(deepLink);
     await page.waitForFunction(()=>document.querySelector('#player-dialog').open);
-    assert.equal(await page.locator('#player-version').innerText(),'Revision 2');
+    assert.equal(await page.locator('#player-version').innerText(),'Revision');
     await page.setViewportSize({width:390,height:844});
     await page.waitForFunction(()=>document.querySelector('#episode-video').readyState>=2);
     assert.equal(await page.evaluate(()=>document.querySelector('dialog').scrollWidth<=document.querySelector('dialog').clientWidth),true);
@@ -118,11 +121,48 @@ const server = http.createServer((request,response) => {
         await page.screenshot({path:path.join(output,`${width===390?'mobile':'desktop'}-gallery.png`),fullPage:false});
       }
     }
-    await page.locator('[data-version="final"]').click();
+    await page.locator('[data-version="revision"]').click();
     for(const card of await page.locator('.task-card').all())assert.equal(await card.locator('.sample-dot').count(),10);
-    assert.equal(await page.locator('[data-version="final"]').getAttribute('aria-pressed'),'true');
+    assert.equal(await page.locator('[data-version="revision"]').getAttribute('aria-pressed'),'true');
+    // Check the two replaced tasks and an unchanged revised task against their
+    // original source bytes, then actually decode, seek and play each selection.
+    const retained = [
+      ['libero_10_t05_r00','7883e0c077fbbac2a7b2c8c89afdc807b23ec7c85eb8f5bee058cc74be73ab8f','_r2'],
+      ['libero_goal_t05_r00','e0fc4527757c63c8a8a168aabff157ea79ce316aa89889e9fb7e9308fe3058b0','_r2'],
+      ['libero_10_t06_r00','52948e0fb2d95e6725736195f2faf05b10d530777fc7370004b7f5c1c3843239','_r1']
+    ];
+    for(const [key,sha,suffix] of retained){
+      const episode=episodes.find(item=>item.id===`revision/${key}`);
+      assert.ok(episode.sourceRun.endsWith(suffix));
+      assert.equal(episode.sha256,sha);
+      assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync(path.join(dataset,episode.video))).digest('hex'),sha);
+      const url=new URL(origin);url.searchParams.set('version','revision');url.searchParams.set('episode',episode.id);
+      await page.goto(url.href);
+      await page.waitForFunction(()=>document.querySelector('#player-dialog').open&&document.querySelector('#episode-video').readyState>=2);
+      assert.equal(await page.locator('#player-versions button').count(),2);
+      assert.equal(await page.locator('#player-version').innerText(),'Revision');
+      assert.equal(await page.locator('#revised-instruction').innerText(),episode.instruction);
+      assert.ok((await page.locator('#revised-instruction strong').count())>0);
+      const source=await page.locator('#episode-video').getAttribute('src');
+      assert.ok(source.endsWith(episode.video));
+      await page.locator('#episode-video').evaluate(async video=>{video.currentTime=video.duration/2;await video.play();});
+      await page.waitForFunction(()=>{const v=document.querySelector('#episode-video');return v.currentTime>v.duration/2+0.15;});
+      await page.locator('#episode-video').evaluate(video=>video.pause());
+      assert.equal(await page.locator('#video-error').isVisible(),false);
+      assert.doesNotMatch(await page.locator('body').innerText(),/Revision [12]|Final evaluation|\bR[12]\b/);
+    }
+    // Existing shared links must resolve to the sole public revision.
+    for(const oldVersion of ['revised_r1','revised_r2','final']){
+      const url=new URL(origin);url.searchParams.set('version',oldVersion);url.searchParams.set('episode',`${oldVersion==='revised_r2'?'revised_r2':'revised_r1'}/${revised.pairKey}`);
+      await page.goto(url.href);
+      await page.waitForFunction(()=>document.querySelector('#player-dialog').open);
+      assert.equal(new URL(page.url()).searchParams.get('version'),'revision');
+      assert.equal(new URL(page.url()).searchParams.get('episode'),revised.id);
+      assert.equal(await page.locator('#player-version').innerText(),'Revision');
+      assert.equal(await page.locator('#revised-instruction').innerText(),revised.instruction);
+    }
     assert.deepEqual(errors,[]);
-    console.log('PASS: 510 episodes; original 400, r1 90, r2 20, final 400; filters; paired instructions; video play/seek; downloads; URL/back/escape; widths 360/390/768/1440.');
+    console.log('PASS: 490 episodes; original 400, revision 90; latest book/plate and retained mug source bytes; legacy links; filters; paired instructions; video play/seek; downloads; URL/back/escape; widths 360/390/768/1440.');
     console.log(`Screenshots: ${output}`);
   } finally {await browser.close();await new Promise(resolve=>server.close(resolve));}
 })().catch(error=>{console.error(error);process.exitCode=1;});

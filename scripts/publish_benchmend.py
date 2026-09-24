@@ -15,7 +15,7 @@ from huggingface_hub import HfApi
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STAGES = {"original": 400, "revised_r1": 90, "revised_r2": 20}
+STAGES = {"original": 400, "revision": 90}
 PUBLIC_METADATA = {
     "README.md", ".gitattributes", "episodes.json", "episodes.jsonl",
     "episodes.csv", "metadata.json", "provenance.json", "checksums.sha256",
@@ -58,18 +58,18 @@ def validate_dataset(root):
     episodes = json.loads((root / "episodes.json").read_text())
     require(all(set(row) == EPISODE_FIELDS for row in episodes), "Unexpected public episode fields")
     require(Counter(row["stage"] for row in episodes) == STAGES, "Unexpected stage counts")
-    require(len({row["id"] for row in episodes}) == 510, "Duplicate episode IDs")
+    require(len({row["id"] for row in episodes}) == 490, "Duplicate episode IDs")
     final = [row for row in episodes if row["final"]]
     require(Counter(row["stage"] for row in final) == {
-        "original": 310, "revised_r1": 70, "revised_r2": 20,
+        "original": 310, "revision": 90,
     }, "Final comparison must explicitly reuse 310 original episodes")
     require(len({row["pairKey"] for row in final}) == 400, "Duplicate final episode slots")
     originals = {row["pairKey"]: row for row in episodes if row["stage"] == "original"}
     require(len(originals) == 400, "Duplicate original episode slots")
-    require(len({(row["stage"], row["pairKey"]) for row in episodes}) == 510,
+    require(len({(row["stage"], row["pairKey"]) for row in episodes}) == 490,
             "Duplicate stage/episode slots")
-    require(len({row["video"] for row in episodes}) == 510
-            and len({row["poster"] for row in episodes}) == 510,
+    require(len({row["video"] for row in episodes}) == 490
+            and len({row["poster"] for row in episodes}) == 490,
             "Every recording must have its own video and poster")
     priority = {stage: index for index, stage in enumerate(STAGES)}
     latest = {}
@@ -90,6 +90,12 @@ def validate_dataset(root):
         require(original["instruction"] == row["originalInstruction"], "Original instruction differs")
         require(row["stage"] == "original" or row["instruction"] != original["instruction"],
                 "Revision did not change its instruction")
+        if row["stage"] == "revision":
+            replacement = (row["suite"], row["taskId"]) in {("libero_goal", 5), ("libero_10", 5)}
+            expected_run = ("astra_libero_v5_instruction_minimal_parallel4_r2" if replacement
+                            else "astra_libero_v5_instruction_refined_parallel8_r1")
+            require(row["sourceRun"] == expected_run,
+                    f"Revision must use the selected instruction repair: {row['id']}")
         require(type(row["final"]) is bool and row["final"] == (latest[row["pairKey"]] is row),
                 "Final comparison must select the latest available instruction revision")
         require(type(row["nativeSuccess"]) is bool, "Native outcome must be boolean")
@@ -165,7 +171,7 @@ def verify_remote(api, repo, kind, revision, root, names):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset-root", type=Path, default=Path("/playpen-ssd/tianqizh/benchmend-libero"))
+    parser.add_argument("--dataset-root", type=Path, default=Path("/playpen-ssd/tianqizh/benchmend-libero-merged"))
     parser.add_argument("--space-root", type=Path, default=ROOT / "hf-space")
     parser.add_argument("--dataset", default="benchmend/libero")
     parser.add_argument("--space", default="benchmend/gallery")
@@ -183,7 +189,10 @@ def main():
     api.create_repo(args.space, repo_type="space", space_sdk="static", private=False, exist_ok=True)
     commit = api.upload_folder(
         repo_id=args.dataset, repo_type="dataset", folder_path=args.dataset_root,
-        allow_patterns=sorted(names), commit_message="Publish 400 original LIBERO evaluations and 110 instruction-repair reruns",
+        allow_patterns=sorted(names), commit_message="Consolidate LIBERO instruction repairs into one revision",
+        # The published revision replaces both earlier public revision folders.
+        # Older commit URLs remain valid; the current Dataset has just two splits.
+        delete_patterns=["revised_r1/**", "revised_r2/**"],
     )
     dataset_sha = verify_remote(api, args.dataset, "dataset", commit.oid, args.dataset_root, names)
     print(f"Dataset verified: {args.dataset}@{dataset_sha}", flush=True)
@@ -215,7 +224,7 @@ def main():
                 "Unexpected style.css on the Space; preserve it for review")
     commit = api.upload_folder(
         repo_id=args.space, repo_type="space", folder_path=args.space_root,
-        allow_patterns=sorted(space_names), commit_message="Launch the LIBERO-only BenchMend gallery",
+        allow_patterns=sorted(space_names), commit_message="Show original and consolidated revision in the LIBERO gallery",
         delete_patterns=["style.css"] if boilerplate else None,
     )
     space_sha = verify_remote(api, args.space, "space", commit.oid, args.space_root, space_names)

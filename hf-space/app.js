@@ -1,15 +1,13 @@
 'use strict';
 (() => {
   const $ = selector => document.querySelector(selector);
-  const versions = ['original', 'revised_r1', 'revised_r2', 'final'];
-  const versionNames = {original:'Original', revised_r1:'Revision 1', revised_r2:'Revision 2', final:'Final evaluation'};
+  const versions = ['original', 'revision'];
+  const versionNames = {original:'Original', revision:'Revision'};
   const suiteNames = {libero_spatial:'LIBERO Spatial', libero_object:'LIBERO Object', libero_goal:'LIBERO Goal', libero_10:'LIBERO Long'};
   const suiteOrder = Object.keys(suiteNames);
   const notes = {
     original:'Original task instructions, evaluated across all 40 tasks.',
-    revised_r1:'90 new episodes across nine tasks, using the first instruction revision.',
-    revised_r2:'20 new episodes across two tasks, using the second instruction revision.',
-    final:'400 evaluations: 310 unchanged original + 70 revision-1 + 20 revision-2 episodes. This composite is not 400 new rollouts.'
+    revision:'The latest revised instructions for nine tasks, evaluated on the same 10 initial states per task.'
   };
   const state = {episodes:[], byId:new Map(), version:'original', suite:'all', outcome:'all', search:'', active:null, pushed:false, opener:null};
   const dialog = $('#player-dialog');
@@ -41,7 +39,7 @@
   }
 
   function versionEpisodes() {
-    return state.episodes.filter(episode => state.version === 'final' ? episode.final === true : episode.stage === state.version);
+    return state.episodes.filter(episode => episode.stage === state.version);
   }
 
   function writeURL(push=false, episodeId=state.active?.id) {
@@ -57,7 +55,11 @@
 
   function readURL() {
     const params = new URL(location.href).searchParams;
-    state.version = versions.includes(params.get('version')) ? params.get('version') : 'original';
+    const requestedVersion = params.get('version');
+    const requestedEpisode = params.get('episode');
+    const episodeId = requestedEpisode ? requestedEpisode.replace(/^revised_r[12]\//, 'revision/') : null;
+    const version = /^revised_r[12]$/.test(requestedVersion || '') ? 'revision' : requestedVersion;
+    state.version = versions.includes(version) ? version : 'original';
     state.suite = suiteOrder.includes(params.get('suite')) ? params.get('suite') : 'all';
     state.outcome = ['success','failure'].includes(params.get('outcome')) ? params.get('outcome') : 'all';
     state.search = params.get('q') || '';
@@ -65,7 +67,12 @@
     $('#suite').value = state.suite;
     $('#outcome').value = state.outcome;
     renderCollection();
-    const episode = state.byId.get(params.get('episode'));
+    const episode = state.byId.get(episodeId);
+    if (requestedVersion === 'final' && episode) {
+      state.version = episode.stage;
+      renderCollection();
+    }
+    if (requestedVersion === 'final' || version !== requestedVersion || episodeId !== requestedEpisode) writeURL(false, episode?.id || null);
     if (episode) showEpisode(episode,false);
     else hidePlayer();
   }

@@ -1,5 +1,7 @@
 """Guard source selection, recording preservation and HF metadata semantics."""
 import importlib.util
+from collections import Counter
+from copy import deepcopy
 import json
 from pathlib import Path
 import shutil
@@ -45,20 +47,84 @@ def test_host_paths_and_private_trace_fields_are_rejected(value):
 
 def test_video_folder_metadata_has_real_video_feature_and_relative_paths(tmp_path):
     rows = []
-    for stage in export.STAGES:
+    for stage in export.PUBLIC_STAGES:
         (tmp_path / stage).mkdir()
         rows.append({'id': stage + '/episode', 'stage': stage,
                      'video': stage + '/videos/episode.mp4',
                      'poster': stage + '/posters/episode.jpg',
                      'nativeSuccess': False, 'agentSuccess': None})
     export.write_public_files(tmp_path, rows, [], {})
-    for stage in export.STAGES:
+    for stage in export.PUBLIC_STAGES:
         item = json.loads((tmp_path / stage / 'metadata.jsonl').read_text())
         assert item['file_name'] == 'videos/episode.mp4'
         assert item['poster'] == 'posters/episode.jpg'
         assert 'video' not in item  # VideoFolder generates the decoded Video feature.
         assert item['agentSuccess'] is None
     assert json.loads((tmp_path / 'episodes.json').read_text()) == rows
+    card = (tmp_path / 'README.md').read_text()
+    assert 'split: original' in card and 'split: revision' in card
+    assert 'split: revised_r1' not in card and 'split: revised_r2' not in card
+
+
+def test_public_revision_replaces_whole_tasks_and_preserves_all_originals():
+    reference, final, _ = export.load_reference(SCRIPT.parents[1])
+    stage_names = {config[0]: stage for stage, config in export.SOURCE_STAGES.items()}
+    sources = []
+    for (audit_stage, pair), expected in reference.items():
+        stage = stage_names[audit_stage]
+        sources.append({'source': Path(expected['runName']) / pair / 'video.mp4',
+                        'expectedFrames': 100, 'row': {
+                            'id': f'{stage}/{pair}', 'stage': stage, 'pairKey': pair,
+                            'video': f'{stage}/videos/{pair}.mp4',
+                            'poster': f'{stage}/posters/{pair}.jpg',
+                            'sourceRun': expected['runName'],
+                            'sourceResultSha256': expected['resultSha256'],
+                            'sourceFinishSha256': expected['finishSha256'],
+                            'instruction': expected['instruction'],
+                            'nativeSuccess': expected['nativeSuccess'],
+                            'final': (audit_stage, pair) in final,
+                            'sha256': f'{stage}/{pair}', 'bytes': 1,
+                        }})
+    before = deepcopy(sources)
+    selected = export.select_public_sources(sources)
+    assert sources == before  # Source metadata must also remain untouched.
+    assert len(selected) == 490
+    originals = [source for source in selected if source['row']['stage'] == 'original']
+    assert originals == [source for source in sources if source['row']['stage'] == 'original']
+    revisions = [source for source in selected if source['row']['stage'] == 'revision']
+    assert len(revisions) == 90
+    latest_run = export.SOURCE_STAGES['revised_r2'][1]
+    latest = [source for source in revisions if source['row']['sourceRun'] == latest_run]
+    assert Counter(source['row']['pairKey'].rsplit('_r', 1)[0] for source in latest) == {
+        'libero_goal_t05': 10, 'libero_10_t05': 10,
+    }
+    assert {source['row']['pairKey'] for source in latest} == {
+        f'{task}_r{index:02d}' for task in ('libero_goal_t05', 'libero_10_t05')
+        for index in range(10)
+    }
+    first_run = export.SOURCE_STAGES['revised_r1'][1]
+    retained = [source for source in revisions if source['row']['sourceRun'] == first_run]
+    assert Counter(source['row']['pairKey'].rsplit('_r', 1)[0] for source in retained) == {
+        'libero_spatial_t04': 10, 'libero_goal_t00': 10, 'libero_goal_t09': 10,
+        'libero_object_t00': 10, 'libero_object_t04': 10,
+        'libero_10_t06': 10, 'libero_10_t07': 10,
+    }
+    by_source = {(source['row']['sourceRun'], source['row']['pairKey']): source
+                 for source in sources}
+    for source in revisions:
+        row = source['row']
+        original_source = by_source[(row['sourceRun'], row['pairKey'])]
+        assert source['source'] == original_source['source']
+        assert source['expectedFrames'] == original_source['expectedFrames']
+        for field in row.keys() - {'id', 'stage', 'video', 'poster'}:
+            assert row[field] == original_source['row'][field]
+        assert row['id'] == f'revision/{row["pairKey"]}'
+        assert row['video'] == f'revision/videos/{row["pairKey"]}.mp4'
+        assert row['poster'] == f'revision/posters/{row["pairKey"]}.jpg'
+    summary = export.summarize([source['row'] for source in selected])
+    assert summary['nativeSuccessCounts'] == {'original': 322, 'revision': 75}
+    assert summary['finalComposite']['stageCounts'] == {'original': 310, 'revision': 90}
+    assert summary['finalComposite']['nativeSuccess'] == 357
 
 
 @pytest.mark.skipif(not shutil.which('ffmpeg') or not shutil.which('ffprobe'),
