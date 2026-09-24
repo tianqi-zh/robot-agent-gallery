@@ -1021,15 +1021,21 @@
         "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
       },
       "media": {
-        "videoSha256": "23e74e745a669b2ca8692986f88302cbc38d775a48e50e95405503c4ced14b41",
-        "videoBytes": 699421,
-        "posterSha256": "a4e3d13eb7030b3d35f3437aa4eb2c7faad21dc48772cb1587e3977e7cfe9222",
-        "posterBytes": 31742,
-        "posterFrame": 219,
+        "videoSha256": "88697a49b74788de6b4debdff9bf8956d512cda94940b756f1661d6614e9ad82",
+        "videoBytes": 5565488,
+        "posterSha256": "056f2b42bb5eeca0df3f898d10f27b3ecccbbd62238976eb738461b27a12926e",
+        "posterBytes": 22462,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "original/libero_goal_t05_r02",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/videos/libero_goal_t05_r02.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_goal_t05_r02.jpg"
       }
     },
     "r2:libero_goal_t05_r02": {
@@ -1075,15 +1081,21 @@
         "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
       },
       "media": {
-        "videoSha256": "f398bebdb12429e158cb2dcf49739b75c22463f1dacbba2e9a6ca0495bec3961",
-        "videoBytes": 635822,
-        "posterSha256": "108d20f9925fbaa1501eda6653843dfd7debe6e320bfd33c654c8c0148b57fbd",
-        "posterBytes": 36253,
-        "posterFrame": 199,
+        "videoSha256": "17cb62c810009ce52870822a25ae5016d64e33da8e7e80a3f1346e308e6dcfec",
+        "videoBytes": 5177489,
+        "posterSha256": "7cb5d5a75590432001ce9e3bdbc4448c20d4164afc459c5406d98f21512f89b0",
+        "posterBytes": 22554,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "revision/libero_goal_t05_r02",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/videos/libero_goal_t05_r02.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/posters/libero_goal_t05_r02.jpg"
       }
     },
     "r2:libero_goal_t05_r05": {
@@ -1183,15 +1195,21 @@
         "initFileSha256": "794beed679b18bbd7d9fb851c81877a974915ad63addff2d5ac5af0607fafac9"
       },
       "media": {
-        "videoSha256": "5f0e3b95c3bd2995d5c50575aa6184c455475c621b04961a2f917e38d89d76b1",
-        "videoBytes": 750619,
-        "posterSha256": "3c4085e18f9c2351b1d720a0afe2ecbbabe881c71c5fa8707e22ef18146180e8",
-        "posterBytes": 35111,
-        "posterFrame": 255,
+        "videoSha256": "08c4b952bbe5c14593697a44281b1cc95bcca1e3540337fdd6ec6819fc5a1902",
+        "videoBytes": 6365072,
+        "posterSha256": "7369592c414771a8962b95326fdb3939f879cb50c07ff16bab3a7e4cc3bd7641",
+        "posterBytes": 23078,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "revision/libero_goal_t05_r07",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/videos/libero_goal_t05_r07.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/posters/libero_goal_t05_r07.jpg"
       }
     },
     "baseline:libero_10_t03_r00": {
@@ -1237,15 +1255,21 @@
         "initFileSha256": "e98ded151f64a036c74c872336dd09b968c379f3c9db7bc333aba37e7c235b86"
       },
       "media": {
-        "videoSha256": "06e5df19715b563ebd9f42189b5a7b0f826197238d912d18c3aa3d1178eee78b",
-        "videoBytes": 1201544,
-        "posterSha256": "e5e5c3aac8bdfe16093c943ddee5c578a175958ac5cbc29438579c71ceda13dc",
-        "posterBytes": 47617,
-        "posterFrame": 255,
+        "videoSha256": "c0e5897314daad6a90aba2f449ff6215d0f82d75eb09b8f4347fb4548f26256c",
+        "videoBytes": 8160278,
+        "posterSha256": "53183bc6a37860f264de7e560dbedb0c6e54d252f7f30b806fe4c89cda35c174",
+        "posterBytes": 25138,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "original/libero_10_t03_r00",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/videos/libero_10_t03_r00.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_10_t03_r00.jpg"
       }
     },
     "baseline:libero_10_t09_r00": {
@@ -1347,13 +1371,19 @@
       "media": {
         "videoSha256": "f0cd4302e90524acb2a4d403c561fb95a90f2b3fed2da4d4c6ac17036d4d5432",
         "videoBytes": 7684965,
-        "posterSha256": "d9d5f7cc65b587a5481fec6a8461172a6ee540ebea309be549643f030aa19da3",
-        "posterBytes": 43953,
-        "posterFrame": 253,
+        "posterSha256": "4abfbf6d22d9de1ff92855a96d275dacff37e0d4019bd28028a1760b48e21cea",
+        "posterBytes": 19885,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "original/libero_spatial_t04_r04",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/videos/libero_spatial_t04_r04.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_spatial_t04_r04.jpg"
       }
     },
     "r1:libero_spatial_t04_r04": {
@@ -1399,15 +1429,21 @@
         "initFileSha256": "deef3df529e0bb57658b973bbb3baf02b02922db065c025a73ebfcd11eb54d46"
       },
       "media": {
-        "videoSha256": "182b1b45f7817396a126d0b24cd46521ab781de10743415e74fdd08b7b2efc4d",
-        "videoBytes": 882209,
-        "posterSha256": "dde5bc775256c22a3c5f57372e59467711243eaabcbeffc91792a3e6ce429577",
-        "posterBytes": 33423,
-        "posterFrame": 237,
+        "videoSha256": "1a872037d53f9402884fc79e3882d97fe75d4614cfbad4462692084f2555755d",
+        "videoBytes": 7197897,
+        "posterSha256": "b98e31bc89f8fd4654aa9abc166bda8c820534bce643d083f8478e124a9cc34f",
+        "posterBytes": 20413,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "revision/libero_spatial_t04_r04",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/videos/libero_spatial_t04_r04.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/posters/libero_spatial_t04_r04.jpg"
       }
     }
   },
@@ -1418,6 +1454,6 @@
     "verifiedClips": 18,
     "newClips": 9,
     "reusedClips": 9,
-    "newMediaBytes": 5506717
+    "newMediaBytes": 21939783
   }
 }

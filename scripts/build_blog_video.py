@@ -96,7 +96,8 @@ def make_manifest(speed):
         "videoBoxes": BOXES, "audio": False, "subtitles": False,
         "cases": cases,
         "libero": {stage: review[stage] for stage in ("before", "after")},
-        "robotwin": {stage: robotwin[stage] for stage in ("before", "after")},
+        "robotwin": {**{stage: robotwin[stage] for stage in ("before", "after")},
+                     "comparisonScope": robotwin["comparisonScope"]},
         "scenes": scenes, "frames": start_frame, "durationSeconds": start_frame / FPS,
         "sources": {str(path.relative_to(ROOT)): sha256(path) for path in (
             ROOT / "data/libero-blog-media.json", ROOT / "data/libero-human-review.json",

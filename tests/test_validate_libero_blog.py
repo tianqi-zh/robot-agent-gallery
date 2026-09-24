@@ -30,6 +30,8 @@ class LiberoBlogPublicationTests(unittest.TestCase):
                 path.write_bytes(payload)
                 clip['media'][kind+'Bytes']=len(payload)
                 clip['media'][kind+'Sha256']=hashlib.sha256(payload).hexdigest()
+                if kind=='video' and 'gallerySource' in clip:
+                    clip['source']['videoSha256']=clip['media']['videoSha256']
         media['validation']['newMediaBytes']=sum(
             clip['media']['videoBytes']+clip['media']['posterBytes']
             for clip in media['clips'].values() if not clip['reusedBaselineMedia'])
@@ -84,6 +86,18 @@ class LiberoBlogPublicationTests(unittest.TestCase):
     def test_rejects_changed_pair_transition_matrix(self):
         self.media['pairs'][0]['pairedMatrix']['F→S']-=1
         with self.assertRaisesRegex(ValidationError,'pairedMatrix'):
+            self.validate()
+
+    def test_rejects_wrong_gallery_episode(self):
+        clip=next(c for c in self.media['clips'].values() if 'gallerySource' in c)
+        clip['gallerySource']['recordId']='original/libero_goal_t05_r09'
+        with self.assertRaisesRegex(ValidationError,'Gallery record differs'):
+            self.validate()
+
+    def test_rejects_stale_gallery_poster_frame(self):
+        clip=next(c for c in self.media['clips'].values() if 'gallerySource' in c)
+        clip['media']['posterFrame']=clip['frames']//2
+        with self.assertRaisesRegex(ValidationError,'Poster frame differs'):
             self.validate()
 
     def test_rejects_stale_instruction(self):

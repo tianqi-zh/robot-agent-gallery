@@ -228,7 +228,7 @@ def validate_documents(root,alignment,rows,media,*,probe=False,media_root=None):
     require(isinstance(clips,dict) and clips,'No blog clips')
     tasks={t['id']:t for t in alignment['tasks']}
     for clip_id,clip in clips.items():
-        require(set(clip)==set('id stage stageLabel episodeId episodeKey suite taskId taskName rolloutIndex seed initStateId instruction originalInstruction status nativeSuccess agentAssessment stopReason steps maxSteps video poster width height frames fps durationSeconds reusedBaselineMedia task source media'.split()),
+        require(set(clip)-{'gallerySource'}==set('id stage stageLabel episodeId episodeKey suite taskId taskName rolloutIndex seed initStateId instruction originalInstruction status nativeSuccess agentAssessment stopReason steps maxSteps video poster width height frames fps durationSeconds reusedBaselineMedia task source media'.split()),
                 'Unexpected clip fields; raw model/environment data is not public')
         alias=clip['stage'];require(alias in MEDIA_STAGES,'Invalid clip stage')
         stage,prefix=MEDIA_STAGES[alias];key=clip['episodeId']
@@ -262,7 +262,24 @@ def validate_documents(root,alignment,rows,media,*,probe=False,media_root=None):
         require(set(meta)==set('videoSha256 videoBytes posterSha256 posterBytes posterFrame codec pixelFormat fastStart verified'.split()),
                 'Unexpected clip encoding fields')
         require(meta['codec']=='h264' and meta['pixelFormat']=='yuv420p','Wrong browser encoding')
-        require(meta['posterFrame']==clip['frames']//2,'Poster frame differs from export contract')
+        poster_frame=clip['frames']//2
+        if 'gallerySource' in clip:
+            gallery=clip['gallerySource']
+            require(isinstance(gallery,dict) and set(gallery)=={'catalogUrl','recordId','videoUrl','posterUrl'},
+                    'Unexpected gallery source fields')
+            gallery_stage='original' if alias=='baseline' else 'revision'
+            require(gallery['recordId']==f'{gallery_stage}/{key}', 'Gallery record differs from clip')
+            require(re.fullmatch(r'https://huggingface.co/spaces/benchmend/gallery/resolve/[0-9a-f]{40}/gallery/libero/episodes\.json',gallery['catalogUrl']),
+                    'Gallery catalog must use an immutable revision')
+            match=re.fullmatch(r'(https://huggingface.co/datasets/benchmend/libero/resolve/[0-9a-f]{40}/)'
+                               +re.escape(f'{gallery_stage}/videos/{key}.mp4'),gallery['videoUrl'])
+            require(match is not None, 'Gallery video must identify the pinned episode')
+            require(gallery['posterUrl']==match.group(1)+f'{gallery_stage}/posters/{key}.jpg',
+                    'Gallery poster must match the video source')
+            require(meta['videoSha256']==source['videoSha256'], 'Gallery video must retain original bytes')
+            # The gallery exporter selects one second (or 10% for shorter clips).
+            poster_frame=int(min(1.0,clip['durationSeconds']/10)*clip['fps'])
+        require(meta['posterFrame']==poster_frame,'Poster frame differs from export contract')
         resolved={}
         for kind,extension in [('video','mp4'),('poster','jpg')]:
             local_asset(resolver.media_root or resolver.root,clip[kind],kind,allow_missing=True)

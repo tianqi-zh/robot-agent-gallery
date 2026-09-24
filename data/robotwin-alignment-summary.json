@@ -17559,68 +17559,150 @@
       }
     }
   ],
-  "archivedExamplesSource": {
-    "url": "https://github.com/tianqi-zh/robot-agent-gallery/blob/a853415121ee6363d34db7ce892631f909af9ba0/data/robotwin-alignment-summary.json",
-    "sha256": "99168be0ab0f20a6f668351d408fc77c95df80aa229cf9caf65cc2bdac4a0f67",
-    "sourceRun": "robotwin_goal_spec_full_v1",
-    "note": "Archived failure examples retain historical records and media; their historical after outcomes are not used in the latest comparison."
-  },
   "cases": [
     {
-      "episodeKey": "move_can_pot_r01",
-      "taskName": "move_can_pot",
-      "before": {
-        "status": "failure",
-        "benchSuccess": false,
-        "agentSuccess": true,
-        "agentOutcome": "visually_complete",
-        "terminalReason": "agent_finished",
-        "steps": 45,
-        "toolCalls": 27,
-        "wallSeconds": 264.172
+      "episodeKey": "dump_bin_bigbin_r01",
+      "taskId": 6,
+      "episodeNumber": 2,
+      "taskName": "dump_bin_bigbin",
+      "label": "RoboTwin · Task 06 · EPISODE 02",
+      "phase": "revision",
+      "benchSuccess": false,
+      "galleryUrl": "https://benchmend-gallery.static.hf.space/gallery/robotwin/?episode=robotwin_v4_manual_dump_bin_bigbin_r01_v4m023",
+      "task": {
+        "before": {
+          "successes": 1,
+          "episodes": 10
+        },
+        "after": {
+          "successes": 1,
+          "episodes": 10
+        },
+        "scope": "all ten episode slots; after composite"
       },
-      "after": {
-        "status": "failure",
-        "benchSuccess": false,
-        "agentSuccess": true,
-        "agentOutcome": "visually_complete",
-        "terminalReason": "agent_finished",
-        "steps": 47,
-        "toolCalls": 30,
-        "wallSeconds": 408.205
+      "source": {
+        "catalog": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/gallery.json",
+        "episodeObjectSha256": "22e5278223a254327e90218ebd3f9d88c5e3905ae7357424ec9321a681f0a198",
+        "selection": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/robotwin-original-disagreement-selection.json"
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_move_can_pot_r01.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_move_can_pot_r01.jpg",
-      "archived": true,
-      "sourceRun": "robotwin_goal_spec_full_v1"
+      "mediaSources": {
+        "video": {
+          "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_dump_bin_bigbin_r01_v4m023.mp4",
+          "sha256": "6c4204cf8dc4cebb889e3dcad3267be62c4db089c8f0224dae828f008a9d7f8e",
+          "bytes": 935747,
+          "metadata": {
+            "format": "mov,mp4,m4a,3gp,3g2,mj2",
+            "durationSeconds": 3.5,
+            "streams": [
+              {
+                "codec_name": "h264",
+                "codec_type": "video",
+                "width": 1536,
+                "height": 384,
+                "r_frame_rate": "10/1",
+                "nb_frames": "35",
+                "pix_fmt": "yuv420p"
+              }
+            ]
+          }
+        },
+        "poster": {
+          "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_dump_bin_bigbin_r01_v4m023.jpg",
+          "sha256": "04101611f2ace7f4e84257a66202873a61808e79ad88540c40462dde128f155e",
+          "bytes": 15184,
+          "metadata": {
+            "codec_name": "mjpeg",
+            "width": 1536,
+            "height": 384,
+            "pix_fmt": "yuvj420p"
+          }
+        }
+      },
+      "id": "robotwin_v4_manual_dump_bin_bigbin_r01_v4m023",
+      "instruction": "Lift the simple white plastic trash bin high and tip it over onto the table so the balls pour out on the tabletop.",
+      "status": "failure",
+      "seed": 100002,
+      "steps": 34,
+      "toolCalls": 36,
+      "wallSeconds": 435.633,
+      "durationSeconds": 3.5,
+      "width": 1536,
+      "height": 384,
+      "frames": 35,
+      "video": "media/blog/robotwin/dump_bin_bigbin_r01-revision.mp4",
+      "poster": "media/blog/robotwin/dump_bin_bigbin_r01-revision.jpg"
     },
     {
-      "episodeKey": "place_dual_shoes_r00",
-      "taskName": "place_dual_shoes",
-      "before": {
-        "status": "failure",
-        "benchSuccess": false,
-        "agentSuccess": false,
-        "agentOutcome": null,
-        "terminalReason": null,
-        "steps": 157,
-        "toolCalls": 80,
-        "wallSeconds": 1197.023
+      "episodeKey": "scan_object_r02",
+      "taskId": 41,
+      "episodeNumber": 3,
+      "taskName": "scan_object",
+      "label": "RoboTwin · Task 41 · EPISODE 03",
+      "phase": "revision",
+      "benchSuccess": false,
+      "galleryUrl": "https://benchmend-gallery.static.hf.space/gallery/robotwin/?episode=robotwin_v4_manual_scan_object_r02_v4m114",
+      "task": {
+        "before": {
+          "successes": 1,
+          "episodes": 10
+        },
+        "after": {
+          "successes": 2,
+          "episodes": 10
+        },
+        "scope": "all ten episode slots; after composite"
       },
-      "after": {
-        "status": "failure",
-        "benchSuccess": false,
-        "agentSuccess": true,
-        "agentOutcome": "visually_complete",
-        "terminalReason": "agent_finished",
-        "steps": 86,
-        "toolCalls": 60,
-        "wallSeconds": 831.141
+      "source": {
+        "catalog": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/gallery.json",
+        "episodeObjectSha256": "ca40c577a94cfa9cde6356f1264762837da431b48db81ff1582f4862a7c868e3",
+        "selection": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/robotwin-original-disagreement-selection.json"
       },
-      "video": "media/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes_r00.mp4",
-      "poster": "media/robotwin_nvidia10/robotwin_nvidia10_place_dual_shoes_r00.jpg",
-      "archived": true,
-      "sourceRun": "robotwin_goal_spec_full_v1"
+      "mediaSources": {
+        "video": {
+          "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_scan_object_r02_v4m114.mp4",
+          "sha256": "7bb6c3ae2b184227ee14851e382efb01becfa48f8f652a0b1c56c5aefa32f5f5",
+          "bytes": 582582,
+          "metadata": {
+            "format": "mov,mp4,m4a,3gp,3g2,mj2",
+            "durationSeconds": 2.0,
+            "streams": [
+              {
+                "codec_name": "h264",
+                "codec_type": "video",
+                "width": 1536,
+                "height": 384,
+                "r_frame_rate": "10/1",
+                "nb_frames": "20",
+                "pix_fmt": "yuv420p"
+              }
+            ]
+          }
+        },
+        "poster": {
+          "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/media/robotwin_v4_manual/robotwin_v4_manual_scan_object_r02_v4m114.jpg",
+          "sha256": "162a7f6395425ad3f842b972d715f0baff1aa2406de8722c6c93e6e577cc6768",
+          "bytes": 23284,
+          "metadata": {
+            "codec_name": "mjpeg",
+            "width": 1536,
+            "height": 384,
+            "pix_fmt": "yuvj420p"
+          }
+        }
+      },
+      "id": "robotwin_v4_manual_scan_object_r02_v4m114",
+      "instruction": "Grab the smooth black tea box and the scanner with the flat reading surface at the same time, then point the scanner face at the tea box as if scanning it.",
+      "status": "failure",
+      "seed": 100006,
+      "steps": 19,
+      "toolCalls": 21,
+      "wallSeconds": 280.787,
+      "durationSeconds": 2.0,
+      "width": 1536,
+      "height": 384,
+      "frames": 20,
+      "video": "media/blog/robotwin/scan_object_r02-revision.mp4",
+      "poster": "media/blog/robotwin/scan_object_r02-revision.jpg"
     }
   ],
   "selectedExamples": [

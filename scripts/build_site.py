@@ -14,9 +14,9 @@ PUBLIC_FILES = (
     "METHODOLOGY.md", "LIBERO_ALIGNMENT.md",
     "data/libero-alignment.json", "data/libero-alignment-episodes.csv",
     "data/libero-blog-media.json", "data/libero-human-review.json",
-    "data/robotwin-alignment-summary.json", "data/robotwin-instruction-examples.json",
+    "data/robotwin-alignment-summary.json",
     "data/robotwin-human-review.json",
-    "media/blog/overview/blog-showcase-v2.mp4", "media/blog/overview/blog-showcase-v2.jpg",
+    "media/blog/overview/blog-showcase-v3.mp4", "media/blog/overview/blog-showcase-v3.jpg",
 )
 GALLERY_PAGES = (
     "gallery/index.html",
@@ -79,8 +79,8 @@ def main():
             shutil.copy2(ROOT / name, target)
         files = [path for path in stage.rglob("*") if path.is_file()]
         size = sum(path.stat().st_size for path in files)
-        if size >= 50_000_000:
-            raise SystemExit(f"Blog exceeds the 50 MB safety margin: {size} bytes")
+        if size >= 80_000_000:
+            raise SystemExit(f"Blog exceeds the 80 MB safety margin: {size} bytes")
         if DESTINATION.exists():
             shutil.rmtree(DESTINATION)
         stage.rename(DESTINATION)

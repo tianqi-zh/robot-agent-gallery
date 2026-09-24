@@ -93,3 +93,13 @@ artifacts/
 !/media/blog/robotwin/adjust_bottle_r01-original.jpg
 !/media/blog/robotwin/adjust_bottle_r01-revision.mp4
 !/media/blog/robotwin/adjust_bottle_r01-revision.jpg
+
+# Gallery revision failures shown in the article.
+!/media/blog/robotwin/dump_bin_bigbin_r01-revision.mp4
+!/media/blog/robotwin/dump_bin_bigbin_r01-revision.jpg
+!/media/blog/robotwin/scan_object_r02-revision.mp4
+!/media/blog/robotwin/scan_object_r02-revision.jpg
+
+# Overview updated to the current gallery comparison.
+!/media/blog/overview/blog-showcase-v3.mp4
+!/media/blog/overview/blog-showcase-v3.jpg

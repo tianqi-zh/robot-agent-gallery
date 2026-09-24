@@ -2,8 +2,8 @@
 """Build public RoboTwin article data from an immutable, audited HF snapshot.
 
 Inputs default to artifacts/benchmend/blog_refresh_latest: snapshot.json, the
-unchanged catalog and selection, stats-audit.json, stats-public.json, and
-selected-examples.json. Existing output supplies two archived failure examples.
+unchanged catalog and selection, stats-audit.json, stats-public.json,
+selected-examples.json, and failure-examples.json.
 An author confirmation is applied only after the immutable raw audit validates.
 """
 import argparse
@@ -17,8 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "artifacts/benchmend/blog_refresh_latest"
 DEFAULT_OUTPUT = ROOT / "data/robotwin-alignment-summary.json"
 DEFAULT_HUMAN_REVIEW = ROOT / "data/robotwin-human-review.json"
-ARCHIVED_KEYS = ("move_can_pot_r01", "place_dual_shoes_r00")
-ARCHIVED_REVISION = "a853415121ee6363d34db7ce892631f909af9ba0"
+FAILURE_KEYS = ("dump_bin_bigbin_r01", "scan_object_r02")
 SELECTED_KEYS = ("adjust_bottle_r01", "place_object_basket_r01")
 
 
@@ -140,6 +139,55 @@ def apply_author_confirmation(rows, snapshot, review_path):
     return revised, provenance
 
 
+def failure_examples(manifest, rows, records, task_order, root):
+    """Use the selected final-composite record for each gallery failure example."""
+    by_key = {row["episodeKey"]: row for row in rows}
+    require(tuple(item["sourceEpisodeKey"] for item in manifest["examples"]) == FAILURE_KEYS,
+            "Expected exactly Task 06 / Episode 02 and Task 41 / Episode 03")
+    examples = []
+    for item in manifest["examples"]:
+        row = by_key[item["sourceEpisodeKey"]]
+        record, audited = item["sourceRecord"], row["after"]
+        require(record == records[audited["id"]] and record["seed"] == row["seed"]
+                and record["status"] == audited["nativeStatus"] == "failure"
+                and audited["nativeSuccess"] is False
+                and row["disposition"] == "revision_replaces_original_disagreement"
+                and item["phase"] == "revision", "Failure record differs from final comparison")
+        require(item["taskName"] == row["task"]
+                and item["taskId"] == task_order.index(row["task"])
+                and item["episodeNumber"] == int(row["episodeKey"].rsplit("_r", 1)[1]) + 1,
+                "Failure label differs from gallery task/episode numbering")
+        task_rows = [episode for episode in rows if episode["task"] == row["task"]]
+        require(len(task_rows) == 10, "Failure task must retain all ten episode slots")
+        example = {"episodeKey": row["episodeKey"], "taskId": item["taskId"],
+                   "episodeNumber": item["episodeNumber"], "taskName": row["task"],
+                   "label": item["label"], "phase": "revision", "benchSuccess": False,
+                   "galleryUrl": "https://benchmend-gallery.static.hf.space/gallery/robotwin/"
+                                 "?episode=" + audited["id"],
+                   "task": {"before": {"successes": sum(episode["before"]["nativeSuccess"] for episode in task_rows),
+                                       "episodes": len(task_rows)},
+                            "after": {"successes": sum(episode["after"]["nativeSuccess"] for episode in task_rows),
+                                      "episodes": len(task_rows)},
+                            "scope": "all ten episode slots; after composite"},
+                   "source": audited["source"], "mediaSources": {}}
+        example.update({key: record[key] for key in ("id", "instruction", "status", "seed", "steps",
+                        "toolCalls", "wallSeconds", "durationSeconds", "width", "height", "frames")})
+        for kind in ("video", "poster"):
+            asset = item["media"][kind]
+            path = root / asset["localPath"]
+            require(asset["sourcePath"] == record[kind]
+                    and asset["sourceUrl"] == audited["source"]["catalog"].removesuffix("data/gallery.json") + record[kind]
+                    and path.is_file() and path.stat().st_size == asset["bytes"]
+                    and sha256(path) == asset["sha256"], f"Missing or changed gallery failure {kind}")
+            require(kind != "video" or asset.get("fullDecodeVerified") is True,
+                    "Failure video has not passed full decoding")
+            example[kind] = asset["localPath"]
+            example["mediaSources"][kind] = {"url": asset["sourceUrl"], "sha256": asset["sha256"],
+                                             "bytes": asset["bytes"], "metadata": asset["probe"]}
+        examples.append(example)
+    return examples
+
+
 def confirmed_stats(raw_stats, confirmed_count):
     stats = deepcopy(raw_stats)
     require(stats["positiveDisagreementUnknown"] == confirmed_count
@@ -154,11 +202,12 @@ def confirmed_stats(raw_stats, confirmed_count):
     return stats
 
 
-def regenerate(snapshot_dir, legacy_path, root=ROOT, human_review_path=DEFAULT_HUMAN_REVIEW):
+def regenerate(snapshot_dir, root=ROOT, human_review_path=DEFAULT_HUMAN_REVIEW):
     snapshot = read(snapshot_dir / "snapshot.json")
     audit, public = (read(snapshot_dir / name) for name in ("stats-audit.json", "stats-public.json"))
     media = read(snapshot_dir / "selected-examples.json")
-    require(snapshot == audit["snapshot"] == public["snapshot"] == media["sourceSnapshot"],
+    failures = read(snapshot_dir / "failure-examples.json")
+    require(snapshot == audit["snapshot"] == public["snapshot"] == media["sourceSnapshot"] == failures["sourceSnapshot"],
             "Input snapshots differ")
     base = f"https://huggingface.co/spaces/{snapshot['space']}/resolve/{snapshot['revision']}/"
     sources = {name: audit["sources"][name] for name in ("catalog", "selection")}
@@ -198,14 +247,10 @@ def regenerate(snapshot_dir, legacy_path, root=ROOT, human_review_path=DEFAULT_H
     rules = {**public["rules"],
              "revisedFailure": "Use the recorded final assessment or the separately sourced author confirmation. A verified missing finish counts as incomplete. Raw unavailable assessments remain null.",
              "authorConfirmation": "The project author confirmed that all 36 listed V4 failures remain agent-benchmark disagreements on 2026-09-24. This confirmation supplies their classification, not a recovered raw finish assessment."}
-    legacy = read(legacy_path)
-    archived_source = legacy.get("archivedExamplesSource", {
-        "url": f"https://github.com/tianqi-zh/robot-agent-gallery/blob/{ARCHIVED_REVISION}/data/robotwin-alignment-summary.json",
-        "sha256": sha256(legacy_path), "sourceRun": "robotwin_goal_spec_full_v1",
-        "note": "Archived failure examples retain historical records and media; their historical after outcomes are not used in the latest comparison.",
-    })
-    archived = {case["episodeKey"]: deepcopy(case) for case in legacy["cases"]}
-    cases = [{**archived[key], "archived": True, "sourceRun": "robotwin_goal_spec_full_v1"} for key in ARCHIVED_KEYS]
+    original = next(benchmark for benchmark in catalog["benchmarks"]
+                    if benchmark["id"] == "robotwin_nvidia10_before")
+    task_order = [task["id"].removeprefix(original["id"] + "_") for task in original["tasks"]]
+    cases = failure_examples(failures, rows, records, task_order, root)
     result = {"schemaVersion": 2, "generatedAt": catalog["generatedAt"], "benchmark": "robotwin",
               "snapshot": snapshot, "sources": sources, "comparisonScope": public["comparisonScope"],
               "before": before,
@@ -218,7 +263,7 @@ def regenerate(snapshot_dir, legacy_path, root=ROOT, human_review_path=DEFAULT_H
                         "The project author confirmed 36 remaining disagreements; their raw self-assessments are still unavailable. The confirmed after alignment is 92.8%."],
               "rules": rules, "unknownAfterEpisodeKeys": [],
               "authorConfirmedAfterEpisodeKeys": read(human_review_path)["episodeKeys"],
-              "episodes": rows, "archivedExamplesSource": archived_source, "cases": cases,
+              "episodes": rows, "cases": cases,
               "selectedExamples": selected_examples(media, rows, root)}
     encoded = json.dumps(result, ensure_ascii=False)
     require(not any(private in encoded for private in ("/playpen/", "/lustre/", "/home/", "agentReason", "agentVisualChecks")),
@@ -230,12 +275,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot-dir", type=Path, default=DEFAULT_SNAPSHOT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
-    parser.add_argument("--legacy-summary", type=Path, help="Defaults to existing output")
     parser.add_argument("--human-review", type=Path, default=DEFAULT_HUMAN_REVIEW,
                         help="Dated, snapshot-scoped author confirmation")
     args = parser.parse_args()
-    result = regenerate(args.snapshot_dir, args.legacy_summary or args.output,
-                        human_review_path=args.human_review)
+    result = regenerate(args.snapshot_dir, human_review_path=args.human_review)
     args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
     print(f"Wrote {len(result['episodes'])} audited episodes and {len(result['selectedExamples'])} paired examples: "
           f"native success {result['before']['benchSuccess']} → {result['after']['benchSuccess']}")

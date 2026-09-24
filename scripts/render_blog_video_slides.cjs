@@ -103,7 +103,7 @@ function scoreCard(report, type, after) {
   const stats = values(report, type);
   const title = type === 'libero'
     ? (after ? 'After · revised composite' : 'Before · original instructions')
-    : (after ? 'After · public goal spec rerun' : 'Before · original RoboTwin instructions');
+    : (after ? 'After · revised composite' : 'Before · original RoboTwin instructions');
   // The matrix labels, reporting-convention cell, and arithmetic mirror blog.js.
   return `<section class="score-card ${after ? 'after right' : 'before left'}"><div class="score-top"><h3>${title}</h3><span>n = ${stats.n}</span></div><p class="score-value">${percent(stats.ias).slice(0,-1)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${stats.completeFail} / ${stats.n} = ${percent(stats.ias)}</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${stats.completePass}</td><td class="mismatch">${stats.completeFail}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${stats.incompleteFail}</td></tr></tbody></table><p class="native-score">Bench judges success: <strong>${report.benchSuccess}/${stats.n} · ${percent(stats.native)}</strong></p></section>`;
 }
@@ -111,9 +111,10 @@ function resultsSlide(type) {
   const before = values(manifest[type].before,type), after = values(manifest[type].after,type);
   const name = type === 'libero' ? 'LIBERO' : 'RoboTwin';
   const page = type === 'libero' ? '03 / 05' : '04 / 05';
+  const scope = manifest.robotwin.comparisonScope;
   const note = type === 'libero'
     ? '<b>Reviewed 400-episode composite:</b> 310 original + 70 first revision + 20 final revision;<br>one human completion correction. Verifier and recorded demonstrations unchanged.'
-    : '<b>Terminal episodes: 499 → 498.</b> Revised run includes 19 infrastructure errors; 2 of 500 planned episodes missing.<br>Effective scene seeds not fully matched. Verifier and recorded demonstrations unchanged.';
+    : `<b>${escape(scope.originalEpisodes)} original episodes → ${escape(scope.compositeEpisodes)}-episode composite:</b> ${escape(scope.unchangedOriginalEpisodes)} originals retained + ${escape(scope.replacedOriginalDisagreements)} selected reruns.<br>Disagreements: ${before.completeFail} → ${after.completeFail}. Verifier and recorded demonstrations unchanged.`;
   return frame(`${header(`Results / ${name}`,`${name}: clearer instructions, better alignment.`,page)}<p class="deck">Instruction-layer repairs preserve the benchmark verifier and recorded demonstrations.</p>${scoreCard(manifest[type].before,type,false)}${scoreCard(manifest[type].after,type,true)}<div class="result-gains"><span>Instinct-alignment score <strong>${points(before.ias,after.ias)}</strong></span><span>Benchmark success <strong>${points(before.native,after.native)}</strong></span></div><p class="method-note">${note}</p><div class="footer"><span>Agent as Policy · ${name}</span><span>\\ = not applicable under the reporting convention · pp = percentage points</span></div>`);
 }
 function takeawaysSlide() {

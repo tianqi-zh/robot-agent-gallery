@@ -77,19 +77,18 @@ The source in `hf-space/` is the standalone LIBERO app. The live shared Space ho
 To render the silent 16:9 presentation video, install the browser dependencies above and FFmpeg, then run:
 
 ```bash
-python3 scripts/build_blog_video.py --output artifacts/video/blog-showcase-v2.mp4
+python3 scripts/build_blog_video.py --output artifacts/video/blog-showcase-v3.mp4
 ```
 
-The output is `artifacts/video/blog-showcase-v2.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+The output is `artifacts/video/blog-showcase-v3.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
 
-The article embeds a copy at `media/blog/overview/blog-showcase-v2.mp4` with a 16:9 poster, playback controls, and a download link. It loads only when the reader plays it.
+The article embeds a copy at `media/blog/overview/blog-showcase-v3.mp4` with a 16:9 poster, playback controls, and a download link. It loads only when the reader plays it.
 
 ## Evidence and methods
 
 - [LIBERO accounting and audit methods](LIBERO_ALIGNMENT.md)
 - [Evaluation methodology](METHODOLOGY.md)
 - [LIBERO alignment data](data/libero-alignment.json), [episode records](data/libero-alignment-episodes.csv), [reviewed labels](data/libero-human-review.json), and [clip provenance](data/libero-blog-media.json)
-- [RoboTwin alignment summary](data/robotwin-alignment-summary.json)
-- [Verbatim RoboTwin instruction comparisons and source provenance](data/robotwin-instruction-examples.json)
+- [RoboTwin alignment summary, current examples, instructions and source provenance](data/robotwin-alignment-summary.json)
 
 Only the article’s overview and evidence videos and posters remain in this branch; the full gallery archive lives on HF. Existing Git history and the historical RoboCasa GitHub Release remain available; the migration does not rewrite history.

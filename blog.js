@@ -33,11 +33,9 @@
     'plate-control-budget': ['Sustained contact while pushing a plate', 'The plate must slide into a small region near the stove. The policy repeatedly repositions the gripper but does not finish within 500 control steps: sustained contact and small positional corrections remain difficult.'],
     'bottom-drawer-sequence': ['Placement followed by drawer closure', 'The bowl reaches the drawer, but the drawer remains open after 500 control steps. The task requires a change of contact after placement, followed by a controlled push to complete the closure.']
   };
-  // Cohort rates verified against archived data/gallery.json identified by
-  // data/robotwin-instruction-examples.json revisedSource (SHA-256 aca0bfc4a669…).
   const robotwinFailureDetails = {
-    move_can_pot_r01: {title:'Placing a can at a precise pose',successes:0,episodes:10,detail:'The can must be positioned beside the pot, aligned in position and orientation, and released on the table. This episode illustrates the difficulty of combining a precise final pose with a stable placement.'},
-    place_dual_shoes_r00: {title:'Two shoes, two precise placements',successes:4,episodes:10,detail:'Both shoes must fit into the box at the required positions and orientations. Reorienting, lowering, and releasing each shoe creates repeated contact transitions; both placements must succeed in the same episode.'}
+    dump_bin_bigbin_r01: {title:'Emptying a bin onto the tabletop',detail:'The instruction asks the robot to lift and tip the bin so its balls pour onto the tabletop. This motion requires control of the bin while its contents move.'},
+    scan_object_r02: {title:'Holding and aiming two objects',detail:'The two arms must hold the tea box and scanner at the same time, then aim the scanner face at the box. This requires coordinating the positions and orientations of both objects.'}
   };
   let reviewCorrections = new Map();
   function highlightInstructionChanges(original, improved, phrases) {
@@ -118,10 +116,10 @@
   function failureClipMarkup(clip, label, instruction, metadata, instructionLabel = '') {
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status failure">Failed episode</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + clip.episodeKey)}"></video><figcaption><p class="clip-instruction">${instructionLabel ? `<span class="instruction-label">${esc(instructionLabel)}</span>` : ''}<span class="instruction-text">“${esc(instruction)}”</span></p><p class="clip-meta">${esc(metadata)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
-  function failureTaskRate(successes, episodes) {
-    return `<div class="task-rate negative"><span>Task success rate</span><strong>${Math.round(100 * successes / episodes)}% · ${successes}/${episodes}</strong></div>`;
+  function failureTaskRate(before, after) {
+    return `<div class="task-rate negative"><span>Task success · before → after</span><strong>${Math.round(100 * before.successes / before.episodes)}% → ${Math.round(100 * after.successes / after.episodes)}%</strong><span>${before.successes}/${before.episodes} → ${after.successes}/${after.episodes} episodes</span></div>`;
   }
-  function renderMedia(media) {
+  function renderMedia(media, alignment) {
     document.querySelector('#paired-cases').innerHTML = Object.entries(liberoExamples).map(([id,example],index) => {
       const pair = media.pairs.find(item => item.id === id);
       const before = media.clips[pair.before], after = media.clips[pair.after];
@@ -134,7 +132,9 @@
       if (clip.nativeSuccess) throw new Error(`Expected a failed LIBERO episode: ${item.clip}`);
       const label = clip.stage === 'baseline' ? 'Unchanged instruction · baseline recording' : `Revised instruction · revision ${clip.stage.slice(1)}`;
       const metadata = `seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} control steps`;
-      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))}</p><h3>${esc(title)}</h3>${failureTaskRate(item.task.successes,item.task.episodes)}<p>${esc(detail)}</p></div>${failureClipMarkup(clip,label,clip.instruction,metadata)}</section>`;
+      const task = alignment.tasks.find(task => task.suite === clip.suite && task.taskId === clip.taskId);
+      const rates = ['before','after'].map(phase => ({successes:task[phase].benchSuccess,episodes:task[phase].n}));
+      return `<section class="failure-case" id="failure-${esc(item.id)}"><div class="failure-description"><p class="eyebrow">${esc(taskLabel(clip.suite,clip.taskId))}</p><h3>${esc(title)}</h3>${failureTaskRate(...rates)}<p>${esc(detail)}</p></div>${failureClipMarkup(clip,label,clip.instruction,metadata)}</section>`;
     }).join('');
   }
   function bindVideoControls() {
@@ -184,7 +184,7 @@
   function robotwinCaseMarkup(item) {
     return `<section class="case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="case-head"><div><p class="eyebrow">${esc(robotwinEpisodeLabel(item))}</p><h3>${esc(item.title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Bench outcome</span><strong>${benchOutcome(item.before)} → ${benchOutcome(item.after)}</strong></div></div><div class="paired-videos">${robotwinClipMarkup(item,'before')}${robotwinClipMarkup(item,'after')}</div><div class="case-foot"><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same scene seed ${esc(item.before.seed)} · <a href="${esc(item.galleryUrl)}">View episode in gallery ↗</a></span><span class="play-status" role="status"></span></div></div></section>`;
   }
-  function renderRobotwin(data, instructions) {
+  function renderRobotwin(data) {
     document.querySelector('#robotwin-comparison').innerHTML =
       robotwinScoreCard(data.before, 'Before · original RoboTwin instructions', false) +
       robotwinScoreCard(data.after, 'After · revised composite', true);
@@ -196,19 +196,11 @@
       if (item.before.seed !== item.after.seed) throw new Error(`RoboTwin example scene mismatch: ${item.episodeKey}`);
       return robotwinCaseMarkup(item);
     }).join('');
-    const instructionByEpisode = new Map(instructions.cases.map(item => [item.episodeKey,item]));
-    const instructionFor = item => {
-      const instruction = instructionByEpisode.get(item.episodeKey);
-      if (!instruction) throw new Error(`Missing RoboTwin instruction: ${item.episodeKey}`);
-      if (instruction.baselineBenchSuccess !== item.before.benchSuccess || instruction.revisedBenchSuccess !== item.after.benchSuccess) throw new Error(`RoboTwin instruction outcome mismatch: ${item.episodeKey}`);
-      return instruction;
-    };
     document.querySelector('#robotwin-failure-cases').innerHTML = Object.entries(robotwinFailureDetails).map(([episodeKey,detail]) => {
       const item = data.cases.find(record => record.episodeKey === episodeKey);
-      if (!item || item.after.benchSuccess) throw new Error(`Expected a failed RoboTwin episode: ${episodeKey}`);
-      const instruction = instructionFor(item);
-      const metadata = `seed ${instruction.revisedSeed} · ${item.after.steps} actions · ${item.after.toolCalls} tool calls · ${Math.round(item.after.wallSeconds)} s wall time`;
-      return `<section class="failure-case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="failure-description"><p class="eyebrow">ROBOTWIN / ${esc(item.taskName)}</p><h3>${esc(detail.title)}</h3>${failureTaskRate(detail.successes,detail.episodes)}<p>${esc(detail.detail)}</p></div>${failureClipMarkup(item,'Revised instructions',instruction.revisedBaseInstruction,metadata,'Base instruction')}</section>`;
+      if (!item || item.benchSuccess !== false || item.phase !== 'revision') throw new Error(`Expected a failed RoboTwin revision: ${episodeKey}`);
+      const metadata = `seed ${item.seed} · ${item.steps} actions · ${item.toolCalls} tool calls · ${Math.round(item.wallSeconds)} s wall time`;
+      return `<section class="failure-case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="failure-description"><p class="eyebrow">${esc(robotwinEpisodeLabel(item))}</p><h3>${esc(detail.title)}</h3>${failureTaskRate(item.task.before,item.task.after)}<p>${esc(detail.detail)}</p><p class="small"><a href="${esc(item.galleryUrl)}">View episode in gallery ↗</a></p></div>${failureClipMarkup(item,'Revision',item.instruction,metadata,'Task instruction')}</section>`;
     }).join('');
   }
   window.galleryHosting.then(async config => {
@@ -218,7 +210,7 @@
     document.querySelectorAll('[data-gallery-path]').forEach(link => {
       link.href = new URL(link.dataset.galleryPath, hosting.galleryUrl).href;
     });
-    const [data,media,review,robotwin,robotwinInstructions] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json','data/robotwin-instruction-examples.json'].map(async path => {
+    const [data,media,review,robotwin] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
       const response = await fetch(url(path));
       if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
       return response.json();
@@ -229,8 +221,8 @@
     renderComparison(review);
     document.querySelector('#review-accounting').textContent = `The 400 original episodes comprise ${review.before.matrix.success.benchSuccess} where the agent considers the task complete and the bench judges success; ${review.before.matrix.success.benchFailure} where the agent considers the task complete and the bench judges failure; and ${review.before.matrix.failure.benchFailure} where the agent does not consider the task complete and the bench judges failure. In the revised composite of 400 episodes, those same categories contain ${review.after.matrix.success.benchSuccess}, ${review.after.matrix.success.benchFailure}, and ${review.after.matrix.failure.benchFailure} episodes, respectively.`;
     renderInstructions(data);
-    renderMedia(media);
-    renderRobotwin(robotwin,robotwinInstructions);
+    renderMedia(media,data);
+    renderRobotwin(robotwin);
     bindVideoControls();
     document.documentElement.dataset.blogReady = 'true';
   }).catch(error => {
