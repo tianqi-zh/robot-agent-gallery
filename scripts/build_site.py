@@ -16,7 +16,7 @@ PUBLIC_FILES = (
     "data/libero-blog-media.json", "data/libero-human-review.json",
     "data/robotwin-alignment-summary.json",
     "data/robotwin-human-review.json",
-    "media/blog/overview/blog-showcase-v3.mp4", "media/blog/overview/blog-showcase-v3.jpg",
+    "media/blog/overview/blog-showcase-v4.mp4", "media/blog/overview/blog-showcase-v4.jpg",
 )
 GALLERY_PAGES = (
     "gallery/index.html",

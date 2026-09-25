@@ -127,7 +127,7 @@ def test_missing_paired_video_preserves_previous_build(workspace, phase):
 
 @pytest.mark.parametrize("missing", ["gallery-hosting.json", "gallery-redirect.js", "blog.js",
                                      "data/robotwin-alignment-summary.json", "gallery/robotwin/index.html",
-                                     "media/blog/overview/blog-showcase-v3.mp4", "media/blog/overview/blog-showcase-v3.jpg"])
+                                     "media/blog/overview/blog-showcase-v4.mp4", "media/blog/overview/blog-showcase-v4.jpg"])
 def test_missing_required_asset_preserves_previous_build(workspace, missing):
     root, destination = workspace
     (root / missing).unlink()

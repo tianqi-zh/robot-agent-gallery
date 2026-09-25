@@ -29,7 +29,7 @@ Open http://localhost:8080/. The essay's 13 video players (the overview and 12 e
 
 [gallery-hosting.json](gallery-hosting.json) configures the Space and media URLs. The archive media URL is pinned to a verified HF Dataset commit and is retained for validation and recovering missing files. Article playback uses local media; adopting a new example requires updating the evidence catalog and local assets together.
 
-The RoboTwin result tables use the September 24 gallery snapshot `88d4de7466bf55f29d8643791055e5c9c5cc1bed`: 500 original episodes versus a composite retaining 369 originals and replacing 131 original disagreements. Native success changes from 336/500 to 429/500. The project author confirmed that the 36 failed V4 reruns remain agent–benchmark disagreements; the [review record](data/robotwin-human-review.json) identifies those episodes. IAS therefore rises from 73.8% to 92.8%. Task 00 / Episode 01 and Task 32 / Episode 02 show byte-preserved original/revision recordings and exact published instructions. The failure section retains separately labeled examples from the earlier evaluation.
+The RoboTwin result tables use the September 24 gallery snapshot `f656896dfa3d3c5fb409ca88c6bce3001ccc2891`: 500 original episodes versus a composite retaining 369 originals and replacing 131 original disagreements. Native success changes from 336/500 to 430/500. Task 16 / Episode 09 now passes; the other 35 failed V4 records retain the author-confirmed disagreement labels from the preceding snapshot, as documented in the [review record](data/robotwin-human-review.json). IAS therefore rises from 73.8% to 93.0%. Task 00 / Episode 02 and Task 32 / Episode 02 show byte-preserved original/revision recordings and exact published instructions. The failure section uses current Revision recordings for Task 06 / Episode 02 and Task 41 / Episode 03.
 
 ## Validate and publish
 
@@ -77,12 +77,13 @@ The source in `hf-space/` is the standalone LIBERO app. The live shared Space ho
 To render the silent 16:9 presentation video, install the browser dependencies above and FFmpeg, then run:
 
 ```bash
-python3 scripts/build_blog_video.py --output artifacts/video/blog-showcase-v3.mp4
+python3 scripts/build_blog_video.py --output artifacts/video/blog-showcase-v4.mp4
+cp artifacts/video/blog-showcase-v4.{mp4,jpg} media/blog/overview/
 ```
 
-The output is `artifacts/video/blog-showcase-v3.mp4` (1080p, 30 fps, approximately 105 seconds, no audio or subtitle track). Two LIBERO cases play the complete original recording on the left before revealing the revised instruction and recording on the right. Added words are bold; playback is labeled 2×. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
+The output is `artifacts/video/blog-showcase-v4.mp4` (1080p, 30 fps, approximately 99 seconds, no audio or subtitle track), plus a matching JPG poster. LIBERO Long · Task 05 · EPISODE 01 and RoboTwin · Task 32 · EPISODE 02 play the complete original recording on the left before revealing the revised instruction and recording on the right. Each original is labeled “BENCH JUDGE FAIL” and “AGENT JUDGE SUCCESS,” with a green border around the agent judgment; revised recordings show both “BENCH JUDGE SUCCESS” and the green-bordered “AGENT JUDGE SUCCESS.” Case pages omit task success rates. Added goal phrases are bold; LIBERO plays at 2× and RoboTwin at 0.5×, with the speed labeled on each page. As soon as the original recording finishes, the revised instruction, recording, and judgments fade in together over 0.4 seconds. Each completed comparison then holds for one second before the next page. Use `--speed` and `--robotwin-speed` to adjust the two benchmarks independently. Source aspect ratios are preserved. LIBERO and RoboTwin each have a separate results page using the blog’s before/after judgment matrices, followed by the three core takeaways on page five. The generated manifest records source hashes and scene timings; slide HTML and PNGs are retained alongside the video for editing.
 
-The article embeds a copy at `media/blog/overview/blog-showcase-v3.mp4` with a 16:9 poster, playback controls, and a download link. It loads only when the reader plays it.
+The article embeds a copy at `media/blog/overview/blog-showcase-v4.mp4` with a 16:9 poster and playback controls. It loads only when the reader plays it.
 
 ## Evidence and methods
 

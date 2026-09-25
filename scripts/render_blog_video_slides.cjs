@@ -36,14 +36,13 @@ const css = `
   .label{display:flex;justify-content:space-between;align-items:center;font-size:23px;line-height:29px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--line);padding-bottom:15px}
   .label span{font-size:18px;letter-spacing:.6px;color:var(--muted);font-weight:400}
   .instruction p{font-size:34px;line-height:1.25;margin:22px 0 0;font-weight:400;letter-spacing:-.35px;max-height:159px}
+  .instruction p.long{font-size:30px}
   strong{color:var(--green);font-weight:800}
   .video{position:absolute;top:470px;width:864px;height:432px;background:#101713}
-  .status{position:absolute;top:932px;width:864px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+  .status{position:absolute;top:932px;width:864px;display:flex;align-items:center;gap:20px}
   .badge{display:inline-flex;align-items:center;gap:12px;border:1px solid #c7cdbd;border-radius:4px;padding:13px 17px;font-size:22px;font-weight:700;letter-spacing:.6px;white-space:nowrap}
   .badge.fail{color:var(--rust);background:#f1e9df;border-color:#e1cdbb}.badge.pass{color:var(--green);background:var(--wash);border-color:#c9d6c1}
-  .assessment{font-size:21px;color:var(--muted);line-height:1.2}
-  .rate{font-size:24px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
-  .rate b{font-size:33px;font-weight:700;color:var(--green)}
+  .badge.agent{color:var(--green);background:var(--wash);border:3px solid var(--green);padding:11px 15px}
   .footer{position:absolute;left:72px;right:72px;top:1020px;border-top:1px solid var(--line);padding-top:15px;display:flex;justify-content:space-between;font-size:20px;color:var(--muted);line-height:24px}
   .deck{position:absolute;left:72px;right:72px;top:195px;margin:0;font-size:27px;line-height:1.3;color:var(--muted)}
   /* Match the blog's before/after IAS cards and 2 × 2 judgment matrices. */
@@ -89,10 +88,10 @@ function caseSlide(item, index, revealed) {
   // permit only escaped text and the emphasis tags used for changed words.
   const highlighted = item.revisionHtml || escape(item.revisedInstruction);
   if (/<(?!\/?strong\s*>)[^>]*>/i.test(highlighted)) throw new Error(`Unexpected revision HTML for ${item.id}`);
-  const left = `<section class="instruction left"><div class="label">Original instruction</div><p>${escape(item.originalInstruction)}</p></section>
-    <div class="video left"></div><div class="status left"><div><span class="badge fail">BENCH FAIL</span></div><div class="assessment">Agent considers<br>the task complete</div><div class="rate">Task success &nbsp;<b>${item.beforeSuccesses}/${item.episodes}</b></div></div>`;
-  const right = revealed ? `<section class="instruction right"><div class="label">Revised instruction <span>Changed words in bold</span></div><p>${highlighted}</p></section><div class="video right"></div><div class="status right"><span class="badge pass">BENCH PASS</span><div class="rate">Task success &nbsp;${item.beforeSuccesses}/${item.episodes} <span style="color:var(--muted)">→</span> <b>${item.afterSuccesses}/${item.episodes}</b></div></div>` : '';
-  return frame(`${header(`LIBERO / Case ${String(index + 1).padStart(2,'0')}`, item.title, `${String(index+1).padStart(2,'0')} / 05`)}${left}${right}<div class="footer"><span>Same initial state · seed ${escape(item.seed)} · state ${escape(item.initStateId)}</span><span>${escape(manifest.playbackSpeed || 2)}× playback · task success measured over ${escape(item.episodes)} initial states</span></div>`);
+  const left = `<section class="instruction left"><div class="label">Original instruction</div><p${item.originalInstruction.length > 110 ? ' class="long"' : ''}>${escape(item.originalInstruction)}</p></section>
+    <div class="video left"></div><div class="status left"><span class="badge fail">BENCH JUDGE FAIL</span><span class="badge agent">AGENT JUDGE SUCCESS</span></div>`;
+  const right = revealed ? `<section class="instruction right"><div class="label">Revised instruction <span>Changed words in bold</span></div><p${item.revisedInstruction.length > 110 ? ' class="long"' : ''}>${highlighted}</p></section><div class="video right"></div><div class="status right"><span class="badge pass">BENCH JUDGE SUCCESS</span><span class="badge agent">AGENT JUDGE SUCCESS</span></div>` : '';
+  return frame(`${header(item.label, item.title, `${String(index+1).padStart(2,'0')} / 05`)}${left}${right}<div class="footer"><span>${escape(item.matchLabel)}</span><span>${escape(item.playbackSpeed)}× playback</span></div>`);
 }
 
 function values(report, type) {
@@ -135,7 +134,7 @@ function takeawaysSlide() {
     async function render(relative, html) {
       await page.setContent(html, {waitUntil:'load'});
       await page.evaluate(() => document.fonts.ready);
-      const overflow = await page.evaluate(() => Array.from(document.querySelectorAll('.instruction p,.takeaway-copy,.score-card,.score-top,.cross-table,.native-score,.result-gains,.method-note,.footer')).flatMap(element => {
+      const overflow = await page.evaluate(() => Array.from(document.querySelectorAll('.instruction p,.status,.badge,.takeaway-copy,.score-card,.score-top,.cross-table,.native-score,.result-gains,.method-note,.footer')).flatMap(element => {
         const rect = element.getBoundingClientRect();
         return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1 || rect.bottom > 1080 || rect.right > 1920 ? [element.className || element.tagName] : [];
       }));

@@ -1,8 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "snapshot": {
     "space": "benchmend/gallery",
-    "revision": "88d4de7466bf55f29d8643791055e5c9c5cc1bed"
+    "revision": "f656896dfa3d3c5fb409ca88c6bce3001ccc2891"
   },
   "date": "2026-09-24",
   "source": {
@@ -10,8 +10,22 @@
     "description": "The project author confirmed that all 36 listed revised episodes remain agent-benchmark disagreements."
   },
   "decision": "agent_benchmark_disagreement",
-  "scope": "The 36 selected V4 native failures whose raw finish assessments are not exported in this pinned snapshot.",
-  "provenanceNote": "This is author-provided confirmation, not recovered raw result logs. Preserve agentOutcome as null and agentOutcomeAvailability as not_exported for these episodes.",
+  "scope": "Carry the original author confirmation forward only for unchanged selected native-failure records.",
+  "provenanceNote": "This is inherited author confirmation, not a new human review or recovered raw result logs. Unavailable raw agent outcomes remain null.",
+  "sourceReview": {
+    "snapshot": {
+      "space": "benchmend/gallery",
+      "revision": "88d4de7466bf55f29d8643791055e5c9c5cc1bed"
+    },
+    "url": "https://github.com/tianqi-zh/robot-agent-gallery/blob/7467d3cc445071a7d8c2b65a62f4bd089793394b/data/robotwin-human-review.json",
+    "sha256": "357bded22962ac4b51eecaa197cb37545e357ee034eafb137a8f55a5494c5856",
+    "episodeCount": 36
+  },
+  "sourceCatalog": {
+    "url": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/data/gallery.json",
+    "sha256": "d2ddac60ce3354b369f39346fab01cfdf02a7ffefa2c3b362ba4c29a4f753aea"
+  },
+  "inheritanceRule": "Both snapshots must contain the exact same selected episode object SHA256 and native failure status.",
   "episodeKeys": [
     "blocks_ranking_rgb_r00",
     "blocks_ranking_rgb_r08",
@@ -33,7 +47,6 @@
     "handover_mic_r06",
     "handover_mic_r07",
     "handover_mic_r09",
-    "open_laptop_r08",
     "place_bread_skillet_r01",
     "place_cans_plasticbox_r05",
     "place_mouse_pad_r09",
@@ -49,5 +62,226 @@
     "scan_object_r09",
     "stamp_seal_r05",
     "stamp_seal_r09"
+  ],
+  "records": [
+    {
+      "episodeKey": "blocks_ranking_rgb_r00",
+      "episodeId": "robotwin_v4_manual_blocks_ranking_rgb_r00_v4m013",
+      "sourceEpisodeObjectSha256": "e94db53fb7d39cfece118285cab645501f1b83666926b6e9448786dd7305b5a7",
+      "currentEpisodeObjectSha256": "e94db53fb7d39cfece118285cab645501f1b83666926b6e9448786dd7305b5a7"
+    },
+    {
+      "episodeKey": "blocks_ranking_rgb_r08",
+      "episodeId": "robotwin_v4_manual_blocks_ranking_rgb_r08_v4m016",
+      "sourceEpisodeObjectSha256": "156eef8087a03c9c915bbd80763b564414c65f3ae0534c4df3c59f77aa9cb09c",
+      "currentEpisodeObjectSha256": "156eef8087a03c9c915bbd80763b564414c65f3ae0534c4df3c59f77aa9cb09c"
+    },
+    {
+      "episodeKey": "blocks_ranking_size_r02",
+      "episodeId": "robotwin_v4_manual_blocks_ranking_size_r02_v4m018",
+      "sourceEpisodeObjectSha256": "1aeb955cde5bce5d0e6d8fa3ab468f9e3330d1a3d01c8127fb2c01a830c08883",
+      "currentEpisodeObjectSha256": "1aeb955cde5bce5d0e6d8fa3ab468f9e3330d1a3d01c8127fb2c01a830c08883"
+    },
+    {
+      "episodeKey": "blocks_ranking_size_r04",
+      "episodeId": "robotwin_v4_manual_blocks_ranking_size_r04_v4m019",
+      "sourceEpisodeObjectSha256": "2323ea59f734bec358c4b3d19366a6cc2d7652da76a8d22830b83b13d3c0328e",
+      "currentEpisodeObjectSha256": "2323ea59f734bec358c4b3d19366a6cc2d7652da76a8d22830b83b13d3c0328e"
+    },
+    {
+      "episodeKey": "blocks_ranking_size_r08",
+      "episodeId": "robotwin_v4_manual_blocks_ranking_size_r08_v4m020",
+      "sourceEpisodeObjectSha256": "9e1bb6044d47cd133436c2bc8a2032e81b26b7047eb6eb800c5de36844b57cc3",
+      "currentEpisodeObjectSha256": "9e1bb6044d47cd133436c2bc8a2032e81b26b7047eb6eb800c5de36844b57cc3"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r00",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r00_v4m022",
+      "sourceEpisodeObjectSha256": "8b76fee0bcec31fee58c30bb47583f9b785da03588a7cddf7ddca25b1bbacadd",
+      "currentEpisodeObjectSha256": "8b76fee0bcec31fee58c30bb47583f9b785da03588a7cddf7ddca25b1bbacadd"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r01",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r01_v4m023",
+      "sourceEpisodeObjectSha256": "22e5278223a254327e90218ebd3f9d88c5e3905ae7357424ec9321a681f0a198",
+      "currentEpisodeObjectSha256": "22e5278223a254327e90218ebd3f9d88c5e3905ae7357424ec9321a681f0a198"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r02",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r02_v4m024",
+      "sourceEpisodeObjectSha256": "a4bfba44ce16a4427be3b68e8db2ba5d39aac8df8a9ecc05989e9393eb243d17",
+      "currentEpisodeObjectSha256": "a4bfba44ce16a4427be3b68e8db2ba5d39aac8df8a9ecc05989e9393eb243d17"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r03",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r03_v4m025",
+      "sourceEpisodeObjectSha256": "42db94756fe7b3dce18aef3330c9459b09671e75288db92bbc0dfe57ea83c461",
+      "currentEpisodeObjectSha256": "42db94756fe7b3dce18aef3330c9459b09671e75288db92bbc0dfe57ea83c461"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r04",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r04_v4m026",
+      "sourceEpisodeObjectSha256": "c3791053153cd9d7c1a572bfaca17b3f46dfca922f54c1a660293cb2571d08a8",
+      "currentEpisodeObjectSha256": "c3791053153cd9d7c1a572bfaca17b3f46dfca922f54c1a660293cb2571d08a8"
+    },
+    {
+      "episodeKey": "dump_bin_bigbin_r06",
+      "episodeId": "robotwin_v4_manual_dump_bin_bigbin_r06_v4m027",
+      "sourceEpisodeObjectSha256": "2119ec4cc570c54d8cf082732ba21c69b5a549662e2307eb032b722f97d64938",
+      "currentEpisodeObjectSha256": "2119ec4cc570c54d8cf082732ba21c69b5a549662e2307eb032b722f97d64938"
+    },
+    {
+      "episodeKey": "handover_block_r02",
+      "episodeId": "robotwin_v4_manual_handover_block_r02_v4m032",
+      "sourceEpisodeObjectSha256": "f549c0ba25764ed73e15f8a2e2607fa03b16c1ab7ccf9ba5af89013e8410253d",
+      "currentEpisodeObjectSha256": "f549c0ba25764ed73e15f8a2e2607fa03b16c1ab7ccf9ba5af89013e8410253d"
+    },
+    {
+      "episodeKey": "handover_mic_r00",
+      "episodeId": "robotwin_v4_manual_handover_mic_r00_v4m035",
+      "sourceEpisodeObjectSha256": "d5ba4d6272251c18e1c5ed3e47ad252ece7dfb16b6fc52e955535896f4416c90",
+      "currentEpisodeObjectSha256": "d5ba4d6272251c18e1c5ed3e47ad252ece7dfb16b6fc52e955535896f4416c90"
+    },
+    {
+      "episodeKey": "handover_mic_r02",
+      "episodeId": "robotwin_v4_manual_handover_mic_r02_v4m036",
+      "sourceEpisodeObjectSha256": "3b5a1fc0796e71a9dbda599911b8f0f12a2f0123ee2b386583d5e8653de05ec6",
+      "currentEpisodeObjectSha256": "3b5a1fc0796e71a9dbda599911b8f0f12a2f0123ee2b386583d5e8653de05ec6"
+    },
+    {
+      "episodeKey": "handover_mic_r03",
+      "episodeId": "robotwin_v4_manual_handover_mic_r03_v4m037",
+      "sourceEpisodeObjectSha256": "80d165ba2015d796d8052485506bdd6f5d94043283417a6baff6868fa3123fda",
+      "currentEpisodeObjectSha256": "80d165ba2015d796d8052485506bdd6f5d94043283417a6baff6868fa3123fda"
+    },
+    {
+      "episodeKey": "handover_mic_r04",
+      "episodeId": "robotwin_v4_manual_handover_mic_r04_v4m038",
+      "sourceEpisodeObjectSha256": "c005fc3271f96f2542c4e81504454fe2143a8f539812707551b2bb5040ee8b9d",
+      "currentEpisodeObjectSha256": "c005fc3271f96f2542c4e81504454fe2143a8f539812707551b2bb5040ee8b9d"
+    },
+    {
+      "episodeKey": "handover_mic_r05",
+      "episodeId": "robotwin_v4_manual_handover_mic_r05_v4m039",
+      "sourceEpisodeObjectSha256": "ca54665ce65d09a674ecd4337ba55d06003fed60fae995d988f2f69c756e47c8",
+      "currentEpisodeObjectSha256": "ca54665ce65d09a674ecd4337ba55d06003fed60fae995d988f2f69c756e47c8"
+    },
+    {
+      "episodeKey": "handover_mic_r06",
+      "episodeId": "robotwin_v4_manual_handover_mic_r06_v4m040",
+      "sourceEpisodeObjectSha256": "47a6e43fb921244efa1f91224fc495a74c4e7598de87d2bb7534a5b2a0ae6ea2",
+      "currentEpisodeObjectSha256": "47a6e43fb921244efa1f91224fc495a74c4e7598de87d2bb7534a5b2a0ae6ea2"
+    },
+    {
+      "episodeKey": "handover_mic_r07",
+      "episodeId": "robotwin_v4_manual_handover_mic_r07_v4m041",
+      "sourceEpisodeObjectSha256": "ea2597e7d6e93ead3ca23ab0e27e77b131adbe2c69599983d28b947c926fb760",
+      "currentEpisodeObjectSha256": "ea2597e7d6e93ead3ca23ab0e27e77b131adbe2c69599983d28b947c926fb760"
+    },
+    {
+      "episodeKey": "handover_mic_r09",
+      "episodeId": "robotwin_v4_manual_handover_mic_r09_v4m043",
+      "sourceEpisodeObjectSha256": "a6911a99349e31d16ca20262544ebb70af0f49592efe1e851b95745b9b267b88",
+      "currentEpisodeObjectSha256": "a6911a99349e31d16ca20262544ebb70af0f49592efe1e851b95745b9b267b88"
+    },
+    {
+      "episodeKey": "place_bread_skillet_r01",
+      "episodeId": "robotwin_v4_manual_place_bread_skillet_r01_v4m078",
+      "sourceEpisodeObjectSha256": "b8bd04d5edfba4b5cec6360ba678bdc1543d79b9c49afcf910895e6faaaa7273",
+      "currentEpisodeObjectSha256": "b8bd04d5edfba4b5cec6360ba678bdc1543d79b9c49afcf910895e6faaaa7273"
+    },
+    {
+      "episodeKey": "place_cans_plasticbox_r05",
+      "episodeId": "robotwin_v4_manual_place_cans_plasticbox_r05_v4m083",
+      "sourceEpisodeObjectSha256": "f3875fed15c5bb4d683ab90c0294727c2c6dff552f8a7ad9aa013030dbb99717",
+      "currentEpisodeObjectSha256": "f3875fed15c5bb4d683ab90c0294727c2c6dff552f8a7ad9aa013030dbb99717"
+    },
+    {
+      "episodeKey": "place_mouse_pad_r09",
+      "episodeId": "robotwin_v4_manual_place_mouse_pad_r09_v4m090",
+      "sourceEpisodeObjectSha256": "e73bfdd5673f29256b652304fa0220b7b24d1b445451c493014adf11033184d3",
+      "currentEpisodeObjectSha256": "e73bfdd5673f29256b652304fa0220b7b24d1b445451c493014adf11033184d3"
+    },
+    {
+      "episodeKey": "place_object_basket_r02",
+      "episodeId": "robotwin_v4_manual_place_object_basket_r02_v4m092",
+      "sourceEpisodeObjectSha256": "c8571d23bf08aa7d0a960b12d9d27e9f73a99a0133a02904435618a2af8670fb",
+      "currentEpisodeObjectSha256": "c8571d23bf08aa7d0a960b12d9d27e9f73a99a0133a02904435618a2af8670fb"
+    },
+    {
+      "episodeKey": "rotate_qrcode_r03",
+      "episodeId": "robotwin_v4_manual_rotate_qrcode_r03_v4m107",
+      "sourceEpisodeObjectSha256": "174cf72abf564ec6c739139c41d29868a5027f886c8288e3b119252099602758",
+      "currentEpisodeObjectSha256": "174cf72abf564ec6c739139c41d29868a5027f886c8288e3b119252099602758"
+    },
+    {
+      "episodeKey": "rotate_qrcode_r08",
+      "episodeId": "robotwin_v4_manual_rotate_qrcode_r08_v4m111",
+      "sourceEpisodeObjectSha256": "a8f48bd68410ecd076d34972f88ea25b71965c6bb118ceee298e25dc116833e1",
+      "currentEpisodeObjectSha256": "a8f48bd68410ecd076d34972f88ea25b71965c6bb118ceee298e25dc116833e1"
+    },
+    {
+      "episodeKey": "scan_object_r02",
+      "episodeId": "robotwin_v4_manual_scan_object_r02_v4m114",
+      "sourceEpisodeObjectSha256": "ca40c577a94cfa9cde6356f1264762837da431b48db81ff1582f4862a7c868e3",
+      "currentEpisodeObjectSha256": "ca40c577a94cfa9cde6356f1264762837da431b48db81ff1582f4862a7c868e3"
+    },
+    {
+      "episodeKey": "scan_object_r03",
+      "episodeId": "robotwin_v4_manual_scan_object_r03_v4m115",
+      "sourceEpisodeObjectSha256": "ad7b2c0d592054235f970d2997f7e031c1430301842de3353c3c2f90ec85fd31",
+      "currentEpisodeObjectSha256": "ad7b2c0d592054235f970d2997f7e031c1430301842de3353c3c2f90ec85fd31"
+    },
+    {
+      "episodeKey": "scan_object_r04",
+      "episodeId": "robotwin_v4_manual_scan_object_r04_v4m116",
+      "sourceEpisodeObjectSha256": "d1d76b933b40a8b080390ddf848ad6805d2a5cf2a01e1d8fba95836a1434d0a0",
+      "currentEpisodeObjectSha256": "d1d76b933b40a8b080390ddf848ad6805d2a5cf2a01e1d8fba95836a1434d0a0"
+    },
+    {
+      "episodeKey": "scan_object_r05",
+      "episodeId": "robotwin_v4_manual_scan_object_r05_v4m117",
+      "sourceEpisodeObjectSha256": "4bb50a5b0a5bd8bcffe521e9789b93df857faf8699dce9b0bcbf843677689119",
+      "currentEpisodeObjectSha256": "4bb50a5b0a5bd8bcffe521e9789b93df857faf8699dce9b0bcbf843677689119"
+    },
+    {
+      "episodeKey": "scan_object_r06",
+      "episodeId": "robotwin_v4_manual_scan_object_r06_v4m118",
+      "sourceEpisodeObjectSha256": "008a3069d21914fdfcd0b26873802e7db4febaf81631a95b59925f04b3352173",
+      "currentEpisodeObjectSha256": "008a3069d21914fdfcd0b26873802e7db4febaf81631a95b59925f04b3352173"
+    },
+    {
+      "episodeKey": "scan_object_r08",
+      "episodeId": "robotwin_v4_manual_scan_object_r08_v4m119",
+      "sourceEpisodeObjectSha256": "db8cc3310a012d459f50fbd4b712b48a358ac00e57f5781b63c0df3193506885",
+      "currentEpisodeObjectSha256": "db8cc3310a012d459f50fbd4b712b48a358ac00e57f5781b63c0df3193506885"
+    },
+    {
+      "episodeKey": "scan_object_r09",
+      "episodeId": "robotwin_v4_manual_scan_object_r09_v4m120",
+      "sourceEpisodeObjectSha256": "d72a825dfe106c0620cfbd7654e6122fc8f558c55c471d78be0fc774c240e4c5",
+      "currentEpisodeObjectSha256": "d72a825dfe106c0620cfbd7654e6122fc8f558c55c471d78be0fc774c240e4c5"
+    },
+    {
+      "episodeKey": "stamp_seal_r05",
+      "episodeId": "robotwin_v4_manual_stamp_seal_r05_v4m124",
+      "sourceEpisodeObjectSha256": "0fa7634cca2741b1a9357191bd112900f52348c5b3ef39450ee68a9dbc87980f",
+      "currentEpisodeObjectSha256": "0fa7634cca2741b1a9357191bd112900f52348c5b3ef39450ee68a9dbc87980f"
+    },
+    {
+      "episodeKey": "stamp_seal_r09",
+      "episodeId": "robotwin_v4_manual_stamp_seal_r09_v4m125",
+      "sourceEpisodeObjectSha256": "bf06120e6552402b77451d13ead0af04c6d1ef4bee0305689a5ccb4d2b7d9a9d",
+      "currentEpisodeObjectSha256": "bf06120e6552402b77451d13ead0af04c6d1ef4bee0305689a5ccb4d2b7d9a9d"
+    }
+  ],
+  "removedRecords": [
+    {
+      "episodeKey": "open_laptop_r08",
+      "previousEpisodeId": "robotwin_v4_manual_open_laptop_r08_v4m058",
+      "currentEpisodeId": "robotwin_v4_manual_open_laptop_r08_codex_revision_20260924",
+      "currentNativeStatus": "success",
+      "reason": "Selected revision was replaced; prior review does not transfer."
+    }
   ]
 }

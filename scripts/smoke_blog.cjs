@@ -21,7 +21,7 @@ const expectedRobotwinHighlights = {
 };
 const selectedRobotwinFailures = ['dump_bin_bigbin_r01','scan_object_r02'];
 const displayedRobotwinFailures = robotwin.cases.filter(item=>selectedRobotwinFailures.includes(item.episodeKey));
-const overviewVideoPath = 'media/blog/overview/blog-showcase-v3.mp4';
+const overviewVideoPath = 'media/blog/overview/blog-showcase-v4.mp4';
 const displayedVideoPaths = [
   overviewVideoPath,
   ...liberoMedia.pairs.filter(pair=>selectedLiberoPairs.includes(pair.id)).flatMap(pair=>[liberoMedia.clips[pair.before].video,liberoMedia.clips[pair.after].video]),
@@ -104,7 +104,8 @@ const server = http.createServer((request, response) => {
       })),{src:base+overviewVideoPath,poster:base+overviewVideoPath.replace('.mp4','.jpg'),controls:true,playsInline:true,autoplay:false,preload:'none',width:1920,height:1080});
       assert.equal(await overview.evaluate(video=>video.paused),true,'The overview must wait for a user to play it');
       assert.equal(localMediaRequests.includes(base+overviewVideoPath),false,'Opening the article must not eagerly download the overview video');
-      assert.equal(await page.locator('#overview a[download]').getAttribute('href'),overviewVideoPath);
+      assert.equal(await page.locator('#overview video a').getAttribute('href'),overviewVideoPath);
+      assert.equal(await page.locator('#overview .overview-heading, #overview .overview-duration, #overview figcaption, #overview a[download]').count(),0);
       const articleSections = ['introduction','methods','results','failures','conclusion'];
       assert.deepEqual(await page.locator('.article-body > section').evaluateAll(sections=>sections.map(section=>section.id)),articleSections);
       assert.deepEqual(await page.locator('[aria-label="Article contents"] a').evaluateAll(links=>links.map(link=>link.hash)),articleSections.map(id=>`#${id}`));
@@ -194,6 +195,10 @@ const server = http.createServer((request, response) => {
         assert.match(await card.locator('.clip-meta').textContent(),new RegExp(`seed ${item.seed}`));
       }
       assert.deepEqual(await page.locator('#robotwin-comparison .score-top > span').allTextContents(),[robotwin.before,robotwin.after].map(stats=>`n = ${stats.n}`));
+      assert.deepEqual(await page.locator('#robotwin-results-note strong').allTextContents(),[
+        `${robotwin.before.benchSuccess}/${robotwin.before.n} to ${robotwin.after.benchSuccess}/${robotwin.after.n}`,
+        `${robotwin.rerunsOnly.nativeSuccesses} now pass the benchmark`
+      ]);
       assert.deepEqual(await page.locator('#robotwin-comparison .score-value').allTextContents(),[robotwin.before,robotwin.after].map(stats=>stats.agentUnknownBenchFalse ? `${(100*stats.instinctAlignmentBounds.min).toFixed(2)}–${(100*stats.instinctAlignmentBounds.max).toFixed(2)}%` : `${(100*stats.instinctAlignment).toFixed(2)}%`));
       assert.equal(await page.locator('#robotwin-comparison .unclassified').count(),robotwin.after.agentUnknownBenchFalse ? 1 : 0);
       if (robotwin.after.agentUnknownBenchFalse) assert.equal(await page.locator('#robotwin-comparison .unclassified td:last-child').textContent(),String(robotwin.after.agentUnknownBenchFalse));
@@ -244,13 +249,13 @@ const server = http.createServer((request, response) => {
         decoded++;
       }
       const overviewMetadata = await overview.evaluate(video=>({duration:video.duration,width:video.videoWidth,height:video.videoHeight}));
-      assert.ok(Math.abs(overviewMetadata.duration-105.133)<0.2,`Unexpected overview duration: ${overviewMetadata.duration}`);
+      assert.ok(Math.abs(overviewMetadata.duration-98.9)<0.2,`Unexpected overview duration: ${overviewMetadata.duration}`);
       assert.deepEqual([overviewMetadata.width,overviewMetadata.height],[1920,1080]);
       await overview.evaluate(async video=>{await video.play();});
       await page.waitForFunction(()=>{const video=document.querySelector('#overview-video');return !video.paused && video.currentTime>0;});
       await overview.evaluate(video=>video.pause());
       assert.equal(await overview.evaluate(video=>video.paused),true);
-      for(const time of [55,75]) {
+      for(const time of [50,68,86]) {
         await overview.evaluate((video,time)=>{video.currentTime=time;},time);
         await page.waitForFunction(time=>{const video=document.querySelector('#overview-video');return !video.seeking && video.readyState>=2 && Math.abs(video.currentTime-time)<0.2;},time);
         assert.equal(await overview.evaluate(video=>video.error),null,`Overview cannot seek to the results page at ${time}s`);

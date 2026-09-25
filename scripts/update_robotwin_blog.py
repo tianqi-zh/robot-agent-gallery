@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build public RoboTwin article data from an immutable, audited HF snapshot.
 
-Inputs default to artifacts/benchmend/blog_refresh_latest: snapshot.json, the
+Inputs default to artifacts/benchmend/blog_refresh_20260924_f656896: snapshot.json, the
 unchanged catalog and selection, stats-audit.json, stats-public.json,
 selected-examples.json, and failure-examples.json.
 An author confirmation is applied only after the immutable raw audit validates.
@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SNAPSHOT = ROOT / "artifacts/benchmend/blog_refresh_latest"
+DEFAULT_SNAPSHOT = ROOT / "artifacts/benchmend/blog_refresh_20260924_f656896"
 DEFAULT_OUTPUT = ROOT / "data/robotwin-alignment-summary.json"
 DEFAULT_HUMAN_REVIEW = ROOT / "data/robotwin-human-review.json"
 FAILURE_KEYS = ("dump_bin_bigbin_r01", "scan_object_r02")
@@ -57,9 +57,9 @@ def summarize(rows, phase, expected):
         "benchSuccess": sum(item["nativeSuccess"] for item in values),
         "benchFalse": sum(not item["nativeSuccess"] for item in values),
         "timeouts": sum(item["nativeStatus"] == "timeout" for item in values),
-        "instinctAlignment": None if unknown else 1 - known / len(values),
-        "instinctAlignmentBounds": {"min": 1 - (known + unknown) / len(values),
-                                    "max": 1 - known / len(values)},
+        "instinctAlignment": None if unknown else (len(values) - known) / len(values),
+        "instinctAlignmentBounds": {"min": (len(values) - known - unknown) / len(values),
+                                    "max": (len(values) - known) / len(values)},
     })
     require(result["n"] == expected["episodes"]
             and result["benchSuccess"] == expected["nativeSuccesses"]
@@ -70,7 +70,7 @@ def summarize(rows, phase, expected):
     return result
 
 
-def selected_examples(manifest, rows, root):
+def selected_examples(manifest, rows, records, root):
     by_key = {row["episodeKey"]: row for row in rows}
     require(tuple(item["sourceEpisodeKey"] for item in manifest["examples"]) == SELECTED_KEYS,
             "Expected exactly Task 00 / Episode 02 and Task 32 / Episode 02")
@@ -86,7 +86,7 @@ def selected_examples(manifest, rows, root):
         for phase, source_phase in (("before", "original"), ("after", "revision")):
             source = item["phases"][source_phase]
             record, audited = source["sourceRecord"], row[phase]
-            require(record["id"] == audited["id"] and record["seed"] == row["seed"]
+            require(record == records[audited["id"]] and record["seed"] == row["seed"]
                     and record["status"] == audited["nativeStatus"], "Selected record differs from audit")
             details = {key: record[key] for key in ("id", "instruction", "status", "seed", "steps",
                        "toolCalls", "wallSeconds", "durationSeconds", "width", "height", "frames")}
@@ -98,7 +98,10 @@ def selected_examples(manifest, rows, root):
             for kind in ("video", "poster"):
                 asset = source["media"][kind]
                 path = root / asset["localPath"]
-                require(path.is_file() and sha256(path) == asset["sha256"],
+                require(asset["sourcePath"] == record[kind]
+                        and asset["sourceUrl"] == audited["source"]["catalog"].removesuffix("data/gallery.json") + record[kind]
+                        and path.is_file() and path.stat().st_size == asset["bytes"]
+                        and sha256(path) == asset["sha256"],
                         f"Missing or changed selected {kind}: {asset['localPath']}")
                 require(kind != "video" or asset.get("fullDecodeVerified") is True,
                         "Selected video has not passed full decoding")
@@ -111,21 +114,51 @@ def selected_examples(manifest, rows, root):
     return examples
 
 
-def apply_author_confirmation(rows, snapshot, review_path):
-    """Overlay the author's dated judgment without changing raw self-assessments."""
+def apply_author_confirmation(rows, snapshot, review_path, snapshot_dir):
+    """Inherit a dated judgment only for the exact same selected failure record."""
     review = read(review_path)
     require(review["snapshot"] == snapshot, "Author confirmation snapshot differs")
     require(review["source"]["kind"] == "project_author_confirmation"
             and review["decision"] == "agent_benchmark_disagreement", "Unsupported confirmation source or decision")
     keys = review["episodeKeys"]
-    unknown = {row["episodeKey"] for row in rows if row["after"]["positiveDisagreement"] is None}
-    require(len(keys) == len(set(keys)) == 36 and set(keys) == unknown,
-            "Author confirmation must match exactly the 36 unpublished after assessments")
+    source_review_path = snapshot_dir / "source-human-review.json"
+    source_catalog_path = snapshot_dir / "source-gallery.json"
+    original_review, original_catalog = read(source_review_path), read(source_catalog_path)
+    require(review["schemaVersion"] == 2
+            and review["sourceReview"]["sha256"] == sha256(source_review_path)
+            and review["sourceCatalog"]["sha256"] == sha256(source_catalog_path)
+            and review["sourceReview"]["snapshot"] == original_review["snapshot"]
+            and review["sourceReview"]["episodeCount"] == len(original_review["episodeKeys"])
+            and review["source"] == original_review["source"]
+            and review["date"] == original_review["date"]
+            and review["decision"] == original_review["decision"],
+            "Inherited author confirmation differs from its original evidence")
+    original_revisions = {episode["sourceEpisodeKey"]: episode
+                          for benchmark in original_catalog["benchmarks"]
+                          if benchmark["id"] == "robotwin_v4_manual"
+                          for task in benchmark["tasks"] for episode in task["episodes"]}
+    by_key = {row["episodeKey"]: row for row in rows}
+    eligible = {key for key in original_review["episodeKeys"]
+                if key in by_key and by_key[key]["after"]["positiveDisagreement"] is None
+                and by_key[key]["after"]["nativeStatus"] == original_revisions[key]["status"] == "failure"
+                and by_key[key]["after"]["source"]["episodeObjectSha256"] == object_sha256(original_revisions[key])}
+    inherited = {record["episodeKey"]: record for record in review["records"]}
+    require(len(keys) == len(set(keys)) == len(review["records"])
+            and set(keys) == set(inherited) == eligible,
+            "Author confirmation must match exactly the unchanged previously reviewed failures")
+    for key in keys:
+        record, current = inherited[key], by_key[key]["after"]
+        require(record["episodeId"] == current["id"] == original_revisions[key]["id"]
+                and record["sourceEpisodeObjectSha256"] == record["currentEpisodeObjectSha256"]
+                == current["source"]["episodeObjectSha256"] == object_sha256(original_revisions[key]),
+                "A reviewed episode changed; its original judgment cannot be inherited")
     provenance = {"document": "data/robotwin-human-review.json", "sha256": sha256(review_path),
-                  "date": review["date"], "source": review["source"], "decision": review["decision"]}
+                  "date": review["date"], "source": review["source"], "decision": review["decision"],
+                  "sourceReview": review["sourceReview"], "inheritedForUnchangedRecords": True,
+                  "confirmedEpisodeCount": len(keys)}
     revised = deepcopy(rows)
     for row in revised:
-        if row["episodeKey"] not in unknown:
+        if row["episodeKey"] not in eligible:
             continue
         after = row["after"]
         require(row["disposition"] == "revision_replaces_original_disagreement"
@@ -190,14 +223,15 @@ def failure_examples(manifest, rows, records, task_order, root):
 
 def confirmed_stats(raw_stats, confirmed_count):
     stats = deepcopy(raw_stats)
-    require(stats["positiveDisagreementUnknown"] == confirmed_count
-            and stats["presentationMatrix"]["unknown_failure"] == confirmed_count,
+    require(stats["positiveDisagreementUnknown"] >= confirmed_count
+            and stats["presentationMatrix"]["unknown_failure"] >= confirmed_count,
             "Confirmed outcomes do not match unknown failure statistics")
     stats["explicitPositiveDisagreementsKnown"] += confirmed_count
-    stats["positiveDisagreementUnknown"] = 0
-    stats["positiveDisagreementRange"] = [stats["explicitPositiveDisagreementsKnown"]] * 2
+    stats["positiveDisagreementUnknown"] -= confirmed_count
+    stats["positiveDisagreementRange"] = [stats["explicitPositiveDisagreementsKnown"],
+                                         stats["explicitPositiveDisagreementsKnown"] + stats["positiveDisagreementUnknown"]]
     stats["presentationMatrix"]["complete_failure"] += confirmed_count
-    stats["presentationMatrix"]["unknown_failure"] = 0
+    stats["presentationMatrix"]["unknown_failure"] -= confirmed_count
     stats["authorConfirmedDisagreements"] = confirmed_count
     return stats
 
@@ -239,32 +273,37 @@ def regenerate(snapshot_dir, root=ROOT, human_review_path=DEFAULT_HUMAN_REVIEW):
     before = summarize(rows, "before", public["before"])
     summarize(rows, "after", public["afterComposite"])
     summarize([row for row in rows if row["episodeKey"] in changed], "after", public["rerunsOnly"])
-    rows, confirmation = apply_author_confirmation(rows, snapshot, human_review_path)
-    after_stats = confirmed_stats(public["afterComposite"], 36)
-    rerun_stats = confirmed_stats(public["rerunsOnly"], 36)
+    rows, confirmation = apply_author_confirmation(rows, snapshot, human_review_path, snapshot_dir)
+    confirmed_count = confirmation["confirmedEpisodeCount"]
+    after_stats = confirmed_stats(public["afterComposite"], confirmed_count)
+    rerun_stats = confirmed_stats(public["rerunsOnly"], confirmed_count)
     summarize([row for row in rows if row["episodeKey"] in changed], "after", rerun_stats)
     sources["authorConfirmation"] = confirmation
     rules = {**public["rules"],
              "revisedFailure": "Use the recorded final assessment or the separately sourced author confirmation. A verified missing finish counts as incomplete. Raw unavailable assessments remain null.",
-             "authorConfirmation": "The project author confirmed that all 36 listed V4 failures remain agent-benchmark disagreements on 2026-09-24. This confirmation supplies their classification, not a recovered raw finish assessment."}
+             "authorConfirmation": "Carry the original dated author confirmation forward only when the entire selected failure record is unchanged. Replaced records receive no inherited judgment; unavailable raw self-assessments remain null."}
     original = next(benchmark for benchmark in catalog["benchmarks"]
                     if benchmark["id"] == "robotwin_nvidia10_before")
     task_order = [task["id"].removeprefix(original["id"] + "_") for task in original["tasks"]]
     cases = failure_examples(failures, rows, records, task_order, root)
+    after = summarize(rows, "after", after_stats)
+    unknown_keys = [row["episodeKey"] for row in rows if row["after"]["positiveDisagreement"] is None]
+    alignment_note = (f"The confirmed after alignment is {after['instinctAlignment']:.1%}."
+                      if not unknown_keys else "The exact after alignment remains unavailable for unreviewed assessments.")
     result = {"schemaVersion": 2, "generatedAt": catalog["generatedAt"], "benchmark": "robotwin",
               "snapshot": snapshot, "sources": sources, "comparisonScope": public["comparisonScope"],
               "before": before,
-              "after": summarize(rows, "after", after_stats),
+              "after": after,
               "rerunsOnly": rerun_stats,
               "coverage": {"plannedEpisodes": len(rows), "beforeTerminalResults": len(rows),
                            "afterTerminalResults": len(rows), "revisionEpisodes": len(changed)},
               "notes": ["After combines unchanged originals with selected reruns of original disagreements.",
                         "Native success counts as agent complete in the reporting matrix; raw self-assessments are preserved separately.",
-                        "The project author confirmed 36 remaining disagreements; their raw self-assessments are still unavailable. The confirmed after alignment is 92.8%."],
-              "rules": rules, "unknownAfterEpisodeKeys": [],
+                        f"The original author confirmation is retained for {confirmed_count} unchanged failure records; their raw self-assessments remain unavailable. {alignment_note}"],
+              "rules": rules, "unknownAfterEpisodeKeys": unknown_keys,
               "authorConfirmedAfterEpisodeKeys": read(human_review_path)["episodeKeys"],
               "episodes": rows, "cases": cases,
-              "selectedExamples": selected_examples(media, rows, root)}
+              "selectedExamples": selected_examples(media, rows, records, root)}
     encoded = json.dumps(result, ensure_ascii=False)
     require(not any(private in encoded for private in ("/playpen/", "/lustre/", "/home/", "agentReason", "agentVisualChecks")),
             "Private paths or assessment notes entered public data")

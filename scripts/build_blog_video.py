@@ -18,7 +18,6 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTH, HEIGHT, FPS = 1920, 1080, 30
-CASE_IDS = ("alphabet-soup", "book-compartment")
 BOXES = {"left": {"x": 72, "y": 470, "width": 864, "height": 432},
          "right": {"x": 984, "y": 470, "width": 864, "height": 432}}
 
@@ -33,55 +32,77 @@ def sha256(path):
 
 def revised_markup(case_id, instruction):
     escaped = html.escape(instruction)
-    additions = ("blue-and-yellow", "can") if case_id == "alphabet-soup" else (", between the two large side compartments",)
+    additions = {
+        "book-compartment": (", between the two large side compartments",),
+        "place-object-basket": ("and then lift the basket with the toy car inside.",),
+    }[case_id]
     for addition in additions:
         escaped_addition = html.escape(addition)
-        if addition == "can":
-            escaped = escaped.replace(" can ", " <strong>can</strong> ")
-        else:
-            if escaped_addition not in escaped:
-                raise ValueError(f"Missing expected instruction addition: {addition}")
-            escaped = escaped.replace(escaped_addition, f"<strong>{escaped_addition}</strong>")
+        if escaped_addition not in escaped:
+            raise ValueError(f"Missing expected instruction addition: {addition}")
+        escaped = escaped.replace(escaped_addition, f"<strong>{escaped_addition}</strong>")
     if html.unescape(escaped.replace("<strong>", "").replace("</strong>", "")) != instruction:
         raise ValueError("Instruction highlighting changed the original text")
     return escaped
 
 
-def make_manifest(speed):
+def make_manifest(speed, robotwin_speed=0.5):
     media = read_json(ROOT / "data/libero-blog-media.json")
     review = read_json(ROOT / "data/libero-human-review.json")
     robotwin = read_json(ROOT / "data/robotwin-alignment-summary.json")
+    libero_pair = next(item for item in media["pairs"] if item["id"] == "book-compartment")
+    robotwin_pair = next(item for item in robotwin["selectedExamples"]
+                        if item["taskId"] == 32 and item["episodeNumber"] == 2)
+    selected = [
+        ({"id": libero_pair["id"], "title": libero_pair["title"],
+          "label": f"LIBERO Long · Task {libero_pair['taskId']:02d} · EPISODE {libero_pair['rolloutIndex'] + 1:02d}",
+          "playbackSpeed": speed,
+          "seed": libero_pair["seed"], "initStateId": libero_pair["initStateId"],
+          "matchLabel": f"Same initial state · seed {libero_pair['seed']} · state {libero_pair['initStateId']}"},
+         media["clips"][libero_pair["before"]], media["clips"][libero_pair["after"]]),
+        ({"id": "place-object-basket", "title": "Specify the final lift",
+          "playbackSpeed": robotwin_speed,
+          "label": robotwin_pair["label"], "seed": robotwin_pair["before"]["seed"],
+          "matchLabel": f"Same scene seed · {robotwin_pair['before']['seed']}"},
+         robotwin_pair["before"], robotwin_pair["after"]),
+    ]
     cases, scenes = [], []
+    sources = {str(path.relative_to(ROOT)): sha256(path) for path in (
+        ROOT / "data/libero-blog-media.json", ROOT / "data/libero-human-review.json",
+        ROOT / "data/robotwin-alignment-summary.json")}
     start_frame = 0
-    for case_id in CASE_IDS:
-        pair = next(item for item in media["pairs"] if item["id"] == case_id)
-        before, after = (media["clips"][pair[stage]] for stage in ("before", "after"))
-        if before["nativeSuccess"] or before["agentAssessment"] != "visually_complete" or not after["nativeSuccess"]:
+    for metadata, before, after in selected:
+        case_id = metadata["id"]
+        if (before.get("nativeSuccess", before.get("benchSuccess"))
+                or before.get("agentAssessment", before.get("agentOutcome")) != "visually_complete"
+                or not after.get("nativeSuccess", after.get("benchSuccess"))):
             raise ValueError(f"Invalid disagreement-to-success pair: {case_id}")
-        if (before["seed"], before["initStateId"]) != (after["seed"], after["initStateId"]):
+        if (before["seed"], before.get("initStateId")) != (after["seed"], after.get("initStateId")):
             raise ValueError(f"Unmatched initial state: {case_id}")
         for clip in (before, after):
-            if sha256(ROOT / clip["video"]) != clip["media"]["videoSha256"]:
+            expected_hash = (clip["media"]["videoSha256"] if "media" in clip
+                             else clip["mediaSources"]["video"]["sha256"])
+            actual_hash = sha256(ROOT / clip["video"])
+            if actual_hash != expected_hash:
                 raise ValueError(f"Video does not match its evidence hash: {clip['video']}")
-        left_frames = math.ceil(before["durationSeconds"] / speed * FPS)
-        reveal_frame = left_frames + FPS
-        right_frames = math.ceil(after["durationSeconds"] / speed * FPS)
-        total_frames = reveal_frame + right_frames + round(2.5 * FPS)
+            sources[clip["video"]] = actual_hash
+        playback_speed = metadata["playbackSpeed"]
+        left_frames = math.ceil(before["durationSeconds"] / playback_speed * FPS)
+        # Fade in the revision as soon as the original ends; hold the completed pair.
+        hold_frames = FPS
+        reveal_frame = left_frames
+        right_frames = math.ceil(after["durationSeconds"] / playback_speed * FPS)
+        total_frames = reveal_frame + right_frames + hold_frames
         case = {
-            "id": case_id,
-            "title": "Identify the intended can" if case_id == "alphabet-soup" else "Specify the intended compartment",
+            **metadata,
             "originalInstruction": before["instruction"],
             "revisedInstruction": after["instruction"],
             "revisionHtml": revised_markup(case_id, after["instruction"]),
-            "beforeSuccesses": pair["beforeTask"]["successes"],
-            "afterSuccesses": pair["afterTask"]["successes"],
-            "episodes": pair["beforeTask"]["episodes"],
-            "seed": before["seed"], "initStateId": before["initStateId"],
             "beforeVideo": before["video"], "afterVideo": after["video"],
             "beforeSourceSeconds": before["durationSeconds"],
             "afterSourceSeconds": after["durationSeconds"],
             "leftFrames": left_frames, "revealFrame": reveal_frame,
-            "rightFrames": right_frames, "frames": total_frames,
+            "rightFrames": right_frames, "holdFrames": hold_frames, "frames": total_frames,
         }
         cases.append(case)
         scenes.append({"id": case_id, "kind": "case", "startFrame": start_frame,
@@ -99,9 +120,7 @@ def make_manifest(speed):
         "robotwin": {**{stage: robotwin[stage] for stage in ("before", "after")},
                      "comparisonScope": robotwin["comparisonScope"]},
         "scenes": scenes, "frames": start_frame, "durationSeconds": start_frame / FPS,
-        "sources": {str(path.relative_to(ROOT)): sha256(path) for path in (
-            ROOT / "data/libero-blog-media.json", ROOT / "data/libero-human-review.json",
-            ROOT / "data/robotwin-alignment-summary.json")},
+        "sources": sources,
     }
 
 
@@ -118,21 +137,26 @@ def encode_options(frames):
             "-pix_fmt", "yuv420p", "-movflags", "+faststart"]
 
 
-def render_case(case, speed, work):
+def render_case(case, work):
     scene_id = case["id"]
     output = work / f"{scene_id}.mp4"
     duration = case["frames"] / FPS
     reveal = case["revealFrame"] / FPS
+    speed = case["playbackSpeed"]
     # The complete original recording plays first, then holds its final frame.
-    # The revised panel and recording fade in together; neither clip is cropped.
+    # The revised panel and recording fade in together as the original ends.
     graph = (
         f"[0:v]format=yuv420p,setpts=PTS-STARTPTS[base];"
         f"[1:v]format=rgba,setpts=PTS-STARTPTS,fade=t=in:st={reveal}:d=0.4:alpha=1[panel];"
         f"[base][panel]overlay=0:0:shortest=1[background];"
-        f"[2:v]setpts=(PTS-STARTPTS)/{speed},fps={FPS},scale=864:432:flags=lanczos,setsar=1,"
+        f"[2:v]setpts=(PTS-STARTPTS)/{speed},fps={FPS},"
+        f"scale=864:432:force_original_aspect_ratio=decrease:flags=lanczos,"
+        f"pad=864:432:(ow-iw)/2:(oh-ih)/2:color=0x101713,setsar=1,"
         f"tpad=stop_mode=clone:stop_duration={duration}[left];"
         f"[background][left]overlay=72:470:eof_action=repeat[withleft];"
-        f"[3:v]setpts=(PTS-STARTPTS)/{speed},fps={FPS},scale=864:432:flags=lanczos,setsar=1,"
+        f"[3:v]setpts=(PTS-STARTPTS)/{speed},fps={FPS},"
+        f"scale=864:432:force_original_aspect_ratio=decrease:flags=lanczos,"
+        f"pad=864:432:(ow-iw)/2:(oh-ih)/2:color=0x101713,setsar=1,"
         f"tpad=stop_mode=clone:stop_duration={duration},format=rgba,"
         f"fade=t=in:st=0:d=0.4:alpha=1,setpts=PTS+{reveal}/TB[right];"
         f"[withleft][right]overlay=984:470:enable='gte(t,{reveal})':eof_action=repeat,"
@@ -161,18 +185,21 @@ def render_still(scene, work):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / "artifacts/video/blog-showcase.mp4")
-    parser.add_argument("--speed", type=float, default=2.0, help="Playback speed, visibly labeled on case pages")
+    parser.add_argument("--speed", type=float, default=2.0, help="LIBERO playback speed, visibly labeled on its case page")
+    parser.add_argument("--robotwin-speed", type=float, default=0.5, help="RoboTwin playback speed, visibly labeled on its case page")
     parser.add_argument("--prepare-only", action="store_true", help="Write the manifest without rendering")
     args = parser.parse_args()
     if not 0.25 <= args.speed <= 4:
         parser.error("--speed must be between 0.25 and 4")
+    if not 0.25 <= args.robotwin_speed <= 4:
+        parser.error("--robotwin-speed must be between 0.25 and 4")
     output = args.output.resolve()
     if output.suffix.lower() != ".mp4":
         parser.error("--output must end in .mp4")
     output.parent.mkdir(parents=True, exist_ok=True)
     work = output.with_suffix("")
     work.mkdir(parents=True, exist_ok=True)
-    manifest = make_manifest(args.speed)
+    manifest = make_manifest(args.speed, args.robotwin_speed)
     manifest_path = work / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(f"Prepared {manifest['durationSeconds']:.2f}s, {WIDTH}×{HEIGHT}, {FPS} fps; silent, no subtitle track.", flush=True)
@@ -181,7 +208,7 @@ def main():
     subprocess.run(["node", str(ROOT / "scripts/render_blog_video_slides.cjs"),
                     "--manifest", str(manifest_path), "--output", str(work)], check=True, cwd=ROOT)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        tasks = [pool.submit(render_case, case, args.speed, work) for case in manifest["cases"]]
+        tasks = [pool.submit(render_case, case, work) for case in manifest["cases"]]
         tasks += [pool.submit(render_still, scene, work) for scene in manifest["scenes"] if scene["kind"] == "slide"]
         parts = [task.result() for task in tasks]
     concat = work / "concat.txt"
@@ -200,7 +227,14 @@ def main():
     if abs(float(probe["format"]["duration"]) - manifest["durationSeconds"]) > 1 / FPS:
         raise RuntimeError("Output duration differs from the storyboard")
     (work / "output-probe.json").write_text(json.dumps(probe, indent=2) + "\n")
+    # Show both panels of the first comparison on the article's video poster.
+    poster = output.with_suffix(".jpg")
+    poster_seconds = manifest["cases"][0]["frames"] / FPS - 0.5
+    run_logged(["ffmpeg", "-y", "-hide_banner", "-ss", str(poster_seconds), "-i", str(output),
+                "-frames:v", "1", "-q:v", "2", "-update", "1", str(poster)],
+               work / "poster.ffmpeg.log")
     print(f"Video ready: {output} ({output.stat().st_size / 1_000_000:.1f} MB)", flush=True)
+    print(f"Poster ready: {poster}", flush=True)
 
 
 if __name__ == "__main__":

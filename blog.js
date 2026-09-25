@@ -186,6 +186,8 @@
     return `<section class="case robotwin-case" data-episode="${esc(item.episodeKey)}" id="robotwin-case-${esc(item.episodeKey)}"><div class="case-head"><div><p class="eyebrow">${esc(robotwinEpisodeLabel(item))}</p><h3>${esc(item.title)}</h3></div><div class="task-rate ${item.after.benchSuccess ? '' : 'negative'}"><span>Bench outcome</span><strong>${benchOutcome(item.before)} → ${benchOutcome(item.after)}</strong></div></div><div class="paired-videos">${robotwinClipMarkup(item,'before')}${robotwinClipMarkup(item,'after')}</div><div class="case-foot"><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same scene seed ${esc(item.before.seed)} · <a href="${esc(item.galleryUrl)}">View episode in gallery ↗</a></span><span class="play-status" role="status"></span></div></div></section>`;
   }
   function renderRobotwin(data) {
+    const {before, after, rerunsOnly} = data;
+    document.querySelector('#robotwin-results-note').innerHTML = `In the latest gallery results, native success rises from <strong>${before.benchSuccess}/${before.n} to ${after.benchSuccess}/${after.n}</strong> (${pct(before.benchmarkSuccessRate)}% → ${pct(after.benchmarkSuccessRate)}%). Of the ${rerunsOnly.episodes} revised episodes, <strong>${rerunsOnly.nativeSuccesses} now pass the benchmark</strong>; ${rerunsOnly.nativeFailuresIncludingTimeout} remain unsuccessful, including ${rerunsOnly.timeouts} timeout${rerunsOnly.timeouts === 1 ? '' : 's'}.`;
     document.querySelector('#robotwin-comparison').innerHTML =
       robotwinScoreCard(data.before, 'Before · original RoboTwin instructions', false) +
       robotwinScoreCard(data.after, 'After · revised composite', true);
@@ -212,7 +214,7 @@
       link.href = new URL(link.dataset.galleryPath, hosting.galleryUrl).href;
     });
     const [data,media,review,robotwin] = await Promise.all(['data/libero-alignment.json','data/libero-blog-media.json','data/libero-human-review.json','data/robotwin-alignment-summary.json'].map(async path => {
-      const response = await fetch(url(path));
+      const response = await fetch(url(path), {cache:'no-cache'});
       if (!response.ok) throw new Error(`Cannot load ${path}: ${response.status}`);
       return response.json();
     }));
