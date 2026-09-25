@@ -18,7 +18,6 @@ fs.mkdirSync(path.join(output, 'cases'), {recursive: true});
 
 const escape = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const percent = value => `${(Number(value) * 100).toFixed(2)}%`;
-const points = (before, after) => `+${((Number(after) - Number(before)) * 100).toFixed(2)} pp`;
 const boxes = {left: {x:72,y:470,width:864,height:432}, right: {x:984,y:470,width:864,height:432}};
 
 const css = `
@@ -44,31 +43,25 @@ const css = `
   .badge.fail{color:var(--rust);background:#f1e9df;border-color:#e1cdbb}.badge.pass{color:var(--green);background:var(--wash);border-color:#c9d6c1}
   .badge.agent{color:var(--green);background:var(--wash);border:3px solid var(--green);padding:11px 15px}
   .footer{position:absolute;left:72px;right:72px;top:1020px;border-top:1px solid var(--line);padding-top:15px;display:flex;justify-content:space-between;font-size:20px;color:var(--muted);line-height:24px}
-  .deck{position:absolute;left:72px;right:72px;top:195px;margin:0;font-size:27px;line-height:1.3;color:var(--muted)}
-  /* Match the blog's before/after IAS cards and 2 × 2 judgment matrices. */
-  .score-card{position:absolute;top:251px;width:864px;height:615px;border:1px solid var(--line);border-radius:8px;padding:26px 30px 24px;background:#faf9f5}
+  .results-heading{top:88px}
+  .results-benchmark{position:absolute;left:72px;top:179px;margin:0;font-size:31px;line-height:1.3;font-weight:600;letter-spacing:1px;color:var(--green)}
+  .score-card{position:absolute;top:267px;width:864px;height:717px;border:1px solid var(--line);border-radius:8px;padding:32px;display:flex;flex-direction:column;background:#faf9f5}
   .score-card.after{background:#edf1e6;border-color:#c4d0ba}
-  .score-top{display:flex;align-items:center;justify-content:space-between;gap:14px;color:var(--muted);font-size:22px;line-height:29px}
-  .score-top h3{font-size:23px;font-weight:600;letter-spacing:0;line-height:29px;color:var(--ink);margin:0}
-  .score-top span{white-space:nowrap;font-variant-numeric:tabular-nums}
-  .score-value{font-family:Georgia,'Times New Roman',serif;font-size:89px;letter-spacing:-3px;line-height:1.1;margin:14px 0 0}
-  .score-value span{font-size:48px}
-  .score-label{font-size:22px;line-height:28px;color:var(--muted);margin:0 0 10px}
-  .score-equation{font-size:23px;line-height:29px;font-variant-numeric:tabular-nums;padding-bottom:17px;border-bottom:1px solid var(--line);margin:0}
-  .cross-table{border-collapse:collapse;width:100%;font-size:29px;margin:20px 0 14px;font-variant-numeric:tabular-nums;table-layout:fixed}
-  .cross-table caption{text-align:left;font-size:21px;line-height:27px;color:var(--muted);padding-bottom:13px}
-  .cross-table th,.cross-table td{padding:13px 13px;border-bottom:1px solid var(--line);text-align:right;line-height:1.25}
-  .cross-table th{font-weight:500;font-size:23px}
+  .score-top h3{font-size:26px;font-weight:600;line-height:32px;color:var(--ink);margin:0}
+  .cross-table{border-collapse:collapse;width:100%;font-size:34px;margin:24px 0 0;font-variant-numeric:tabular-nums;table-layout:fixed}
+  .cross-table caption{text-align:center;font-size:24px;line-height:31px;color:var(--muted);padding-bottom:24px}
+  .cross-table th,.cross-table td{padding:18px 14px;border-bottom:1px solid var(--line);text-align:center;line-height:1.3}
+  .cross-table th{font-weight:500;font-size:24px}
   .cross-table th:first-child{text-align:left;padding-left:0;width:44%;line-height:1.35}
   .cross-table thead th:not(:first-child){width:28%}
+  .cross-table tbody tr:last-child th,.cross-table tbody tr:last-child td{border-bottom:0}
   .cross-table .mismatch{background:#f0e6dc;color:var(--rust);font-weight:700;border-radius:4px}
   .cross-table .not-applicable{color:var(--muted)}
-  .native-score{font-size:23px;line-height:31px;margin:14px 0 0}
-  .native-score strong{font-size:26px;color:var(--ink);font-weight:600}
-  .result-gains{position:absolute;left:72px;right:72px;top:889px;display:flex;gap:40px;align-items:baseline;font-size:26px;line-height:36px}
-  .result-gains>span{flex:1}.result-gains strong{font-size:35px;letter-spacing:-.6px;font-weight:600;margin-left:10px}
-  .method-note{position:absolute;left:72px;right:72px;top:944px;margin:0;font-size:21px;line-height:1.4;color:var(--muted)}
-  .method-note b{color:var(--ink);font-weight:600}
+  .metric-summary{margin-top:auto;border-top:1px solid var(--line);padding-top:28px}
+  .metrics-table{width:100%;table-layout:fixed;border-collapse:collapse;text-align:center;font-variant-numeric:tabular-nums}
+  .metrics-table th{font-size:24px;line-height:1.35;font-weight:500;padding:0 8px 18px;color:var(--muted)}
+  .metrics-table td{font-family:Georgia,'Times New Roman',serif;font-size:73px;line-height:1.2;letter-spacing:-2px;padding:0 8px 10px;color:var(--ink)}
+  .score-card.after .metrics-table td{color:var(--green)}
   .takeaway{position:absolute;left:72px;right:72px;display:flex;gap:33px;padding:27px 0 29px;border-top:1px solid var(--line)}
   .takeaway-number{width:98px;flex-shrink:0;font-family:Georgia,'Times New Roman',serif;font-size:70px;line-height:1;color:var(--green);letter-spacing:-3px}
   .takeaway-copy{padding-top:2px;max-width:1620px}
@@ -100,21 +93,13 @@ function values(report, type) {
 }
 function scoreCard(report, type, after) {
   const stats = values(report, type);
-  const title = type === 'libero'
-    ? (after ? 'After · revised composite' : 'Before · original instructions')
-    : (after ? 'After · revised composite' : 'Before · original RoboTwin instructions');
-  // The matrix labels, reporting-convention cell, and arithmetic mirror blog.js.
-  return `<section class="score-card ${after ? 'after right' : 'before left'}"><div class="score-top"><h3>${title}</h3><span>n = ${stats.n}</span></div><p class="score-value">${percent(stats.ias).slice(0,-1)}<span>%</span></p><p class="score-label">Instinct-alignment score</p><p class="score-equation">1 − ${stats.completeFail} / ${stats.n} = ${percent(stats.ias)}</p><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${stats.completePass}</td><td class="mismatch">${stats.completeFail}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${stats.incompleteFail}</td></tr></tbody></table><p class="native-score">Bench judges success: <strong>${report.benchSuccess}/${stats.n} · ${percent(stats.native)}</strong></p></section>`;
+  // Keep the published judgment matrix and report its two metrics underneath.
+  return `<section class="score-card ${after ? 'after right' : 'before left'}"><div class="score-top"><h3>${after ? 'After' : 'Before'}</h3></div><table class="cross-table"><caption>Agent’s completion judgment × benchmark’s verdict</caption><thead><tr><th scope="col">Agent’s completion judgment</th><th scope="col">Bench judges success</th><th scope="col">Bench judges failure</th></tr></thead><tbody><tr class="success"><th scope="row">Agent considers complete</th><td>${stats.completePass}</td><td class="mismatch">${stats.completeFail}</td></tr><tr class="failure"><th scope="row">Agent does not consider complete</th><td class="not-applicable" aria-label="Not applicable under the reporting convention">&#92;</td><td>${stats.incompleteFail}</td></tr></tbody></table><div class="metric-summary"><table class="metrics-table" aria-label="Summary metrics"><thead><tr><th scope="col">Instinct-alignment score</th><th scope="col">Bench success rate</th></tr></thead><tbody><tr><td>${percent(stats.ias)}</td><td>${percent(stats.native)}</td></tr></tbody></table></div></section>`;
 }
 function resultsSlide(type) {
-  const before = values(manifest[type].before,type), after = values(manifest[type].after,type);
   const name = type === 'libero' ? 'LIBERO' : 'RoboTwin';
   const page = type === 'libero' ? '03 / 05' : '04 / 05';
-  const scope = manifest.robotwin.comparisonScope;
-  const note = type === 'libero'
-    ? '<b>Reviewed 400-episode composite:</b> 310 original + 70 first revision + 20 final revision;<br>one human completion correction. Verifier and recorded demonstrations unchanged.'
-    : `<b>${escape(scope.originalEpisodes)} original episodes → ${escape(scope.compositeEpisodes)}-episode composite:</b> ${escape(scope.unchangedOriginalEpisodes)} originals retained + ${escape(scope.replacedOriginalDisagreements)} selected reruns.<br>Disagreements: ${before.completeFail} → ${after.completeFail}. Verifier and recorded demonstrations unchanged.`;
-  return frame(`${header(`Results / ${name}`,`${name}: clearer instructions, better alignment.`,page)}<p class="deck">Instruction-layer repairs preserve the benchmark verifier and recorded demonstrations.</p>${scoreCard(manifest[type].before,type,false)}${scoreCard(manifest[type].after,type,true)}<div class="result-gains"><span>Instinct-alignment score <strong>${points(before.ias,after.ias)}</strong></span><span>Benchmark success <strong>${points(before.native,after.native)}</strong></span></div><p class="method-note">${note}</p><div class="footer"><span>Agent as Policy · ${name}</span><span>\\ = not applicable under the reporting convention · pp = percentage points</span></div>`);
+  return frame(`<div class="topline"></div><div class="page">${page}</div><h1 class="results-heading">Clearer instructions, better alignment.</h1><h2 class="results-benchmark">${name}</h2>${scoreCard(manifest[type].before,type,false)}${scoreCard(manifest[type].after,type,true)}`);
 }
 function takeawaysSlide() {
   const rows = [
@@ -134,7 +119,7 @@ function takeawaysSlide() {
     async function render(relative, html) {
       await page.setContent(html, {waitUntil:'load'});
       await page.evaluate(() => document.fonts.ready);
-      const overflow = await page.evaluate(() => Array.from(document.querySelectorAll('.instruction p,.status,.badge,.takeaway-copy,.score-card,.score-top,.cross-table,.native-score,.result-gains,.method-note,.footer')).flatMap(element => {
+      const overflow = await page.evaluate(() => Array.from(document.querySelectorAll('.instruction p,.status,.badge,.takeaway-copy,.results-heading,.results-benchmark,.score-card,.score-top,.cross-table,.metric-summary,.metrics-table,.footer')).flatMap(element => {
         const rect = element.getBoundingClientRect();
         return element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1 || rect.bottom > 1080 || rect.right > 1920 ? [element.className || element.tagName] : [];
       }));
@@ -142,23 +127,20 @@ function takeawaysSlide() {
       if (/^results-(libero|robotwin)\.png$/.test(relative)) {
         const type = relative.slice('results-'.length,-'.png'.length);
         const actual = await page.locator('.score-card').evaluateAll(cards => cards.map(card => ({
-          headers:Array.from(card.querySelectorAll('thead th'),cell=>cell.textContent),
-          rows:Array.from(card.querySelectorAll('tbody th'),cell=>cell.textContent),
-          cells:Array.from(card.querySelectorAll('tbody td'),cell=>cell.textContent),
-          ias:card.querySelector('.score-value').textContent,
-          equation:card.querySelector('.score-equation').textContent,
-          count:card.querySelector('.score-top span').textContent,
-          native:card.querySelector('.native-score').textContent
+          headers:Array.from(card.querySelectorAll('.cross-table thead th'),cell=>cell.textContent),
+          rows:Array.from(card.querySelectorAll('.cross-table tbody th'),cell=>cell.textContent),
+          cells:Array.from(card.querySelectorAll('.cross-table tbody td'),cell=>cell.textContent),
+          metrics:Array.from(card.querySelectorAll('.metrics-table th'),cell=>cell.textContent),
+          scores:Array.from(card.querySelectorAll('.metrics-table td'),cell=>cell.textContent)
         })));
         const expected = ['before','after'].map(stage => {
-          const report = manifest[type][stage], stats = values(report,type);
+          const stats = values(manifest[type][stage],type);
           return {
             headers:['Agent’s completion judgment','Bench judges success','Bench judges failure'],
             rows:['Agent considers complete','Agent does not consider complete'],
             cells:[String(stats.completePass),String(stats.completeFail),'\\',String(stats.incompleteFail)],
-            ias:percent(stats.ias),equation:`1 − ${stats.completeFail} / ${stats.n} = ${percent(stats.ias)}`,
-            count:`n = ${stats.n}`,
-            native:`Bench judges success: ${report.benchSuccess}/${stats.n} · ${percent(stats.native)}`
+            metrics:['Instinct-alignment score','Bench success rate'],
+            scores:[percent(stats.ias),percent(stats.native)]
           };
         });
         if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`Slide ${relative} does not match the blog's judgment matrices.`);
