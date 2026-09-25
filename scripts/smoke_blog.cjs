@@ -208,10 +208,10 @@ const server = http.createServer((request, response) => {
       const downloads = await page.locator('.clip-meta a[download]').evaluateAll(links=>links.map(link=>link.href));
       assert.equal(downloads.length,12);
       assert.ok(downloads.every(link=>link.startsWith(base+'media/') && !new URL(link).search),'Article downloads must use local video files');
-      assert.ok((await page.locator('[data-gallery-path]').evaluateAll(links=>links.map(link=>link.href))).every(url=>url.startsWith(hosting.galleryUrl) && new URL(url).pathname.endsWith('/index.html')));
-      assert.deepEqual(await page.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>({href:link.href,legacy:link.hasAttribute('data-gallery-path')}))),Array(3).fill({href:benchmendGallery,legacy:false}),'Main and LIBERO entries must retain the new gallery URL after legacy hosting initializes');
-      assert.equal(await page.locator('.contents-gallery').textContent(),'Browse LIBERO gallery on HF ↗');
-      assert.equal(await page.locator('.site-footer a').last().getAttribute('href'),'https://huggingface.co/spaces/benchmend/gallery');
+      assert.equal(await page.locator('[data-gallery-path]').count(),0);
+      assert.deepEqual(await page.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>({href:link.href,legacy:link.hasAttribute('data-gallery-path')}))),Array(2).fill({href:benchmendGallery,legacy:false}),'Main and sidebar entries must retain the gallery URL after legacy hosting initializes');
+      assert.equal(await page.locator('.contents-gallery').textContent(),'Browse gallery on HF');
+      assert.equal(await page.locator('.explore, .site-footer').count(),0);
       assert.match(await page.locator('#instruction-rows [data-task="libero_goal_t09"]').innerText(),/upper rack, with its base against the lower rail/);
       assert.match(await page.locator('#instruction-rows [data-task="libero_10_t05"]').innerText(),/between the two large side compartments/);
       for (const id of selectedLiberoFailures) assert.match(await page.locator(`#failure-${id} .clip-meta`).innerText(),/500 control steps/);
@@ -329,7 +329,7 @@ const server = http.createServer((request, response) => {
     const fallbackPage = await noScript.newPage();
     for (const mount of ['/',prefix]) {
       await fallbackPage.goto(`${origin}${mount}`);
-      assert.deepEqual(await fallbackPage.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>link.href)),Array(4).fill(benchmendGallery),'All four BenchMend entries, including noscript, must work without JavaScript');
+      assert.deepEqual(await fallbackPage.locator('[data-benchmend-gallery]').evaluateAll(links=>links.map(link=>link.href)),Array(3).fill(benchmendGallery),'All three BenchMend entries, including noscript, must work without JavaScript');
     }
     await fallbackPage.goto(`${origin}${prefix}gallery/robotwin_nvidia10/`);
     assert.equal(await fallbackPage.locator('[data-gallery-path]').getAttribute('href'),`${hosting.galleryUrl}gallery/robotwin/index.html`);
