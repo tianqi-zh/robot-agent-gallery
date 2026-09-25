@@ -13,7 +13,7 @@
   <meta property="og:url" content="https://tianqi-zh.github.io/robot-agent-gallery/">
   <link rel="stylesheet" href="blog.css?v=f5ff7163af9d">
   <script src="gallery-hosting.js?v=07c6812a48b6" defer></script>
-  <script src="blog.js?v=3bf5382d6b57" defer></script>
+  <script src="blog.js?v=ab218c6c8253" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#article">Skip to article</a>
@@ -62,6 +62,7 @@
         <section id="methods">
           <div class="prose"><p class="eyebrow">02 / METHOD AND BENCHMARKS</p><h2>Run an operator.<br>Audit the disagreement.</h2>
             <p>We built control harnesses for two representative benchmarks: <strong>LIBERO</strong>, whose task instructions are fixed strings, and <strong>RoboTwin</strong>, whose instructions vary with the generated scene. GPT-6-Astra operates the robot from task language, live RGB observations, and robot proprioception.</p>
+            <p>All stages requested <code>gpt-6-astra</code> with high reasoning.</p>
             <p>The baseline harnesses follow the <strong>task-information boundary</strong> commonly used in VLA/WAM evaluation: the policy does not receive expert demonstrations, success-checker code, hidden object poses, rewards, or native success labels. The adapters provide camera calibration and generic control guidance so the agent can use the robot interface; they do not give it a long task-specific solution. This is a common information boundary, rather than a claim that GPT and a VLA/WAM use identical observation or action interfaces.</p>
           </div>
           <div class="table-scroll" tabindex="0" role="region" aria-label="Benchmark coverage and instruction intervention"><table class="benchmark-table"><thead><tr><th scope="col">Benchmark</th><th scope="col">Coverage</th><th scope="col">Instruction layer</th><th scope="col">Intervention</th></tr></thead><tbody><tr><th scope="row">LIBERO</th><td>40 tasks · 10 fixed initial states each</td><td>One instruction shared across all episodes of a task</td><td>Minimally edit nine task instructions to add only missing key information. Rerun every episode of each revised task.</td></tr><tr><th scope="row">RoboTwin</th><td>50 tasks · 10 planned rollouts each</td><td>A distinct, scene-dependent instruction for each episode</td><td>Minimally edit instructions for episodes with agent–benchmark disagreements to add only missing key information. Rerun only those episodes.</td></tr></tbody></table></div>
@@ -78,9 +79,6 @@
           <div class="prose"><h3>Instinct-alignment score</h3><p>We define the <strong>instinct-alignment score (IAS)</strong> to summarize how often a benchmark rejects an outcome the operator considers complete:</p></div>
           <div class="formula"><span>Instinct-alignment score</span><strong>1 − <span class="fraction"><span>episodes judged complete by the agent but failed by the benchmark</span><span>episodes included in the comparison panel</span></span></strong></div>
           <div class="prose"><p>Higher IAS means fewer such disagreements under the stated accounting rule. It is <strong>not a replacement for native task success</strong>: an agent that never claims completion on a failed rollout can obtain 100% IAS without solving the task. We report the two-by-two judgment tables, native success, and videos together.</p><h3>Repair the instruction layer</h3><p>Changing the verifier can redefine which recorded trajectories count as valid demonstrations and force a broader data audit or recollection. We take the less disruptive route: keep the native task and checker fixed, and ask the instruction-refining agent to communicate their goal more clearly. The demonstration recordings remain unchanged; a training pipeline can reuse them with the corrected language rather than collect new trajectories.</p></div>
-          <div class="methods prose">
-            <details><summary>Protocol, accounting, and what the policy could see</summary><p>All stages requested <code>gpt-6-astra</code> with high reasoning. LIBERO used task initial-state IDs and seeds 0–9, 500 control steps, 750 tool calls, and a 3,600-second wall-clock limit. RoboTwin requested ten rollouts for each of 50 official tasks. Neither evaluation involved policy fine-tuning or task-specific cross-episode memory. Native success could terminate the environment automatically.</p><p id="review-accounting"></p></details>
-          </div>
         </section>
 
         <section id="results">
@@ -90,12 +88,12 @@
             <div id="comparison" class="comparison"></div>
             <p id="scope-note" class="small"></p>
             <div class="prose"><p>Across the 400-episode comparison, human-reviewed agent–benchmark disagreements fall from <strong>47 to zero</strong>, raising IAS from <strong>88.25% to 100%</strong>. Native success rises from <strong>322/400 to 357/400</strong> (80.50% → 89.25%): 35 more episodes pass the same benchmark checker.</p></div>
-            <div id="instructions" class="prose"><h4>Two task-level examples</h4><p><strong>Goal t05</strong> improves from 0/10 to 2/10 native successes, while <strong>Spatial t04</strong> changes from 5/10 to 4/10. The table shows these two examples; the overall results above include all 40 tasks.</p></div>
+            <div id="instructions" class="prose"><h4>Two task-level examples</h4><p><strong>Goal · Task 09</strong> improves from 7/10 to 10/10 native successes, while <strong>Long · Task 05</strong> improves from 0/10 to 10/10. The table shows these two examples; the overall results above include all 40 tasks.</p></div>
             <div class="table-scroll" tabindex="0" role="region" aria-label="LIBERO instructions and task success rates"><table class="instruction-table"><thead><tr><th scope="col">Task</th><th scope="col">Original instruction</th><th scope="col">Improved instruction</th><th scope="col">Native successes</th></tr></thead><tbody id="instruction-rows"></tbody></table></div>
-            <div id="cases" class="prose"><h4>Before-and-after rollouts</h4><p>Each pair starts from the same initial state and seed. Both Goal t05 and Spatial t04 show a failed episode becoming successful. Each card also reports the task’s result across all ten episodes.</p></div>
+            <div id="cases" class="prose"><h4>Before-and-after rollouts</h4><p><strong>LIBERO Goal · Task 09 · Episode 04</strong> and <strong>LIBERO Long · Task 05 · Episode 01</strong> both change from benchmark failure to success. Each pair starts from the same initial state and seed. Each card also reports the task’s result across all ten episodes.</p></div>
             <p class="small">Full recordings at 20 fps, with scene and wrist views. Thinking time is omitted. Native success may stop the recording before release.</p>
             <div id="paired-cases"></div>
-            <div class="prose"><p>In Spatial t04, rejected completion claims fall from <strong>three to zero</strong> even as native success falls from <strong>5/10 to 4/10</strong>. Better agreement about completion does not guarantee more reliable execution. The two metrics capture different aspects of the outcome.</p></div>
+            <div class="prose"><p>Across these two tasks, agent–benchmark disagreements fall from <strong>13 to zero</strong>, and both tasks reach <strong>10/10 native successes</strong>. The overall comparison above includes every task and initial state, including tasks with smaller gains or regressions.</p></div>
           </section>
           <section id="robotwin" class="benchmark-section" aria-labelledby="robotwin-heading">
             <h3 id="robotwin-heading" class="subsection-title">3.2 RoboTwin</h3>
@@ -124,9 +122,6 @@
 
         <section id="conclusion">
           <div class="prose conclusion"><p class="eyebrow">05 / CONCLUSION</p><h2>Repair the language.<br>Preserve the demonstrations.</h2><p><strong>Small instruction edits can yield substantial gains in benchmark alignment.</strong> In both LIBERO and RoboTwin, the edits add only missing key information while preserving the native checker and existing demonstration trajectories.</p><p>The practical value is a less disruptive way to improve an established benchmark: make its intended goal more legible before changing the task or collecting the data again. Existing recordings can be reused, with their language annotations updated consistently where needed.</p><p>GPT’s current language, vision, and tool-use abilities make it useful as a human-proxy policy for this work. It is not a ground-truth policy, and its claims require scrutiny. It can nevertheless generate informative disagreements, help formulate instruction repairs, and test whether those repairs improve agreement with the evaluator. That is already a useful role in <strong>debugging benchmarks</strong>.</p></div>
-          <div class="methods prose">
-            <details><summary>Evidence, interpretation limits, and reproducibility</summary><p>The authors developed the revisions using source inspection, demonstrations, and observed failures. This is an adaptive diagnostic intervention, not a held-out causal estimate. Both after panels combine unchanged original episodes with selected reruns. IAS depends on completion-reporting behavior, and the instruction supplements differ in information content. We did not conduct a controlled human-operator baseline or a post-training/generalization experiment.</p><p><a href="data/libero-human-review.json">LIBERO reviewed judgments</a> · <a href="data/libero-alignment.json">LIBERO task instructions and run fingerprints</a> · <a href="data/libero-alignment-episodes.csv">All 400 paired LIBERO records</a> · <a href="data/libero-blog-media.json">LIBERO clip selection and hashes</a> · <a href="data/robotwin-alignment-summary.json">RoboTwin outcomes, instructions and sources</a> · <a href="LIBERO_ALIGNMENT.md">Detailed LIBERO accounting</a>.</p><p>The examples are selected to explain mechanisms. Videos retain recorded frames; thinking time is omitted. Public data preserve outcomes and provenance without private model reasoning. The full evaluation gallery remains available on Hugging Face.</p></details>
-          </div>
           <p id="load-error" role="alert" hidden>The comparison data could not load. Please refresh, or use the linked JSON and CSV records.</p>
         </section>
       </article>

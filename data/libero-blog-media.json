@@ -481,15 +481,21 @@
         "initFileSha256": "6cd3937ba18d64e72223222af36888d26ea201840415adbc4dae590454d0a5a8"
       },
       "media": {
-        "videoSha256": "b57f08ed664e9fb38d222664f93f25363ff98a1e1abba50321f92a2520a094b4",
-        "videoBytes": 569132,
-        "posterSha256": "b78aeb72dc58ff596d0655bae9038d6c38058cb774cbcaaf5a9af8626fcf7e78",
-        "posterBytes": 28514,
-        "posterFrame": 254,
+        "videoSha256": "83db9de2851b27c490cb3e06e6e64d4a7af83724d0dd3295135a7e097e2730f9",
+        "videoBytes": 5206439,
+        "posterSha256": "61497db305186461031cdf71284bbe1959a8c85ea1bd791266e6d3394e43ddd9",
+        "posterBytes": 18926,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "original/libero_10_t05_r00",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/videos/libero_10_t05_r00.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_10_t05_r00.jpg"
       }
     },
     "r2:libero_10_t05_r00": {
@@ -535,15 +541,21 @@
         "initFileSha256": "6cd3937ba18d64e72223222af36888d26ea201840415adbc4dae590454d0a5a8"
       },
       "media": {
-        "videoSha256": "128167dc016b0c9b0562747e94dd8ce0467734e9937eccdabf4b29c57aac0fe5",
-        "videoBytes": 528533,
-        "posterSha256": "5df7f44556ff08ec50204f3e2c49ee9add18c13394bd86106455934c9bc49d29",
-        "posterBytes": 27613,
-        "posterFrame": 200,
+        "videoSha256": "7883e0c077fbbac2a7b2c8c89afdc807b23ec7c85eb8f5bee058cc74be73ab8f",
+        "videoBytes": 4337588,
+        "posterSha256": "841b9251f8a241f9ca698bde2f205de557c410cb8c55b1079fa8fa668e3ff4ca",
+        "posterBytes": 18947,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "revision/libero_10_t05_r00",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/videos/libero_10_t05_r00.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/posters/libero_10_t05_r00.jpg"
       }
     },
     "baseline:libero_object_t00_r00": {
@@ -805,15 +817,21 @@
         "initFileSha256": "fa09aa4ade871c1c6be3dd8c93eb3437ea15190fd7dc73b8c986c8d2d3cfb062"
       },
       "media": {
-        "videoSha256": "caf5f61a04c5c4ad52fdfa46c148319c07a49638ff4893248f1f7f0067131bfb",
-        "videoBytes": 647994,
-        "posterSha256": "b39ed2a2b4f9e7bd8b67093bcdf800c0621b4ee79e3f5d5a60cc2d0964e2f01b",
-        "posterBytes": 29894,
-        "posterFrame": 201,
+        "videoSha256": "1ea76a4a0b6f19ecc9693d5cd63785978f928703f4612e1a81af6f5a996a4e36",
+        "videoBytes": 5877220,
+        "posterSha256": "2dca3e2a711ba4757b0d048b9196332bdfd96305d7df1d67dd22aedc122ce06f",
+        "posterBytes": 22787,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "original/libero_goal_t09_r03",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/videos/libero_goal_t09_r03.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/original/posters/libero_goal_t09_r03.jpg"
       }
     },
     "r1:libero_goal_t09_r03": {
@@ -859,15 +877,21 @@
         "initFileSha256": "fa09aa4ade871c1c6be3dd8c93eb3437ea15190fd7dc73b8c986c8d2d3cfb062"
       },
       "media": {
-        "videoSha256": "f1922fc086f358999703d49cd8647b99ca0c7f5ebc39fd330bbe962c456f06c0",
-        "videoBytes": 460171,
-        "posterSha256": "fe1b669fa7947870c1d5a02eb4c2d170862e7f958eb4bbc868a77c5c4197f89d",
-        "posterBytes": 33968,
-        "posterFrame": 161,
+        "videoSha256": "afce220de5ebf995aed726dcb09541593e2714361dd80c2c445448b686d85129",
+        "videoBytes": 4743745,
+        "posterSha256": "382f27f3574cef23e22d55c989e045418415ba5c0b52fe8ea8873c975dec81e7",
+        "posterBytes": 22468,
+        "posterFrame": 20,
         "codec": "h264",
         "pixelFormat": "yuv420p",
         "fastStart": true,
         "verified": true
+      },
+      "gallerySource": {
+        "catalogUrl": "https://huggingface.co/spaces/benchmend/gallery/resolve/88d4de7466bf55f29d8643791055e5c9c5cc1bed/gallery/libero/episodes.json",
+        "recordId": "revision/libero_goal_t09_r03",
+        "videoUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/videos/libero_goal_t09_r03.mp4",
+        "posterUrl": "https://huggingface.co/datasets/benchmend/libero/resolve/f51d70fbf8ae35ad57fbbd7a0edeb45f946b8fde/revision/posters/libero_goal_t09_r03.jpg"
       }
     },
     "baseline:libero_10_t06_r00": {
@@ -1454,6 +1478,6 @@
     "verifiedClips": 18,
     "newClips": 9,
     "reusedClips": 9,
-    "newMediaBytes": 21939783
+    "newMediaBytes": 30012246
   }
 }

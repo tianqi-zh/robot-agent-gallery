@@ -115,7 +115,7 @@ class LiberoBlogPublicationTests(unittest.TestCase):
     def test_rejects_tampered_media_digest(self):
         clip=next(iter(self.media['clips'].values()))
         clip['media']['videoSha256']='0'*64
-        with self.assertRaisesRegex(ValidationError,'video hash/size mismatch'):
+        with self.assertRaisesRegex(ValidationError,'video (hash/size mismatch|must retain original bytes)'):
             self.validate()
 
     def test_rejects_traversal_path(self):

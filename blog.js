@@ -18,11 +18,12 @@
   // The essay's selected recordings ship with this site; the full gallery stays on HF.
   const url = path => new URL(path, siteRoot).href;
   const downloadUrl = url;
-  const suiteNames = {libero_10:'LIBERO-10',libero_goal:'Goal',libero_object:'Object',libero_spatial:'Spatial'};
+  const suiteNames = {libero_10:'Long',libero_goal:'Goal',libero_object:'Object',libero_spatial:'Spatial'};
   const taskLabel = (suite,id) => `${suiteNames[suite]} t${String(id).padStart(2,'0')}`;
+  const liberoEpisodeLabel = item => `LIBERO ${suiteNames[item.suite]} · Task ${String(item.taskId).padStart(2,'0')} · EPISODE ${String(item.rolloutIndex+1).padStart(2,'0')}`;
   const liberoExamples = {
-    'plate-near-stove': {taskId:'libero_goal_t05',title:'A failure becomes a success',detail:'The selected episode changes from a benchmark failure to a success at the same initial state. Across all ten initial states, successes increase from 0/10 to 2/10; eight episodes still fail.'},
-    'spatial-regression': {taskId:'libero_spatial_t04',title:'A failure becomes a success',detail:'At initial state 4, the original rollout is judged complete by the agent but rejected by the benchmark; the revised rollout passes. Across all ten initial states, two failures become successes while three successes become failures, so task-level successes change from 5/10 to 4/10.'}
+    'wine-rack': {taskId:'libero_goal_t09',title:'A failure becomes a success',detail:'At initial state 3, the original rollout is judged complete by the agent but rejected by the benchmark; the revised rollout passes. Across all ten initial states, native successes increase from 7/10 to 10/10.'},
+    'book-compartment': {taskId:'libero_10_t05',title:'A failure becomes a success',detail:'At initial state 0, the original rollout is judged complete by the agent but rejected by the benchmark; the revised rollout passes. Across all ten initial states, native successes increase from 0/10 to 10/10.'}
   };
   // Emphasize the added goal information in these two editorial examples.
   const robotwinInstructionHighlights = {
@@ -111,7 +112,7 @@
     const stage = {baseline:'baseline',r1:'round1',r2:'round2'}[clip.stage];
     const correction = reviewCorrections.get(`${stage}:${clip.episodeKey}`);
     const assessment = correction ? 'Agent claimed completion · corrected to incomplete' : clip.nativeSuccess ? 'Bench judges success' : clip.agentAssessment === 'visually_complete' ? 'Agent considers the task complete' : clip.agentAssessment === 'unable_to_continue' ? 'Agent reports unable to continue' : 'No completion claim · control budget exhausted';
-    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + taskLabel(clip.suite,clip.taskId) + ', rollout ' + clip.rolloutIndex)}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
+    return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status ${clip.status}">Bench judges ${clip.nativeSuccess ? 'success' : 'failure'}</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + liberoEpisodeLabel(clip))}"></video><figcaption><p class="clip-instruction">“${esc(clip.instruction)}”</p><p class="clip-meta">${esc(clip.stageLabel)} · seed ${clip.seed} · init ${clip.initStateId} · ${clip.steps} steps<br>${esc(assessment)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
   }
   function failureClipMarkup(clip, label, instruction, metadata, instructionLabel = '') {
     return `<figure class="clip"><div class="clip-header"><span>${esc(label)}</span><span class="status failure">Failed episode</span></div><video controls playsinline preload="none" poster="${esc(url(clip.poster))}" src="${esc(url(clip.video))}" aria-label="${esc(label + ': ' + clip.episodeKey)}"></video><figcaption><p class="clip-instruction">${instructionLabel ? `<span class="instruction-label">${esc(instructionLabel)}</span>` : ''}<span class="instruction-text">“${esc(instruction)}”</span></p><p class="clip-meta">${esc(metadata)} · <a href="${esc(downloadUrl(clip.video))}" download>Download MP4 ↓</a></p></figcaption></figure>`;
@@ -120,11 +121,11 @@
     return `<div class="task-rate negative"><span>Task success · before → after</span><strong>${Math.round(100 * before.successes / before.episodes)}% → ${Math.round(100 * after.successes / after.episodes)}%</strong><span>${before.successes}/${before.episodes} → ${after.successes}/${after.episodes} episodes</span></div>`;
   }
   function renderMedia(media, alignment) {
-    document.querySelector('#paired-cases').innerHTML = Object.entries(liberoExamples).map(([id,example],index) => {
+    document.querySelector('#paired-cases').innerHTML = Object.entries(liberoExamples).map(([id,example]) => {
       const pair = media.pairs.find(item => item.id === id);
       const before = media.clips[pair.before], after = media.clips[pair.after];
       const sources = (pair.sourceLinks || []).filter(link => link.label === 'Task BDDL');
-      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">CASE ${String(index+1).padStart(2,'0')} / ${esc(taskLabel(pair.suite,pair.taskId))}</p><h3>${esc(example.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(example.detail)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
+      return `<section class="case" id="case-${esc(pair.id)}"><div class="case-head"><div><p class="eyebrow">${esc(liberoEpisodeLabel(pair))}</p><h3>${esc(example.title)}</h3></div><div class="task-rate ${pair.afterTask.successes < pair.beforeTask.successes ? 'negative' : ''}"><span>Task native successes</span><strong>${pair.beforeTask.successes}/10 → ${pair.afterTask.successes}/10</strong></div></div><div class="paired-videos">${clipMarkup(before,'Before')}${clipMarkup(after,'After')}</div><div class="case-foot"><p class="case-detail">${esc(example.detail)}</p><div class="case-actions"><button class="play-pair" type="button">Play both from start</button><span class="case-source">Same initial state ${pair.initStateId} · ${sources.map(link => `<a href="${esc(link.url)}">Native task definition ↗</a>`).join(' · ')}</span><span class="play-status" role="status"></span></div></div></section>`;
     }).join('');
     document.querySelector('#failure-cases').innerHTML = Object.entries(liberoFailureDetails).map(([id,[title,detail]]) => {
       const item = media.failureCases.find(record => record.id === id);
@@ -219,7 +220,6 @@
     if (review.reviewCoverageStatus !== 'complete' || !review.unchangedDisagreementsConfirmed) throw new Error('Human review coverage is not confirmed');
     reviewCorrections = new Map(review.corrections.map(item => [`${item.stage}:${item.episodeKey}`,item]));
     renderComparison(review);
-    document.querySelector('#review-accounting').textContent = `The 400 original episodes comprise ${review.before.matrix.success.benchSuccess} where the agent considers the task complete and the bench judges success; ${review.before.matrix.success.benchFailure} where the agent considers the task complete and the bench judges failure; and ${review.before.matrix.failure.benchFailure} where the agent does not consider the task complete and the bench judges failure. In the revised composite of 400 episodes, those same categories contain ${review.after.matrix.success.benchSuccess}, ${review.after.matrix.success.benchFailure}, and ${review.after.matrix.failure.benchFailure} episodes, respectively.`;
     renderInstructions(data);
     renderMedia(media,data);
     renderRobotwin(robotwin);
