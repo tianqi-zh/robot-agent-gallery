@@ -11,6 +11,9 @@
 @media(max-width:800px){.study-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.study-step:nth-child(2){border-right:0}.study-step:nth-child(n+3){border-top:1px solid var(--line)}.study-step h3{font-size:23px}.study-step p{font-size:12px}}
 @media(max-width:560px){.study-flow{margin-top:29px}.study-step{padding:18px 15px}.study-step>span{font-size:7px;letter-spacing:.7px}.study-step h3{font-size:20px;line-height:1.3;margin:11px 0}.study-step p{font-size:10px;line-height:1.8}.review-rule{grid-template-columns:1fr}.review-rule>div{padding:19px}.review-rule>div+div{border-left:0;border-top:1px solid var(--line)}.review-rule p{font-size:12px}.review-rule strong{font-size:11px}.metric-intro{font-size:14px}}
 
+/* Author links and corresponding-author note beneath the essay title. */
+.hero-byline{margin:0 0 24px}.author-list{display:flex;flex-wrap:wrap;gap:6px 24px;margin:0;font-size:15px;font-weight:500;line-height:1.8}.author-list>span{white-space:nowrap}.author-list a{text-decoration-color:var(--line)}.author-list a:hover{text-decoration-color:var(--green)}.author-list sup{font-size:10px;margin-left:3px}.author-note{margin:7px 0 0;font-size:12px;line-height:1.7;color:var(--muted)}
+
 /* Keep longer judgment labels readable in the comparison tables. */
 .cross-table th:first-child{width:44%}.cross-table thead th:not(:first-child){width:28%}.instruction-table td strong{font-weight:750;color:var(--ink)}
 @media(max-width:560px){.hero h1{font-size:44px}.fraction{font-size:10px}.cross-table th{font-size:10px}.cross-table th:first-child{width:42%}}
